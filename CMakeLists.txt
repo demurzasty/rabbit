@@ -14,6 +14,31 @@ set (RB_VULKAN TRUE)
 
 add_subdirectory ("lib")
 
+set (GLSLANG_VALIDATOR "${CMAKE_CURRENT_SOURCE_DIR}/bin/win32/glslangValidator.exe")
+
+file (GLOB_RECURSE GLSL_SOURCE_FILES "data/shaders/*.vert" "data/shaders/*.frag")
+
+foreach (GLSL_SRC ${GLSL_SOURCE_FILES})
+	get_filename_component (FILE_NAME ${GLSL_SRC} NAME)
+	get_filename_component (FILE_EXT ${GLSL_SRC} EXT)
+
+	set (GENERATED_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/generated/include/rabbit/generated/shaders")
+	set (SPIRV_H "${GENERATED_DIRECTORY}/${FILE_NAME}.spv.h")
+
+	string (REPLACE "." "_" VARIABLE_NAME ${FILE_NAME})
+
+	add_custom_command (
+		OUTPUT ${SPIRV_H}
+		COMMAND ${CMAKE_COMMAND} -E make_directory ${GENERATED_DIRECTORY}
+		# GLSL -> SPIR-V -> C Header
+		COMMAND ${GLSLANG_VALIDATOR} -V ${GLSL_SRC} --vn "${VARIABLE_NAME}" -o ${SPIRV_H}
+		DEPENDS ${GLSL_SRC}
+	)
+	list (APPEND SPIRV_BINARY_FILES ${SPIRV_H})
+endforeach (GLSL_SRC)
+
+add_custom_target (shaders DEPENDS ${SPIRV_BINARY_FILES})
+
 set (SRC
 	"src/platform/window_manager.cpp"
 	"src/graphics/buffer.cpp"
@@ -37,10 +62,19 @@ if (RB_VULKAN)
 endif ()
 
 add_library (rabbit STATIC ${SRC})
-target_include_directories (rabbit PUBLIC "include")
+target_include_directories (rabbit PUBLIC "include" PRIVATE "generated/include")
 target_compile_features (rabbit PUBLIC cxx_std_17)
-target_link_libraries (rabbit PUBLIC vma volk stb gsl json entt)
-target_compile_definitions (rabbit PRIVATE VMA_STATIC_VULKAN_FUNCTIONS NOMINMAX VK_USE_PLATFORM_WIN32_KHR)
+target_link_libraries (rabbit PUBLIC stb gsl json entt)
+add_dependencies (rabbit shaders)
+
+if (MSVC)
+	target_compile_definitions (rabbit PRIVATE NOMINMAX _CRT_SECURE_NO_WARNINGS)
+endif ()
+
+if (RB_VULKAN)
+	target_link_libraries (rabbit PUBLIC vma volk)
+	target_compile_definitions (rabbit PRIVATE VMA_STATIC_VULKAN_FUNCTIONS VK_USE_PLATFORM_WIN32_KHR)
+endif ()
 
 target_compile_definitions (rabbit PUBLIC RB_WINDOWS=$<BOOL:${RB_WINDOWS}>)
 target_compile_definitions (rabbit PUBLIC RB_LINUX=$<BOOL:${RB_LINUX}>)
