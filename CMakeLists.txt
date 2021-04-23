@@ -28,6 +28,7 @@ endif ()
 
 if (RB_VULKAN)
 	set (SRC ${SRC}
+		"src/graphics/vulkan/command_buffer_vulkan.cpp"
 		"src/graphics/vulkan/graphics_device_vulkan.cpp"
 	)
 endif ()

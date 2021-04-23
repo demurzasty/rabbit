@@ -6,6 +6,5 @@ namespace rb {
 
     class graphics_device_manager;
 
-    struct swapchain_desc;
-    class swapchain;
+    class command_buffer;
 }

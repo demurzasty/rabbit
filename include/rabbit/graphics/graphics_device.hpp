@@ -20,6 +20,10 @@ namespace rb {
 
         virtual ~graphics_device() = default;
 
+        virtual std::shared_ptr<command_buffer> create_command_buffer() = 0;
+
+        virtual void submit(const std::shared_ptr<command_buffer>& command_buffer) = 0;
+
         virtual void present() = 0;
 
         const std::shared_ptr<window>& associated_window() const;

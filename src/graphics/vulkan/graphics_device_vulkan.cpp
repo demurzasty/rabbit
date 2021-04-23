@@ -1,4 +1,5 @@
 #include "graphics_device_vulkan.hpp"
+#include "command_buffer_vulkan.hpp"
 
 #include <rabbit/core/config.hpp>
 #include <rabbit/platform/window.hpp>
@@ -40,14 +41,15 @@ graphics_device_vulkan::graphics_device_vulkan(const graphics_device_desc& desc)
     _create_allocator(desc);
     _query_surface(desc);
     _create_swapchain(desc);
+    _create_command_pool(desc);
     _create_synchronization_objects(desc);
 }
 
 graphics_device_vulkan::~graphics_device_vulkan() {
     vkDeviceWaitIdle(_device);
-    vkDestroyFence(_device, _render_fence, nullptr);
     vkDestroySemaphore(_device, _present_semaphore, nullptr);
     vkDestroySemaphore(_device, _render_semaphore, nullptr);
+    vkDestroyCommandPool(_device, _command_pool, nullptr);
     vkDestroyRenderPass(_device, _render_pass, nullptr);
 
     for (auto framebuffer : _framebuffers) {
@@ -67,6 +69,70 @@ graphics_device_vulkan::~graphics_device_vulkan() {
     vkDestroyDevice(_device, nullptr);
     vkDestroySurfaceKHR(_instance, _surface, nullptr);
     vkDestroyInstance(_instance, nullptr);
+}
+
+std::shared_ptr<command_buffer> graphics_device_vulkan::create_command_buffer() {
+    return std::make_shared<command_buffer_vulkan>(_device, _command_pool);
+}
+
+void graphics_device_vulkan::submit(const std::shared_ptr<command_buffer>& command_buffer) {
+    auto native_command_buffer = std::static_pointer_cast<command_buffer_vulkan>(command_buffer);
+
+    auto vulkan_command_buffer = native_command_buffer->command_buffer();
+    auto vulkan_fence = native_command_buffer->fence();
+
+    VkPipelineStageFlags wait_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+
+	VkSubmitInfo submit_info;
+	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submit_info.pNext = nullptr;
+	submit_info.waitSemaphoreCount = 1;
+	submit_info.pWaitSemaphores = &_present_semaphore;
+	submit_info.pWaitDstStageMask = &wait_stage;
+	submit_info.commandBufferCount = 1;
+	submit_info.pCommandBuffers = &vulkan_command_buffer;
+	submit_info.signalSemaphoreCount = 1;
+	submit_info.pSignalSemaphores = &_render_semaphore;
+
+    RB_MAYBE_UNUSED const auto result = vkQueueSubmit(_graphics_queue, 1, &submit_info, vulkan_fence);
+    RB_ASSERT(result == VK_SUCCESS, "Failed to queue submit");
+}
+
+void graphics_device_vulkan::present() {
+    RB_MAYBE_UNUSED VkResult result;
+
+    VkPresentInfoKHR present_info;
+    present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+    present_info.pNext = nullptr;
+
+    // We should wait for rendering execution.
+    present_info.waitSemaphoreCount = 1;
+    present_info.pWaitSemaphores = &_render_semaphore;
+
+    present_info.swapchainCount = 1;
+    present_info.pSwapchains = &_swapchain;
+
+    present_info.pImageIndices = &_image_index;
+
+    present_info.pResults = nullptr;
+
+    result = vkQueuePresentKHR(_graphics_queue, &present_info);
+    RB_ASSERT(result == VK_SUCCESS, "Failed to queue present");
+
+    result = vkAcquireNextImageKHR(_device, _swapchain, UINT64_MAX, _present_semaphore, nullptr, &_image_index);
+    RB_ASSERT(result == VK_SUCCESS, "Failed to reset acquire next swapchain image");
+}
+
+VkRenderPass graphics_device_vulkan::render_pass() const {
+    return _render_pass;
+}
+
+VkExtent2D graphics_device_vulkan::swapchain_extent() const {
+    return _swapchain_extent;
+}
+
+VkFramebuffer graphics_device_vulkan::framebuffer() const {
+    return _framebuffers[_image_index];
 }
 
 void graphics_device_vulkan::_initialize_volk(const graphics_device_desc& desc) {
@@ -301,7 +367,7 @@ void graphics_device_vulkan::_create_swapchain(const graphics_device_desc& desc)
 
     for (std::uint32_t index{ 0 }; index < present_mode_count; ++index) {
         if (present_modes[index] == VK_PRESENT_MODE_MAILBOX_KHR) {
-            _present_mode = VK_PRESENT_MODE_MAILBOX_KHR;
+            // _present_mode = VK_PRESENT_MODE_MAILBOX_KHR;
             break;
         }
     }
@@ -488,21 +554,23 @@ void graphics_device_vulkan::_create_swapchain(const graphics_device_desc& desc)
     }
 }
 
+void graphics_device_vulkan::_create_command_pool(const graphics_device_desc& desc) {
+    VkCommandPoolCreateInfo pool_info{};
+    pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    pool_info.queueFamilyIndex = _graphics_family;
+    pool_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+
+    RB_MAYBE_UNUSED const auto result = vkCreateCommandPool(_device, &pool_info, nullptr, &_command_pool);
+    RB_ASSERT(result == VK_SUCCESS, "Failed to create command pool");
+}
+
 void graphics_device_vulkan::_create_synchronization_objects(const graphics_device_desc& desc) {
-    VkFenceCreateInfo fence_info;
-    fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    fence_info.pNext = nullptr;
-    fence_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-    auto result = vkCreateFence(_device, &fence_info, nullptr, &_render_fence);
-    RB_ASSERT(result == VK_SUCCESS, "Failed to create fence");
-
     VkSemaphoreCreateInfo semaphore_info;
 	semaphore_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 	semaphore_info.pNext = nullptr;
 	semaphore_info.flags = 0;
 
-	result = vkCreateSemaphore(_device, &semaphore_info, nullptr, &_render_semaphore);
+	auto result = vkCreateSemaphore(_device, &semaphore_info, nullptr, &_render_semaphore);
     RB_ASSERT(result == VK_SUCCESS, "Failed to create render semaphore");
 
 	result = vkCreateSemaphore(_device, &semaphore_info, nullptr, &_present_semaphore);
@@ -510,8 +578,4 @@ void graphics_device_vulkan::_create_synchronization_objects(const graphics_devi
 
     result = vkAcquireNextImageKHR(_device, _swapchain, UINT64_MAX, _present_semaphore, nullptr, &_image_index);
     RB_ASSERT(result == VK_SUCCESS, "Failed to reset acquire next swapchain image");
-}
-
-void graphics_device_vulkan::present() {
-    // TODO: Implement
 }

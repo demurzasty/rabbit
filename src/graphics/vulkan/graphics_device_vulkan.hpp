@@ -14,7 +14,17 @@ namespace rb {
 
         ~graphics_device_vulkan();
 
+        std::shared_ptr<command_buffer> create_command_buffer() override;
+
+        void submit(const std::shared_ptr<command_buffer>& command_buffer) override;
+
         void present() override;
+
+        VkRenderPass render_pass() const;
+
+        VkExtent2D swapchain_extent() const;
+
+        VkFramebuffer framebuffer() const;
 
     private:
         void _initialize_volk(const graphics_device_desc& desc);
@@ -32,6 +42,8 @@ namespace rb {
         void _query_surface(const graphics_device_desc& desc);
 
         void _create_swapchain(const graphics_device_desc& desc);
+
+        void _create_command_pool(const graphics_device_desc& desc);
 
         void _create_synchronization_objects(const graphics_device_desc& desc);
 
@@ -63,9 +75,10 @@ namespace rb {
 
         VkRenderPass _render_pass;
 
+        VkCommandPool _command_pool;
+
         VkSemaphore _render_semaphore;
         VkSemaphore _present_semaphore;
-        VkFence _render_fence;
 
         std::uint32_t _image_index{ 0 };
     };
