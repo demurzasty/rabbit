@@ -15,6 +15,8 @@ namespace rb {
 
         virtual ~graphics_device() = default;
 
+        const std::shared_ptr<window>& associated_window() const;
+
     private:
         std::shared_ptr<window> _window;
     };
