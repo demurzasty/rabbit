@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 namespace rb {
     enum class buffer_type;
     struct buffer_desc;
@@ -11,4 +13,10 @@ namespace rb {
     class graphics_device_manager;
 
     class command_buffer;
+
+    enum class vertex_format_type : std::uint8_t;
+    enum class vertex_attribute : std::uint8_t;
+    struct vertex_format;
+    struct vertex_element;
+    class vertex_desc;
 }
