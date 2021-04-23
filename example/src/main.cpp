@@ -5,7 +5,7 @@ using namespace rb;
 
 int main(int argc, char* argv[]) {
     window_manager window_manager;
-    auto window = window_manager.create_window({});
+    auto window = window_manager.create({});
 
     while (window->is_open()) {
         window->poll_events();

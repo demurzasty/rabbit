@@ -13,7 +13,7 @@ namespace rb {
      */
     class window_manager {
     public:
-        std::shared_ptr<window> create_window(const window_desc& desc);
+        std::shared_ptr<window> create(const window_desc& desc);
 
     private:
         std::vector<std::shared_ptr<window>> _windows;
