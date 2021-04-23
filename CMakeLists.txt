@@ -15,13 +15,20 @@ set (RB_VULKAN TRUE)
 add_subdirectory ("lib")
 
 set (SRC
-	"src/platform/window.cpp"
 	"src/platform/window_manager.cpp"
+	"src/graphics/graphics_device_manager.cpp"
+	"src/graphics/graphics_device.cpp"
 )
 
 if (RB_WINDOWS)
 	set (SRC ${SRC}
 		"src/platform/win32/window_win32.cpp"
+	)
+endif ()
+
+if (RB_VULKAN)
+	set (SRC ${SRC}
+		"src/graphics/vulkan/graphics_device_vulkan.cpp"
 	)
 endif ()
 
