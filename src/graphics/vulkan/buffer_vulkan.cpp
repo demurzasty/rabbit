@@ -24,13 +24,7 @@ buffer_vulkan::buffer_vulkan(VkDevice device, VmaAllocator allocator, const buff
     RB_MAYBE_UNUSED auto result = vmaCreateBuffer(allocator, &buffer_info, &allocation_info, &_buffer, &_allocation, nullptr);
 
     if (desc.data) {
-        void* data;
-        result = vmaMapMemory(allocator, _allocation, &data);
-        RB_ASSERT(result == VK_SUCCESS, "Failed to map memory");
-
-        std::memcpy(data, desc.data, desc.size);
-
-        vmaUnmapMemory(allocator, _allocation);
+        update(desc.data);
     }
 }
 
