@@ -1,5 +1,6 @@
 #pragma once
 
+#include "fwd.hpp"
 #include "../platform/fwd.hpp"
 #include "../core/version.hpp"
 
@@ -18,6 +19,8 @@ namespace rb {
         graphics_device(const graphics_device_desc& desc);
 
         virtual ~graphics_device() = default;
+
+        virtual void present() = 0;
 
         const std::shared_ptr<window>& associated_window() const;
 

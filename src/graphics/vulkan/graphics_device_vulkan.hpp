@@ -5,12 +5,16 @@
 #include <volk.h>
 #include <vk_mem_alloc.h>
 
+#include <vector>
+
 namespace rb {
     class graphics_device_vulkan : public graphics_device {
     public:
         graphics_device_vulkan(const graphics_device_desc& desc);
 
         ~graphics_device_vulkan();
+
+        void present() override;
 
     private:
         void _initialize_volk(const graphics_device_desc& desc);
@@ -27,17 +31,42 @@ namespace rb {
 
         void _query_surface(const graphics_device_desc& desc);
 
+        void _create_swapchain(const graphics_device_desc& desc);
+
+        void _create_synchronization_objects(const graphics_device_desc& desc);
+
     private:
         VkInstance _instance;
         VkPhysicalDevice _physical_device;
         VkSurfaceKHR _surface;
         VkDevice _device;
+
         std::uint32_t _graphics_family;
         std::uint32_t _present_family;
         VkQueue _graphics_queue;
         VkQueue _present_queue;
+
         VmaAllocator _allocator;
         VkSurfaceFormatKHR _surface_format;
         VkExtent2D _swapchain_extent;
+
+        VkSwapchainKHR _swapchain;
+        VkPresentModeKHR _present_mode;
+
+        VkImage _depth_image;
+        VmaAllocation _depth_image_allocation;
+        VkImageView _depth_image_view;
+
+        std::vector<VkImage> _images;
+        std::vector<VkImageView> _image_views;
+        std::vector<VkFramebuffer> _framebuffers;
+
+        VkRenderPass _render_pass;
+
+        VkSemaphore _render_semaphore;
+        VkSemaphore _present_semaphore;
+        VkFence _render_fence;
+
+        std::uint32_t _image_index{ 0 };
     };
 }

@@ -39,9 +39,30 @@ graphics_device_vulkan::graphics_device_vulkan(const graphics_device_desc& desc)
     _create_device(desc);
     _create_allocator(desc);
     _query_surface(desc);
+    _create_swapchain(desc);
+    _create_synchronization_objects(desc);
 }
 
 graphics_device_vulkan::~graphics_device_vulkan() {
+    vkDeviceWaitIdle(_device);
+    vkDestroyFence(_device, _render_fence, nullptr);
+    vkDestroySemaphore(_device, _present_semaphore, nullptr);
+    vkDestroySemaphore(_device, _render_semaphore, nullptr);
+    vkDestroyRenderPass(_device, _render_pass, nullptr);
+
+    for (auto framebuffer : _framebuffers) {
+        vkDestroyFramebuffer(_device, framebuffer, nullptr);
+    }
+
+    for (auto image_view : _image_views) {
+        vkDestroyImageView(_device, image_view, nullptr);
+    }
+
+    vkDestroyImageView(_device, _depth_image_view, nullptr);
+    vmaDestroyImage(_allocator, _depth_image, _depth_image_allocation);
+
+    vkDestroySwapchainKHR(_device, _swapchain, nullptr);
+
     vmaDestroyAllocator(_allocator);
     vkDestroyDevice(_device, nullptr);
     vkDestroySurfaceKHR(_instance, _surface, nullptr);
@@ -255,4 +276,242 @@ void graphics_device_vulkan::_query_surface(const graphics_device_desc& desc) {
 
     // Store swapchain extent
     _swapchain_extent = surface_capabilities.currentExtent;
+}
+
+void graphics_device_vulkan::_create_swapchain(const graphics_device_desc& desc) {
+    RB_MAYBE_UNUSED VkResult result;
+
+    // Get window size.
+    const auto window_size = associated_window()->size();
+
+    // Query surface capabilities.
+    VkSurfaceCapabilitiesKHR surface_capabilities;
+    result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(_physical_device, _surface, &surface_capabilities);
+    RB_ASSERT(result == VK_SUCCESS, "Failed to retrieve physical device surface capabilities");
+
+    std::uint32_t present_mode_count{ 0 };
+    result = vkGetPhysicalDeviceSurfacePresentModesKHR(_physical_device, _surface, &present_mode_count, nullptr);
+    RB_ASSERT(result == VK_SUCCESS, "Failed to query present mode count");
+
+    auto present_modes = std::make_unique<VkPresentModeKHR[]>(present_mode_count);
+    result = vkGetPhysicalDeviceSurfacePresentModesKHR(_physical_device, _surface, &present_mode_count, present_modes.get());
+    RB_ASSERT(result == VK_SUCCESS, "Failed to enumerate present mode count");
+
+    _present_mode = VK_PRESENT_MODE_FIFO_RELAXED_KHR;
+
+    for (std::uint32_t index{ 0 }; index < present_mode_count; ++index) {
+        if (present_modes[index] == VK_PRESENT_MODE_MAILBOX_KHR) {
+            _present_mode = VK_PRESENT_MODE_MAILBOX_KHR;
+            break;
+        }
+    }
+
+    auto image_count = surface_capabilities.minImageCount + 1;
+    if (surface_capabilities.maxImageCount > 0 && image_count > surface_capabilities.maxImageCount) {
+        image_count = surface_capabilities.maxImageCount;
+    }
+
+    std::uint32_t queue_indices[] = { _graphics_family, _present_family };
+
+    VkSwapchainCreateInfoKHR swapchain_info;
+    swapchain_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+    swapchain_info.pNext = nullptr;
+    swapchain_info.flags = 0;
+    swapchain_info.surface = _surface;
+    swapchain_info.minImageCount = image_count;
+    swapchain_info.imageFormat = _surface_format.format;
+    swapchain_info.imageColorSpace = _surface_format.colorSpace;
+    swapchain_info.imageExtent = { window_size.x, window_size.y };
+    swapchain_info.imageArrayLayers = 1;
+    swapchain_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    if (_graphics_family != _present_family) {
+        swapchain_info.queueFamilyIndexCount = sizeof(queue_indices) / sizeof(*queue_indices);
+        swapchain_info.pQueueFamilyIndices = queue_indices;
+        swapchain_info.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+    } else {
+        swapchain_info.queueFamilyIndexCount = 0;
+        swapchain_info.pQueueFamilyIndices = nullptr;
+        swapchain_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    }
+    swapchain_info.presentMode = _present_mode;
+    swapchain_info.clipped = VK_TRUE;
+    swapchain_info.preTransform = surface_capabilities.currentTransform;
+    swapchain_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+    swapchain_info.oldSwapchain = nullptr;
+
+    // Create Vulkan swapchain.
+    result = vkCreateSwapchainKHR(_device, &swapchain_info, nullptr, &_swapchain);
+    RB_ASSERT(result == VK_SUCCESS, "Failed to create swapchain");
+
+    // Query swapchain image count.
+    result = vkGetSwapchainImagesKHR(_device, _swapchain, &image_count, nullptr);
+    RB_ASSERT(result == VK_SUCCESS, "Failed to query swapchain image count");
+
+    // Get swapchain images list.
+    _images.resize(image_count);
+    result = vkGetSwapchainImagesKHR(_device, _swapchain, &image_count, _images.data());
+    RB_ASSERT(result == VK_SUCCESS, "Failed to enumerate swapchain images");
+
+    _image_views.resize(_images.size());
+    for (std::size_t index{ 0 }; index < _images.size(); ++index) {
+        VkImageViewCreateInfo image_view_info;
+        image_view_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        image_view_info.pNext = nullptr;
+        image_view_info.flags = 0;
+        image_view_info.image = _images[index];
+        image_view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        image_view_info.format = _surface_format.format;
+        image_view_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+        image_view_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+        image_view_info.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+        image_view_info.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+        image_view_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        image_view_info.subresourceRange.baseMipLevel = 0;
+        image_view_info.subresourceRange.levelCount = 1;
+        image_view_info.subresourceRange.baseArrayLayer = 0;
+        image_view_info.subresourceRange.layerCount = 1;
+
+        result = vkCreateImageView(_device, &image_view_info, nullptr, &_image_views[index]);
+        RB_ASSERT(result == VK_SUCCESS, "Failed to create image view");
+    }
+
+    const VkFormat depth_formats[] = {
+        VK_FORMAT_D24_UNORM_S8_UINT
+    };
+
+    VkImageCreateInfo depth_image_info{};
+    depth_image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    depth_image_info.imageType = VK_IMAGE_TYPE_2D;
+    depth_image_info.extent.width = window_size.x;
+    depth_image_info.extent.height = window_size.y;
+    depth_image_info.extent.depth = 1;
+    depth_image_info.mipLevels = 1;
+    depth_image_info.arrayLayers = 1;
+    depth_image_info.format = VK_FORMAT_D24_UNORM_S8_UINT;
+    depth_image_info.tiling = VK_IMAGE_TILING_OPTIMAL;
+    depth_image_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    depth_image_info.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    depth_image_info.samples = VK_SAMPLE_COUNT_1_BIT;
+    depth_image_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    VmaAllocationCreateInfo depth_allocation_info = {};
+    depth_allocation_info.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+    result = vmaCreateImage(_allocator, &depth_image_info, &depth_allocation_info, &_depth_image, &_depth_image_allocation, nullptr);
+    RB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan depth image");
+
+    VkImageViewCreateInfo depth_image_view_info{};
+    depth_image_view_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    depth_image_view_info.image = _depth_image;
+    depth_image_view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    depth_image_view_info.format = VK_FORMAT_D24_UNORM_S8_UINT;
+    depth_image_view_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+    depth_image_view_info.subresourceRange.baseMipLevel = 0;
+    depth_image_view_info.subresourceRange.levelCount = 1;
+    depth_image_view_info.subresourceRange.baseArrayLayer = 0;
+    depth_image_view_info.subresourceRange.layerCount = 1;
+
+    result = vkCreateImageView(_device, &depth_image_view_info, nullptr, &_depth_image_view);
+    RB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan depth image view");
+
+    VkAttachmentDescription color_attachment;
+    color_attachment.flags = 0;
+    color_attachment.format = _surface_format.format;
+    color_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+    color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    color_attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    color_attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    color_attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    color_attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+    VkAttachmentDescription depth_attachment{};
+    depth_attachment.format = VK_FORMAT_D24_UNORM_S8_UINT;
+    depth_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+    depth_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    depth_attachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    depth_attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    depth_attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    depth_attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    depth_attachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+    VkAttachmentReference color_attachment_reference;
+    color_attachment_reference.attachment = 0;
+    color_attachment_reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+    VkAttachmentReference depth_attachment_reference{};
+    depth_attachment_reference.attachment = 1;
+    depth_attachment_reference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+    VkSubpassDescription subpass{};
+    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    subpass.colorAttachmentCount = 1;
+    subpass.pColorAttachments = &color_attachment_reference;
+    subpass.pDepthStencilAttachment = &depth_attachment_reference;
+
+    VkSubpassDependency subpass_dependency{};
+    subpass_dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    subpass_dependency.dstSubpass = 0;
+    subpass_dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    subpass_dependency.srcAccessMask = 0;
+    subpass_dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    subpass_dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+    VkAttachmentDescription attachments[] = { color_attachment, depth_attachment };
+
+    VkRenderPassCreateInfo render_pass_info{};
+    render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    render_pass_info.attachmentCount = sizeof(attachments) / sizeof(*attachments);
+    render_pass_info.pAttachments = attachments;
+    render_pass_info.subpassCount = 1;
+    render_pass_info.pSubpasses = &subpass;
+    render_pass_info.dependencyCount = 1;
+    render_pass_info.pDependencies = &subpass_dependency;
+
+    result = vkCreateRenderPass(_device, &render_pass_info, nullptr, &_render_pass);
+    RB_ASSERT(result == VK_SUCCESS, "Failed to create render pass");
+
+    _framebuffers.resize(_image_views.size());
+    for (std::size_t index{ 0 }; index < _images.size(); ++index) {
+        VkImageView framebuffer_attachments[] = { _image_views[index], _depth_image_view };
+
+        VkFramebufferCreateInfo framebuffer_info{};
+        framebuffer_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        framebuffer_info.renderPass = _render_pass;
+        framebuffer_info.attachmentCount = sizeof(framebuffer_attachments) / sizeof(*framebuffer_attachments);
+        framebuffer_info.pAttachments = framebuffer_attachments;
+        framebuffer_info.width = window_size.x;
+        framebuffer_info.height = window_size.y;
+        framebuffer_info.layers = 1;
+
+        result = vkCreateFramebuffer(_device, &framebuffer_info, nullptr, &_framebuffers[index]);
+        RB_ASSERT(result == VK_SUCCESS, "Failed to create framebuffer");
+    }
+}
+
+void graphics_device_vulkan::_create_synchronization_objects(const graphics_device_desc& desc) {
+    VkFenceCreateInfo fence_info;
+    fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fence_info.pNext = nullptr;
+    fence_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+    auto result = vkCreateFence(_device, &fence_info, nullptr, &_render_fence);
+    RB_ASSERT(result == VK_SUCCESS, "Failed to create fence");
+
+    VkSemaphoreCreateInfo semaphore_info;
+	semaphore_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+	semaphore_info.pNext = nullptr;
+	semaphore_info.flags = 0;
+
+	result = vkCreateSemaphore(_device, &semaphore_info, nullptr, &_render_semaphore);
+    RB_ASSERT(result == VK_SUCCESS, "Failed to create render semaphore");
+
+	result = vkCreateSemaphore(_device, &semaphore_info, nullptr, &_present_semaphore);
+    RB_ASSERT(result == VK_SUCCESS, "Failed to create present semaphore");
+
+    result = vkAcquireNextImageKHR(_device, _swapchain, UINT64_MAX, _present_semaphore, nullptr, &_image_index);
+    RB_ASSERT(result == VK_SUCCESS, "Failed to reset acquire next swapchain image");
+}
+
+void graphics_device_vulkan::present() {
+    // TODO: Implement
 }
