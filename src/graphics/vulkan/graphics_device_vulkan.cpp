@@ -1,6 +1,7 @@
 #include "graphics_device_vulkan.hpp"
 #include "command_buffer_vulkan.hpp"
 #include "buffer_vulkan.hpp"
+#include "texture_vulkan.hpp"
 
 #include <rabbit/core/config.hpp>
 #include <rabbit/platform/window.hpp>
@@ -75,6 +76,10 @@ std::shared_ptr<command_buffer> graphics_device_vulkan::create_command_buffer() 
 
 std::shared_ptr<buffer> graphics_device_vulkan::create_buffer(const buffer_desc& desc) {
     return std::make_shared<buffer_vulkan>(_device, _allocator, desc);
+}
+
+std::shared_ptr<texture> graphics_device_vulkan::create_texture(const texture_desc& desc) {
+    return std::make_shared<texture_vulkan>(_device, _graphics_queue, _command_pool, _allocator, desc);
 }
 
 void graphics_device_vulkan::submit(const std::shared_ptr<command_buffer>& command_buffer) {
