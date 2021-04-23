@@ -16,6 +16,7 @@ add_subdirectory ("lib")
 
 set (SRC
 	"src/platform/window_manager.cpp"
+	"src/graphics/buffer.cpp"
 	"src/graphics/graphics_device_manager.cpp"
 	"src/graphics/graphics_device.cpp"
 )
@@ -28,8 +29,10 @@ endif ()
 
 if (RB_VULKAN)
 	set (SRC ${SRC}
+		"src/graphics/vulkan/buffer_vulkan.cpp"
 		"src/graphics/vulkan/command_buffer_vulkan.cpp"
 		"src/graphics/vulkan/graphics_device_vulkan.cpp"
+		"src/graphics/vulkan/utils_vulkan.cpp"
 	)
 endif ()
 

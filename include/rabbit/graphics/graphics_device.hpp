@@ -22,6 +22,8 @@ namespace rb {
 
         virtual std::shared_ptr<command_buffer> create_command_buffer() = 0;
 
+        virtual std::shared_ptr<buffer> create_buffer(const buffer_desc& desc) = 0;
+
         virtual void submit(const std::shared_ptr<command_buffer>& command_buffer) = 0;
 
         virtual void present() = 0;

@@ -16,6 +16,8 @@ namespace rb {
 
         std::shared_ptr<command_buffer> create_command_buffer() override;
 
+        std::shared_ptr<buffer> create_buffer(const buffer_desc& desc) override;
+
         void submit(const std::shared_ptr<command_buffer>& command_buffer) override;
 
         void present() override;

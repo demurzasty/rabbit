@@ -1,5 +1,6 @@
 #include "graphics_device_vulkan.hpp"
 #include "command_buffer_vulkan.hpp"
+#include "buffer_vulkan.hpp"
 
 #include <rabbit/core/config.hpp>
 #include <rabbit/platform/window.hpp>
@@ -8,9 +9,6 @@
 #   define WIN32_LEAN_AND_MEAN
 #   include <Windows.h>
 #endif
-
-#define VMA_IMPLEMENTATION
-#include <vk_mem_alloc.h>
 
 using namespace rb;
 
@@ -73,6 +71,10 @@ graphics_device_vulkan::~graphics_device_vulkan() {
 
 std::shared_ptr<command_buffer> graphics_device_vulkan::create_command_buffer() {
     return std::make_shared<command_buffer_vulkan>(_device, _command_pool);
+}
+
+std::shared_ptr<buffer> graphics_device_vulkan::create_buffer(const buffer_desc& desc) {
+    return std::make_shared<buffer_vulkan>(_device, _allocator, desc);
 }
 
 void graphics_device_vulkan::submit(const std::shared_ptr<command_buffer>& command_buffer) {
