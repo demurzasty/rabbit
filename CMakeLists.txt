@@ -44,6 +44,8 @@ set (SRC
 	"src/graphics/buffer.cpp"
 	"src/graphics/graphics_device_manager.cpp"
 	"src/graphics/graphics_device.cpp"
+	"src/graphics/texture.cpp"
+	"src/graphics/vertex.cpp"
 )
 
 if (RB_WINDOWS)
@@ -57,6 +59,7 @@ if (RB_VULKAN)
 		"src/graphics/vulkan/buffer_vulkan.cpp"
 		"src/graphics/vulkan/command_buffer_vulkan.cpp"
 		"src/graphics/vulkan/graphics_device_vulkan.cpp"
+		"src/graphics/vulkan/texture_vulkan.cpp"
 		"src/graphics/vulkan/utils_vulkan.cpp"
 	)
 endif ()

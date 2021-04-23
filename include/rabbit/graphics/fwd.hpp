@@ -14,6 +14,10 @@ namespace rb {
 
     class command_buffer;
 
+    enum class texture_format;
+    struct texture_desc;
+    class texture;
+
     enum class vertex_format_type : std::uint8_t;
     enum class vertex_attribute : std::uint8_t;
     struct vertex_format;
