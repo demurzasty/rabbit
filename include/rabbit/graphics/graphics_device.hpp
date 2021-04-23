@@ -1,12 +1,16 @@
 #pragma once
 
 #include "../platform/fwd.hpp"
+#include "../core/version.hpp"
 
 #include <memory>
+#include <string>
 
 namespace rb {
     struct graphics_device_desc {
         std::shared_ptr<window> window;
+        std::string application_name{ "RabBit" };
+        version application_version{ 1, 0, 0 };
     };
 
     class graphics_device {
