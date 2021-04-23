@@ -16,7 +16,7 @@ namespace rb {
         vec2u size{ 1280, 720 };
 
         /**
-         * @brief Determine initial window title. Can be changed using window::set_title.
+         * @brief Determine initial window title.
          */
         std::string title{ "RabBit " };
     };
