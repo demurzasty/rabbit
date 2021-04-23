@@ -11,7 +11,7 @@ namespace rb {
      *
      * @see window
      */
-    class window_manager {
+    class window_manager final {
     public:
         std::shared_ptr<window> create(const window_desc& desc);
 
