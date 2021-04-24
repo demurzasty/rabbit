@@ -1,0 +1,8 @@
+{
+    "back": "textures/daylight_back.png",
+    "bottom": "textures/daylight_bottom.png",
+    "front": "textures/daylight_front.png",
+    "left": "textures/daylight_left.png",
+    "right": "textures/daylight_right.png",
+    "top": "textures/daylight_top.png"
+}

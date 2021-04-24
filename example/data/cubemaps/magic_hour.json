@@ -1,0 +1,8 @@
+{
+    "back": "textures/magic_hour_back.png",
+    "bottom": "textures/magic_hour_bottom.png",
+    "front": "textures/magic_hour_front.png",
+    "left": "textures/magic_hour_left.png",
+    "right": "textures/magic_hour_right.png",
+    "top": "textures/magic_hour_top.png"
+}
