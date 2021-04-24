@@ -19,6 +19,8 @@ namespace rb {
 
         void end_render_pass() override;
 
+        void set_shader(const std::shared_ptr<shader>& shader) override;
+
         VkCommandBuffer command_buffer() const;
 
         VkFence fence() const;

@@ -42,6 +42,7 @@ add_custom_target (shaders DEPENDS ${SPIRV_BINARY_FILES})
 set (SRC
 	"src/platform/window_manager.cpp"
 	"src/graphics/buffer.cpp"
+	"src/graphics/builtin_shaders.cpp"
 	"src/graphics/graphics_device_manager.cpp"
 	"src/graphics/graphics_device.cpp"
 	"src/graphics/shader.cpp"

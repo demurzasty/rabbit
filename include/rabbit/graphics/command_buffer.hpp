@@ -29,5 +29,7 @@ namespace rb {
         virtual void begin_render_pass(const std::shared_ptr<graphics_device>& graphics_device) = 0;
 
         virtual void end_render_pass() = 0;
+
+        virtual void set_shader(const std::shared_ptr<shader>& shader) = 0;
     };
 }

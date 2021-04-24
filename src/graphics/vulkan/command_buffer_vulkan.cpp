@@ -1,5 +1,6 @@
 #include "command_buffer_vulkan.hpp"
 #include "graphics_device_vulkan.hpp"
+#include "shader_vulkan.hpp"
 
 #include <rabbit/core/config.hpp>
 
@@ -87,6 +88,11 @@ void command_buffer_vulkan::end_render_pass() {
     vkCmdEndRenderPass(_command_buffer);
 }
 
+void command_buffer_vulkan::set_shader(const std::shared_ptr<shader>& shader) {
+    const auto native_shader = std::static_pointer_cast<shader_vulkan>(shader);
+
+    vkCmdBindPipeline(_command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, native_shader->pipeline());
+}
 
 VkCommandBuffer command_buffer_vulkan::command_buffer() const {
     return _command_buffer;
