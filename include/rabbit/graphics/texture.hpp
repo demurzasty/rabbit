@@ -33,7 +33,7 @@ namespace rb {
         std::size_t bytes_per_pixel() const;
 
     private:
-        vec2u _size;
-        texture_format _format;
+        const vec2u _size;
+        const texture_format _format;
     };
 }

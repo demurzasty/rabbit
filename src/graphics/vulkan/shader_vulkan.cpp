@@ -156,8 +156,8 @@ void shader_vulkan::_create_pipeline(const span<const VkPipelineShaderStageCreat
     rasterizer_state_info.rasterizerDiscardEnable = VK_FALSE;
     rasterizer_state_info.polygonMode = VK_POLYGON_MODE_FILL;
     rasterizer_state_info.lineWidth = 1.0f;
-    rasterizer_state_info.cullMode = VK_CULL_MODE_BACK_BIT;
-    rasterizer_state_info.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+    rasterizer_state_info.cullMode = VK_CULL_MODE_NONE; // VK_CULL_MODE_BACK_BIT;
+    rasterizer_state_info.frontFace = VK_FRONT_FACE_CLOCKWISE;
     rasterizer_state_info.depthBiasEnable = VK_FALSE;
 
     VkPipelineMultisampleStateCreateInfo multisampling_state_info{};

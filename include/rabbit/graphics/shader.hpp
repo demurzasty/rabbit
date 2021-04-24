@@ -52,7 +52,7 @@ namespace rb {
         const std::vector<shader_binding_desc>& bindings() const;
 
     private:
-        rb::vertex_desc _vertex_desc;
-        std::vector<shader_binding_desc> _bindings;
+        const rb::vertex_desc _vertex_desc;
+        const std::vector<shader_binding_desc> _bindings;
     };
 }

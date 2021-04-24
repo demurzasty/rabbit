@@ -85,7 +85,7 @@ namespace rb {
          */
         static mat4<T> perspective(T fovy, T aspect, T near, T far) {
             const auto r = fovy / 2;
-            const auto delta = far - near;
+            const auto delta = near - far;
             const auto s = std::sin(r);
 
             if (delta == 0 || s == 0 || aspect == 0) {
@@ -95,7 +95,7 @@ namespace rb {
             const auto cotangent = std::cos(r) / s;
 
             return {
-                cotangent / aspect, 0, 0, 0
+                cotangent / aspect, 0, 0, 0,
                 0, cotangent, 0, 0,
                 0, 0, (near + far) / delta, -1,
                 0, 0, (2 * near * far) / delta, 0

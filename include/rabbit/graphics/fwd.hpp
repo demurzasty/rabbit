@@ -10,12 +10,15 @@ namespace rb {
     enum class builtin_shader;
     struct builtin_shaders;
 
-    struct graphics_device_desc;
-    class graphics_device;
+    class command_buffer;
 
     class graphics_device_manager;
 
-    class command_buffer;
+    struct graphics_device_desc;
+    class graphics_device;
+
+    struct resource_heap_desc;
+    class resource_heap;
 
     struct shader_stage_flags;
     enum class shader_binding_type;

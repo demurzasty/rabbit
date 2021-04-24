@@ -21,7 +21,6 @@ texture_format texture::format() const {
     return _format;
 }
 
-
 std::size_t texture::bytes_per_pixel() const {
     switch (_format) {
         case texture_format::r8: return 1;
