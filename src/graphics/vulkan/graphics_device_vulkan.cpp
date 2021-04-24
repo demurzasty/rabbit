@@ -2,6 +2,7 @@
 #include "command_buffer_vulkan.hpp"
 #include "buffer_vulkan.hpp"
 #include "texture_vulkan.hpp"
+#include "shader_vulkan.hpp"
 
 #include <rabbit/core/config.hpp>
 #include <rabbit/platform/window.hpp>
@@ -45,7 +46,10 @@ graphics_device_vulkan::graphics_device_vulkan(const graphics_device_desc& desc)
 }
 
 graphics_device_vulkan::~graphics_device_vulkan() {
+    vkQueueWaitIdle(_graphics_queue);
+    vkQueueWaitIdle(_present_queue);
     vkDeviceWaitIdle(_device);
+
     vkDestroySemaphore(_device, _present_semaphore, nullptr);
     vkDestroySemaphore(_device, _render_semaphore, nullptr);
     vkDestroyCommandPool(_device, _command_pool, nullptr);
@@ -80,6 +84,10 @@ std::shared_ptr<buffer> graphics_device_vulkan::create_buffer(const buffer_desc&
 
 std::shared_ptr<texture> graphics_device_vulkan::create_texture(const texture_desc& desc) {
     return std::make_shared<texture_vulkan>(_device, _graphics_queue, _command_pool, _allocator, desc);
+}
+
+std::shared_ptr<shader> graphics_device_vulkan::create_shader(const shader_desc& desc) {
+    return std::make_shared<shader_vulkan>(_device, _render_pass, _swapchain_extent, desc);
 }
 
 void graphics_device_vulkan::submit(const std::shared_ptr<command_buffer>& command_buffer) {

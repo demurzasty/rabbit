@@ -3,6 +3,8 @@
 #include <rabbit/core/config.hpp>
 #include <rabbit/graphics/buffer.hpp>
 #include <rabbit/graphics/texture.hpp>
+#include <rabbit/graphics/shader.hpp>
+#include <rabbit/graphics/vertex.hpp>
 
 #define VMA_IMPLEMENTATION
 #include <vk_mem_alloc.h>
@@ -28,4 +30,53 @@ VkFormat utils_vulkan::format(const texture_format& format) {
 
     RB_ASSERT(false, "Failed to map Vulkan format");
     return VK_FORMAT_UNDEFINED;
+}
+
+VkFormat utils_vulkan::format(const vertex_format& format) {
+    switch (format.type) {
+        case vertex_format_type::floating_point:
+            switch (format.components) {
+                case 1: return VK_FORMAT_R32_SFLOAT;
+                case 2: return VK_FORMAT_R32G32_SFLOAT;
+                case 3: return VK_FORMAT_R32G32B32_SFLOAT;
+                case 4: return VK_FORMAT_R32G32B32A32_SFLOAT;
+            }
+            break;
+        case vertex_format_type::integer:
+            switch (format.components) {
+                case 1: return VK_FORMAT_R32_UINT;
+                case 2: return VK_FORMAT_R32G32_UINT;
+                case 3: return VK_FORMAT_R32G32B32_UINT;
+                case 4: return VK_FORMAT_R32G32B32A32_UINT;
+            }
+            break;
+    }
+
+    RB_ASSERT(false, "Failed to map Vulkan format");
+    return VK_FORMAT_UNDEFINED;
+}
+
+VkDescriptorType utils_vulkan::descriptor_type(const shader_binding_type& type) {
+    switch (type) {
+        case shader_binding_type::texture:
+            return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        case shader_binding_type::uniform_buffer:
+            return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    }
+
+    RB_ASSERT(false, "Failed to map Vulkan descriptor type");
+    return VK_DESCRIPTOR_TYPE_MAX_ENUM;
+}
+
+VkShaderStageFlags utils_vulkan::stage_flags(const std::uint32_t flags) {
+    VkShaderStageFlags bitfield = 0;
+
+    if (flags & shader_stage_flags::vertex) {
+        bitfield |= VK_SHADER_STAGE_VERTEX_BIT;
+    }
+    if (flags & shader_stage_flags::fragment) {
+        bitfield |= VK_SHADER_STAGE_FRAGMENT_BIT;
+    }
+
+    return bitfield;
 }

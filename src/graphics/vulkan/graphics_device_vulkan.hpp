@@ -20,6 +20,8 @@ namespace rb {
 
         std::shared_ptr<texture> create_texture(const texture_desc& desc) override;
 
+        std::shared_ptr<shader> create_shader(const shader_desc& desc) override;
+
         void submit(const std::shared_ptr<command_buffer>& command_buffer) override;
 
         void present() override;

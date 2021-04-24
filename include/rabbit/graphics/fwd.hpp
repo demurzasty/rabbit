@@ -14,6 +14,12 @@ namespace rb {
 
     class command_buffer;
 
+    struct shader_stage_flags;
+    enum class shader_binding_type;
+    struct shader_binding_desc;
+    struct shader_desc;
+    class shader;
+
     enum class texture_format;
     struct texture_desc;
     class texture;
