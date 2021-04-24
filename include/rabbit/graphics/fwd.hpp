@@ -7,6 +7,9 @@ namespace rb {
     struct buffer_desc;
     class buffer;
 
+    enum class builtin_shader;
+    struct builtin_shaders;
+
     struct graphics_device_desc;
     class graphics_device;
 
