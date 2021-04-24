@@ -79,14 +79,21 @@ void shader_vulkan::_create_descriptor_set_layout(const shader_desc& desc) {
 }
 
 void shader_vulkan::_create_pipeline_layout(const shader_desc& desc) {
+    auto push_constants = std::make_unique<VkPushConstantRange[]>(desc.push_constants.size());
+    for (std::size_t index{ 0 }; index < desc.push_constants.size(); ++index) {
+        push_constants[index].stageFlags = utils_vulkan::stage_flags(desc.push_constants[index].stage_flags);
+        push_constants[index].offset = static_cast<std::uint32_t>(desc.push_constants[index].offset);
+        push_constants[index].size = static_cast<std::uint32_t>(desc.push_constants[index].size);
+    }
+
     VkPipelineLayoutCreateInfo pipeline_layout_info;
     pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipeline_layout_info.pNext = nullptr;
     pipeline_layout_info.flags = 0;
     pipeline_layout_info.setLayoutCount = 1;
     pipeline_layout_info.pSetLayouts = &_descriptor_set_layout;
-    pipeline_layout_info.pushConstantRangeCount = 0;
-    pipeline_layout_info.pPushConstantRanges = nullptr;
+    pipeline_layout_info.pushConstantRangeCount = static_cast<std::uint32_t>(desc.push_constants.size());
+    pipeline_layout_info.pPushConstantRanges = push_constants.get();
 
     RB_MAYBE_UNUSED auto result = vkCreatePipelineLayout(_device, &pipeline_layout_info, nullptr, &_pipeline_layout);
     RB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan pipeline layout");

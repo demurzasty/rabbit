@@ -20,9 +20,11 @@ shader_desc builtin_shaders::get(builtin_shader shader) {
             desc.fragment_bytecode = forward_frag;
             desc.bindings = {
                 { shader_binding_type::uniform_buffer, shader_stage_flags::vertex, 0, 1 },
-                { shader_binding_type::uniform_buffer, shader_stage_flags::vertex, 1, 1 },
-                { shader_binding_type::uniform_buffer, shader_stage_flags::fragment, 2, 1 },
-                { shader_binding_type::texture, shader_stage_flags::fragment, 3, 1 },
+                { shader_binding_type::uniform_buffer, shader_stage_flags::fragment, 1, 1 },
+                { shader_binding_type::texture, shader_stage_flags::fragment, 2, 1 },
+            };
+            desc.push_constants = {
+                { shader_stage_flags::vertex, 0, 64 }
             };
             break;
     }

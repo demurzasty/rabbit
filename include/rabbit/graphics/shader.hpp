@@ -32,11 +32,19 @@ namespace rb {
         // std::string name; // ? Need in legacy API (GLES2)
     };
 
+    struct shader_push_constant_desc {
+        std::uint32_t stage_flags{ 0 };
+        std::uint32_t offset{ 0 };
+        std::uint32_t size{ 0 };
+        // std::string name; // ? Need in legacy API (GLES2)
+    };
+
     struct shader_desc {
         vertex_desc vertex_desc;
         span<const std::uint32_t> vertex_bytecode;
         span<const std::uint32_t> fragment_bytecode;
         std::vector<shader_binding_desc> bindings;
+        std::vector<shader_push_constant_desc> push_constants;
     };
 
     class shader {

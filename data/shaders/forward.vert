@@ -9,7 +9,7 @@ layout (binding = 0) uniform CameraData {
     mat4 view;
 };
 
-layout (binding = 1) uniform LocalData {
+layout (push_constant) uniform LocalData {
     mat4 world;
 };
 

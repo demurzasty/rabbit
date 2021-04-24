@@ -4,13 +4,13 @@
 
 layout (location = 0) in vec2 v_texcoord;
 
-layout (binding = 2) uniform MaterialData {
+layout (binding = 1) uniform MaterialData {
     vec3 u_base_color;
     float u_roughness;
     float u_metallic;
 };
 
-layout(binding = 3) uniform sampler2D u_albedo_map;
+layout(binding = 2) uniform sampler2D u_albedo_map;
 
 layout (location = 0) out vec4 out_color;
 

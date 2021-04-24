@@ -56,22 +56,18 @@ int main(int argc, char* argv[]) {
     auto shader = graphics_device->create_shader(builtin_shaders::get(builtin_shader::forward));
 
     camera_data camera_data;
-    // camera_data.projection = mat4f::identity();
-    // camera_data.view = mat4f::identity();
     auto camera_buffer = create_uniform_buffer(graphics_device, camera_data);
-
-    local_data local_data;
-    auto local_buffer = create_uniform_buffer(graphics_device, local_data);
 
     material_data material_data;
     auto material_buffer = create_uniform_buffer(graphics_device, material_data);
+
+    local_data local_data;
 
     resource_heap_desc resource_heap_desc;
     resource_heap_desc.shader = shader;
     resource_heap_desc.resources = {
         { 0, camera_buffer },
-        { 1, local_buffer },
-        { 2, material_buffer },
+        { 1, material_buffer },
     };
     auto resource_heap = graphics_device->create_resource_heap(resource_heap_desc);
 
@@ -102,6 +98,8 @@ int main(int argc, char* argv[]) {
         command_buffer->set_resource_heap(resource_heap);
 
         command_buffer->set_vertex_buffer(vertex_buffer);
+
+        command_buffer->push_constant(shader, shader_stage_flags::vertex, 0, sizeof(local_data), &local_data);
 
         command_buffer->draw(3, 1, 0, 0);
 

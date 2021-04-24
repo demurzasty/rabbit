@@ -27,6 +27,8 @@ namespace rb {
 
         void set_vertex_buffer(const std::shared_ptr<buffer>& vertex_buffer) override;
 
+        void push_constant(const std::shared_ptr<shader>& shader, std::uint32_t stage_flags, std::size_t offset, std::size_t size, const void* data) override;
+
         void draw(std::size_t vertex_count, std::size_t instance_count, std::size_t first_vertex, std::size_t first_instance) override;
 
         VkCommandBuffer command_buffer() const;

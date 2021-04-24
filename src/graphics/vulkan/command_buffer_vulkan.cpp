@@ -3,6 +3,7 @@
 #include "shader_vulkan.hpp"
 #include "resource_heap_vulkan.hpp"
 #include "buffer_vulkan.hpp"
+#include "utils_vulkan.hpp"
 
 #include <rabbit/core/config.hpp>
 
@@ -124,6 +125,17 @@ void command_buffer_vulkan::set_vertex_buffer(const std::shared_ptr<buffer>& ver
     const VkDeviceSize offset{ 0 };
 
     vkCmdBindVertexBuffers(_command_buffer, 0, 1, &buffer, &offset);
+}
+
+void command_buffer_vulkan::push_constant(const std::shared_ptr<shader>& shader, std::uint32_t stage_flags, std::size_t offset, std::size_t size, const void* data) {
+    const auto native_shader = std::static_pointer_cast<shader_vulkan>(shader);
+
+    vkCmdPushConstants(_command_buffer,
+        native_shader->pipeline_layout(),
+        utils_vulkan::stage_flags(stage_flags),
+        static_cast<std::uint32_t>(offset),
+        static_cast<std::uint32_t>(size),
+        data);
 }
 
 void command_buffer_vulkan::draw(std::size_t vertex_count, std::size_t instance_count, std::size_t first_vertex, std::size_t first_instance) {
