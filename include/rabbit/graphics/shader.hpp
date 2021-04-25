@@ -60,6 +60,7 @@ namespace rb {
      * @brief Shader interface.
      */
     class shader {
+    public:
         /**
          * @brief Default virtual destructor.
          */
