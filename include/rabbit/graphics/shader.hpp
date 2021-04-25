@@ -49,7 +49,7 @@ namespace rb {
      * @brief Shader descriptor structure.
      */
     struct shader_desc {
-        vertex_desc vertex_desc;
+        vertex_layout vertex_layout;
         span<const std::uint32_t> vertex_bytecode;
         span<const std::uint32_t> fragment_bytecode;
         std::vector<shader_binding_desc> bindings;
@@ -69,7 +69,7 @@ namespace rb {
         /**
          * @brief Returns vertex layout descriptor.
          */
-        const vertex_desc& vertex_desc() const;
+        const vertex_layout& vertex_layout() const;
 
         std::optional<shader_binding_desc> binding(std::size_t slot) const;
 
@@ -79,7 +79,7 @@ namespace rb {
         shader(const shader_desc& desc);
 
     private:
-        const rb::vertex_desc _vertex_desc;
+        const rb::vertex_layout _vertex_layout;
         const std::vector<shader_binding_desc> _bindings;
     };
 }

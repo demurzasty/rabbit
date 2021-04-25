@@ -11,7 +11,7 @@ shader_desc builtin_shaders::get(builtin_shader shader) {
 
     switch (shader) {
         case builtin_shader::forward:
-            desc.vertex_desc  = {
+            desc.vertex_layout  = {
                 { vertex_attribute::position, vertex_format::vec3f() },
                 { vertex_attribute::texcoord, vertex_format::vec2f() },
                 { vertex_attribute::normal, vertex_format::vec3f() },

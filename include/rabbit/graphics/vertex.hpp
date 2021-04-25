@@ -63,7 +63,7 @@ namespace rb {
         vertex_format format;
     };
 
-    class vertex_desc {
+    class vertex_layout {
     public:
         using value_type = vertex_element;
         using allocator_type = std::vector<vertex_element>::allocator_type;
@@ -79,15 +79,15 @@ namespace rb {
         using const_iterator = std::vector<vertex_element>::const_iterator;
 
     public:
-        vertex_desc() = default;
+        vertex_layout() = default;
 
-        vertex_desc(std::initializer_list<vertex_element> elements);
+        vertex_layout(std::initializer_list<vertex_element> elements);
 
-        vertex_desc(const vertex_desc&) = default;
-        vertex_desc& operator=(const vertex_desc&) = default;
+        vertex_layout(const vertex_layout&) = default;
+        vertex_layout& operator=(const vertex_layout&) = default;
 
-        vertex_desc(vertex_desc&&) = default;
-        vertex_desc& operator=(vertex_desc&&) = default;
+        vertex_layout(vertex_layout&&) = default;
+        vertex_layout& operator=(vertex_layout&&) = default;
 
         const vertex_element& operator[](std::size_t index) const;
 

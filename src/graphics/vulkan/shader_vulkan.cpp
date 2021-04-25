@@ -115,22 +115,22 @@ VkShaderModule shader_vulkan::_create_shader_module(const span<const std::uint32
 void shader_vulkan::_create_pipeline(const span<const VkPipelineShaderStageCreateInfo>& shader_stages, VkRenderPass render_pass, VkExtent2D swapchain_extent, const shader_desc& desc) {
     VkVertexInputBindingDescription vertex_input_binding_desc;
     vertex_input_binding_desc.binding = 0;
-    vertex_input_binding_desc.stride = static_cast<std::uint32_t>(desc.vertex_desc.stride());
+    vertex_input_binding_desc.stride = static_cast<std::uint32_t>(desc.vertex_layout.stride());
     vertex_input_binding_desc.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
-    auto attributes = std::make_unique<VkVertexInputAttributeDescription[]>(desc.vertex_desc.size());
-    for (std::size_t index{ 0 }; index < desc.vertex_desc.size(); ++index) {
+    auto attributes = std::make_unique<VkVertexInputAttributeDescription[]>(desc.vertex_layout.size());
+    for (std::size_t index{ 0 }; index < desc.vertex_layout.size(); ++index) {
         attributes[index].binding = 0;
         attributes[index].location = static_cast<std::uint32_t>(index);
-        attributes[index].format = utils_vulkan::format(desc.vertex_desc[index].format);
-        attributes[index].offset = static_cast<std::uint32_t>(desc.vertex_desc.offset(index));
+        attributes[index].format = utils_vulkan::format(desc.vertex_layout[index].format);
+        attributes[index].offset = static_cast<std::uint32_t>(desc.vertex_layout.offset(index));
     }
 
     VkPipelineVertexInputStateCreateInfo vertex_input_info{};
     vertex_input_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
     vertex_input_info.vertexBindingDescriptionCount = 1;
     vertex_input_info.pVertexBindingDescriptions = &vertex_input_binding_desc;
-    vertex_input_info.vertexAttributeDescriptionCount = static_cast<std::uint32_t>(desc.vertex_desc.size());
+    vertex_input_info.vertexAttributeDescriptionCount = static_cast<std::uint32_t>(desc.vertex_layout.size());
     vertex_input_info.pVertexAttributeDescriptions = attributes.get();
 
     VkPipelineInputAssemblyStateCreateInfo input_assembly_info{};

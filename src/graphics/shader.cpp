@@ -4,13 +4,13 @@
 using namespace rb;
 
 shader::shader(const shader_desc& desc)
-    : _vertex_desc(desc.vertex_desc)
+    : _vertex_layout(desc.vertex_layout)
     , _bindings(desc.bindings) {
-    RB_ASSERT(!_vertex_desc.empty(), "Vertex description is not provided");
+    RB_ASSERT(!_vertex_layout.empty(), "Vertex description is not provided");
 }
 
-const vertex_desc& shader::vertex_desc() const {
-    return _vertex_desc;
+const vertex_layout& shader::vertex_layout() const {
+    return _vertex_layout;
 }
 
 std::optional<shader_binding_desc> shader::binding(std::size_t slot) const {
