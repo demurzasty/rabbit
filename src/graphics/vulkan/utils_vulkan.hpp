@@ -4,6 +4,8 @@
 
 #include <volk.h>
 
+#include <cstdint>
+
 namespace rb {
     struct utils_vulkan {
         static VkBufferUsageFlags buffer_usage_flags(const buffer_type type);

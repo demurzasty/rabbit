@@ -4,7 +4,7 @@
 #include <rabbit/graphics/buffer.hpp>
 #include <rabbit/graphics/texture.hpp>
 #include <rabbit/graphics/shader.hpp>
-#include <rabbit/graphics/vertex.hpp>
+#include <rabbit/graphics/vertex_layout.hpp>
 #include <rabbit/graphics/polygon_mode.hpp>
 #include <rabbit/graphics/compare_operator.hpp>
 #include <rabbit/graphics/polygon_mode.hpp>

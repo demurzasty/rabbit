@@ -1,4 +1,4 @@
-#include <rabbit/graphics/vertex.hpp>
+#include <rabbit/graphics/vertex_layout.hpp>
 #include <rabbit/core/config.hpp>
 
 #include <numeric>

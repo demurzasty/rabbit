@@ -48,7 +48,7 @@ set (SRC
 	"src/graphics/resource_heap.cpp"
 	"src/graphics/shader.cpp"
 	"src/graphics/texture.cpp"
-	"src/graphics/vertex.cpp"
+	"src/graphics/vertex_layout.cpp"
 )
 
 if (RB_WINDOWS)

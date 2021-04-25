@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cstdint>
-
 namespace rb {
     enum class buffer_type;
     struct buffer_desc;
@@ -38,8 +36,8 @@ namespace rb {
 
     enum class topology;
 
-    enum class vertex_format_type : std::uint8_t;
-    enum class vertex_attribute : std::uint8_t;
+    enum class vertex_format_type;
+    enum class vertex_attribute;
     struct vertex_format;
     struct vertex_element;
     class vertex_desc;

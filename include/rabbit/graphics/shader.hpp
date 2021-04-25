@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fwd.hpp"
-#include "vertex.hpp"
+#include "vertex_layout.hpp"
 #include "topology.hpp"
 #include "cull_mode.hpp"
 #include "front_face.hpp"
