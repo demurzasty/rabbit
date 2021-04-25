@@ -126,15 +126,19 @@ void shader_vulkan::_create_pipeline(const span<const VkPipelineShaderStageCreat
         attributes[index].offset = static_cast<std::uint32_t>(desc.vertex_layout.offset(index));
     }
 
-    VkPipelineVertexInputStateCreateInfo vertex_input_info{};
+    VkPipelineVertexInputStateCreateInfo vertex_input_info;
     vertex_input_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+    vertex_input_info.pNext = nullptr;
+    vertex_input_info.flags = 0;
     vertex_input_info.vertexBindingDescriptionCount = 1;
     vertex_input_info.pVertexBindingDescriptions = &vertex_input_binding_desc;
     vertex_input_info.vertexAttributeDescriptionCount = static_cast<std::uint32_t>(desc.vertex_layout.size());
     vertex_input_info.pVertexAttributeDescriptions = attributes.get();
 
-    VkPipelineInputAssemblyStateCreateInfo input_assembly_info{};
+    VkPipelineInputAssemblyStateCreateInfo input_assembly_info;
     input_assembly_info.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+    input_assembly_info.pNext = nullptr;
+    input_assembly_info.flags = 0;
     input_assembly_info.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     input_assembly_info.primitiveRestartEnable = VK_FALSE;
 
@@ -150,8 +154,10 @@ void shader_vulkan::_create_pipeline(const span<const VkPipelineShaderStageCreat
     scissor.offset = { 0, 0 };
     scissor.extent = swapchain_extent;
 
-    VkPipelineViewportStateCreateInfo viewport_state_info{};
+    VkPipelineViewportStateCreateInfo viewport_state_info;
     viewport_state_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+    viewport_state_info.pNext = nullptr;
+    viewport_state_info.flags = 0;
     viewport_state_info.viewportCount = 1;
     viewport_state_info.pViewports = &viewport;
     viewport_state_info.scissorCount = 1;
@@ -159,21 +165,34 @@ void shader_vulkan::_create_pipeline(const span<const VkPipelineShaderStageCreat
 
     VkPipelineRasterizationStateCreateInfo rasterizer_state_info{};
     rasterizer_state_info.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+    rasterizer_state_info.pNext = nullptr;
+    rasterizer_state_info.flags = 0;
     rasterizer_state_info.depthClampEnable = VK_FALSE;
     rasterizer_state_info.rasterizerDiscardEnable = VK_FALSE;
     rasterizer_state_info.polygonMode = VK_POLYGON_MODE_FILL;
-    rasterizer_state_info.lineWidth = 1.0f;
-    rasterizer_state_info.cullMode = VK_CULL_MODE_NONE; // VK_CULL_MODE_BACK_BIT;
+    rasterizer_state_info.cullMode = VK_CULL_MODE_BACK_BIT;
     rasterizer_state_info.frontFace = VK_FRONT_FACE_CLOCKWISE;
     rasterizer_state_info.depthBiasEnable = VK_FALSE;
+    rasterizer_state_info.depthBiasConstantFactor = 0.0f;
+    rasterizer_state_info.depthBiasClamp = 0.0f;
+    rasterizer_state_info.depthBiasSlopeFactor = 0.0f;
+    rasterizer_state_info.lineWidth = 1.0f;
 
-    VkPipelineMultisampleStateCreateInfo multisampling_state_info{};
+    VkPipelineMultisampleStateCreateInfo multisampling_state_info;
     multisampling_state_info.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-    multisampling_state_info.sampleShadingEnable = VK_FALSE;
+    multisampling_state_info.pNext = nullptr;
+    multisampling_state_info.flags = 0;
     multisampling_state_info.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+    multisampling_state_info.sampleShadingEnable = VK_FALSE;
+    multisampling_state_info.minSampleShading = 0.0f;
+    multisampling_state_info.pSampleMask = nullptr;
+    multisampling_state_info.alphaToCoverageEnable = VK_FALSE;
+    multisampling_state_info.alphaToOneEnable = VK_FALSE;
 
     VkPipelineDepthStencilStateCreateInfo depth_stencil_state_info{};
     depth_stencil_state_info.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+    depth_stencil_state_info.pNext = nullptr;
+    depth_stencil_state_info.flags = 0;
     depth_stencil_state_info.depthTestEnable = VK_TRUE;
     depth_stencil_state_info.depthWriteEnable = VK_TRUE;
     depth_stencil_state_info.depthCompareOp = VK_COMPARE_OP_LESS;
