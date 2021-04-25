@@ -18,5 +18,8 @@ layout (location = 0) out vec2 v_texcoord;
 void main() {
     v_texcoord = in_texcoord;
     gl_Position = proj * view * world * vec4(in_position, 1.0);
+
+#ifdef VULKAN
     gl_Position.y = -gl_Position.y;
+#endif
 }

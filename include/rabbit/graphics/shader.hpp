@@ -7,7 +7,6 @@
 #include <optional>
 
 namespace rb {
-
     /**
      * @brief Shader interface.
      */
