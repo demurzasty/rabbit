@@ -1,23 +1,10 @@
 #pragma once
 
-#include "../math/vec2.hpp"
+#include "texture_desc.hpp"
 
 #include <cstddef>
 
 namespace rb {
-    enum class texture_format {
-        r8,
-        rg8,
-        rgba8,
-        d24s8
-    };
-
-    struct texture_desc {
-        const void* data{ nullptr };
-        vec2u size{ 0, 0 };
-        texture_format format{ texture_format::rgba8 };
-    };
-
     class texture {
     public:
         texture(const texture_desc& desc);
