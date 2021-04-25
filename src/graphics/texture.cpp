@@ -5,7 +5,9 @@ using namespace rb;
 
 texture::texture(const texture_desc& desc)
     : _size(desc.size)
-    , _format(desc.format) {
+    , _format(desc.format)
+    , _filter(desc.filter)
+    , _wrap(desc.wrap) {
     RB_ASSERT(_size.x > 0 && _size.y > 0, "Size of texture must be greater than 0");
 }
 
