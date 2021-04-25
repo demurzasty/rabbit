@@ -5,6 +5,12 @@
 #include <rabbit/graphics/texture.hpp>
 #include <rabbit/graphics/shader.hpp>
 #include <rabbit/graphics/vertex.hpp>
+#include <rabbit/graphics/polygon_mode.hpp>
+#include <rabbit/graphics/compare_operator.hpp>
+#include <rabbit/graphics/polygon_mode.hpp>
+#include <rabbit/graphics/cull_mode.hpp>
+#include <rabbit/graphics/front_face.hpp>
+#include <rabbit/graphics/topology.hpp>
 
 #define VMA_IMPLEMENTATION
 #include <vk_mem_alloc.h>
@@ -79,4 +85,86 @@ VkShaderStageFlags utils_vulkan::stage_flags(const std::uint32_t flags) {
     }
 
     return bitfield;
+}
+
+VkPrimitiveTopology utils_vulkan::topology(rb::topology topology) {
+    switch (topology) {
+        case topology::lines:
+            return VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+        case topology::line_strip:
+            return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
+        case topology::triangles:
+            return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        case topology::triangle_strip:
+            return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+    }
+
+    RB_ASSERT(false, "Failed to map Vulkan primitive topology");
+    return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+}
+
+VkPolygonMode utils_vulkan::polygon_mode(rb::polygon_mode polygon_mode) {
+    switch (polygon_mode) {
+        case polygon_mode::fill:
+            return VK_POLYGON_MODE_FILL;
+        case polygon_mode::line:
+            return VK_POLYGON_MODE_LINE;
+        case polygon_mode::point:
+            return VK_POLYGON_MODE_POINT;
+    }
+
+    RB_ASSERT(false, "Failed to map Vulkan polygon mode");
+    return VK_POLYGON_MODE_FILL;
+}
+
+VkCullModeFlags utils_vulkan::cull_mode(rb::cull_mode cull_mode) {
+    switch (cull_mode) {
+        case cull_mode::none:
+            return VK_CULL_MODE_NONE;
+        case cull_mode::front:
+            return VK_CULL_MODE_FRONT_BIT;
+        case cull_mode::back:
+            return VK_CULL_MODE_BACK_BIT;
+        case cull_mode::front_and_back:
+            return VK_CULL_MODE_FRONT_AND_BACK;
+    }
+
+    RB_ASSERT(false, "Failed to map Vulkan cull mode");
+    return VK_CULL_MODE_NONE;
+}
+
+VkFrontFace utils_vulkan::front_face(rb::front_face front_face) {
+    switch (front_face) {
+        case front_face::clockwise:
+            return VK_FRONT_FACE_CLOCKWISE;
+        case front_face::counter_clockwise:
+            return VK_FRONT_FACE_COUNTER_CLOCKWISE;
+    }
+
+    RB_ASSERT(false, "Failed to map Vulkan front face");
+    return VK_FRONT_FACE_COUNTER_CLOCKWISE;
+}
+
+VkCompareOp utils_vulkan::compare_operator(rb::compare_operator compare_operator) {
+    switch (compare_operator) {
+        case compare_operator::always:
+            return VK_COMPARE_OP_ALWAYS;
+        case compare_operator::never:
+            return VK_COMPARE_OP_NEVER;
+        case compare_operator::less:
+            return VK_COMPARE_OP_LESS;
+        case compare_operator::less_equal:
+            return VK_COMPARE_OP_LESS_OR_EQUAL;
+        case compare_operator::equal:
+            return VK_COMPARE_OP_EQUAL;
+        case compare_operator::greater_equal:
+            return VK_COMPARE_OP_GREATER_OR_EQUAL;
+        case compare_operator::greater:
+            return VK_COMPARE_OP_GREATER;
+        case compare_operator::not_equal:
+            return VK_COMPARE_OP_NOT_EQUAL;
+    }
+
+    RB_ASSERT(false, "Failed to map Vulkan compare operator");
+    return VK_COMPARE_OP_LESS;
 }

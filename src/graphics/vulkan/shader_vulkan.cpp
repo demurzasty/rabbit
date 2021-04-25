@@ -139,7 +139,7 @@ void shader_vulkan::_create_pipeline(const span<const VkPipelineShaderStageCreat
     input_assembly_info.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
     input_assembly_info.pNext = nullptr;
     input_assembly_info.flags = 0;
-    input_assembly_info.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    input_assembly_info.topology = utils_vulkan::topology(desc.input_assembly.topology);
     input_assembly_info.primitiveRestartEnable = VK_FALSE;
 
     VkViewport viewport;
@@ -169,9 +169,9 @@ void shader_vulkan::_create_pipeline(const span<const VkPipelineShaderStageCreat
     rasterizer_state_info.flags = 0;
     rasterizer_state_info.depthClampEnable = VK_FALSE;
     rasterizer_state_info.rasterizerDiscardEnable = VK_FALSE;
-    rasterizer_state_info.polygonMode = VK_POLYGON_MODE_FILL;
-    rasterizer_state_info.cullMode = VK_CULL_MODE_BACK_BIT;
-    rasterizer_state_info.frontFace = VK_FRONT_FACE_CLOCKWISE;
+    rasterizer_state_info.polygonMode = utils_vulkan::polygon_mode(desc.rasterizer_state.polygon_mode);
+    rasterizer_state_info.cullMode = utils_vulkan::cull_mode(desc.rasterizer_state.cull_mode);
+    rasterizer_state_info.frontFace = utils_vulkan::front_face(desc.rasterizer_state.front_face);
     rasterizer_state_info.depthBiasEnable = VK_FALSE;
     rasterizer_state_info.depthBiasConstantFactor = 0.0f;
     rasterizer_state_info.depthBiasClamp = 0.0f;
@@ -193,11 +193,11 @@ void shader_vulkan::_create_pipeline(const span<const VkPipelineShaderStageCreat
     depth_stencil_state_info.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
     depth_stencil_state_info.pNext = nullptr;
     depth_stencil_state_info.flags = 0;
-    depth_stencil_state_info.depthTestEnable = VK_TRUE;
-    depth_stencil_state_info.depthWriteEnable = VK_TRUE;
-    depth_stencil_state_info.depthCompareOp = VK_COMPARE_OP_LESS;
+    depth_stencil_state_info.depthTestEnable = desc.depth_stencil_state.depth_test_enable ? VK_TRUE : VK_FALSE;
+    depth_stencil_state_info.depthWriteEnable = desc.depth_stencil_state.depth_write_enable ? VK_TRUE : VK_FALSE;
+    depth_stencil_state_info.depthCompareOp = utils_vulkan::compare_operator(desc.depth_stencil_state.compare_operator);
     depth_stencil_state_info.depthBoundsTestEnable = VK_FALSE;
-    depth_stencil_state_info.stencilTestEnable = VK_FALSE;
+    depth_stencil_state_info.stencilTestEnable = desc.depth_stencil_state.stencil_test_enable ? VK_TRUE : VK_FALSE;
 
     VkPipelineColorBlendAttachmentState color_blend_attachment_state_info{};
     color_blend_attachment_state_info.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;

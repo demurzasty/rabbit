@@ -12,10 +12,16 @@ namespace rb {
 
     class command_buffer;
 
+    enum class compare_operator;
+    enum class cull_mode;
+    enum class front_face;
+
     class graphics_device_manager;
 
     struct graphics_device_desc;
     class graphics_device;
+
+    enum class polygon_mode;
 
     struct resource_heap_desc;
     class resource_heap;
@@ -29,6 +35,8 @@ namespace rb {
     enum class texture_format;
     struct texture_desc;
     class texture;
+
+    enum class topology;
 
     enum class vertex_format_type : std::uint8_t;
     enum class vertex_attribute : std::uint8_t;
