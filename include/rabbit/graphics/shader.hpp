@@ -9,6 +9,9 @@
 #include <optional>
 
 namespace rb {
+    /**
+     * @brief Shader stage flags.
+     */
     struct shader_stage_flags {
         enum {
             vertex = (1 << 0),
@@ -16,6 +19,9 @@ namespace rb {
         };
     };
 
+    /**
+     * @brief Shader binding type.
+     */
     enum class shader_binding_type {
         uniform_buffer,
         texture
@@ -39,6 +45,9 @@ namespace rb {
         // std::string name; // ? Need in legacy API (GLES2)
     };
 
+    /**
+     * @brief Shader descriptor structure.
+     */
     struct shader_desc {
         vertex_desc vertex_desc;
         span<const std::uint32_t> vertex_bytecode;
@@ -47,17 +56,26 @@ namespace rb {
         std::vector<shader_push_constant_desc> push_constants;
     };
 
+    /**
+     * @brief Shader interface.
+     */
     class shader {
-    public:
-        shader(const shader_desc& desc);
-
+        /**
+         * @brief Default virtual destructor.
+         */
         virtual ~shader() = default;
 
+        /**
+         * @brief Returns vertex layout descriptor.
+         */
         const vertex_desc& vertex_desc() const;
 
         std::optional<shader_binding_desc> binding(std::size_t slot) const;
 
         const std::vector<shader_binding_desc>& bindings() const;
+
+    protected:
+        shader(const shader_desc& desc);
 
     private:
         const rb::vertex_desc _vertex_desc;

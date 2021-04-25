@@ -8,8 +8,20 @@
 // TODO: Begin render pass on render target.
 
 namespace rb {
+    /**
+     * @brief Command buffer interface used for storing and recording GPU commands.
+     *
+     * This is the main interface to recording graphics, compute, and blit command to be submitted to the GPU.
+     * Before any command can be recorded, the command buffer must be set into record mode,
+     * which is done by the command_buffer:begin function.
+     *
+     * @see graphics_device::create_command_buffer
+     */
     class command_buffer {
     public:
+        /**
+         * @brief Default virtual destructor.
+         */
         virtual ~command_buffer() = default;
 
         /**
@@ -26,18 +38,56 @@ namespace rb {
          */
         virtual void end() = 0;
 
+        /**
+         * @brief Begins with a new render pass.
+         */
         virtual void begin_render_pass(const std::shared_ptr<graphics_device>& graphics_device) = 0;
 
-        virtual void update_buffer(const std::shared_ptr<buffer>& buffer, const void* data, std::size_t offset, std::size_t size) = 0;
-
+        /**
+         * @brief Ends the current render pass.
+         */
         virtual void end_render_pass() = 0;
 
+        /**
+         * @brief Updates the data of the specifed buffer during recording the command buffer.
+         *
+         * @param buffer Specifes the destination buffer whose data is to be updated.
+         * @param data Raw pointer to the data which the buffer is to be updated. This must not be null!
+         * @param offset Specifies the destination offset (in bytes) at which the buffer is to be updated.
+         * @param size Specifies the sizes (in bytes) of the data block which is to be updated.
+         *
+         * @warning Record this command outside of a render pass.
+         */
+        virtual void update_buffer(const std::shared_ptr<buffer>& buffer, const void* data, std::size_t offset, std::size_t size) = 0;
+
+        /**
+         * @brief Sets the active shader.
+         *
+         * @param shader Specifies the shader which is to be bound for subsequent draw or compute commands.
+         */
         virtual void set_shader(const std::shared_ptr<shader>& shader) = 0;
 
+        /**
+         * @brief Binds the specified resource heap to the active shader.
+         *
+         * @param resource_heap Specifies the resource heap that contains all shader resources thath will be bound to the shader pipeline.
+         *
+         * @warning Any previously bound resources are invalid after this call.
+         */
         virtual void set_resource_heap(const std::shared_ptr<resource_heap>& resource_heap) = 0;
 
+        /**
+         * @brief Sets the specified vertex buffer for subsequent drawing operations.
+         *
+         * @param vertex_buffer Specifies the vertex buffer to set. This buffer must have been created with the vertex type and its content must not be uninitialized.
+         */
         virtual void set_vertex_buffer(const std::shared_ptr<buffer>& vertex_buffer) = 0;
 
+        /**
+         * @brief Pushes a contant value to active shader pipeline.
+         *
+         * @warning Available only on Vulkan implementation.
+         */
         virtual void push_constant(const std::shared_ptr<shader>& shader, std::uint32_t stage_flags, std::size_t offset, std::size_t size, const void* data) = 0;
 
         virtual void draw(std::size_t vertex_count, std::size_t instance_count, std::size_t first_vertex, std::size_t first_instance) = 0;

@@ -14,12 +14,26 @@ namespace rb {
         std::map<std::size_t, resource_view> resources;
     };
 
+    /**
+     * @brief Resource heap interface.
+     *
+     * An instance of this interface provides all descriptor sets for graphics and compute pipelines.
+     *
+     * @see graphics_device::create_resource_heap
+     * @see command_buffer::set_resource_heap
+     */
     class resource_heap {
     public:
         resource_heap(const resource_heap_desc& desc);
 
+        /**
+         * @brief Default virtual destructor.
+         */
         virtual ~resource_heap() = default;
 
+        /**
+         * @brief Returns associated shader provided with a descriptor.
+         */
         const std::shared_ptr<shader>& associated_shader() const;
 
     private:

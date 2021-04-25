@@ -6,6 +6,9 @@
 #include <vector>
 
 namespace rb {
+    /**
+     * @brief Chooses a graphics device implementation depending on the using platform.
+     */
     class graphics_device_manager final {
     public:
         std::shared_ptr<graphics_device> create(const graphics_device_desc& desc);

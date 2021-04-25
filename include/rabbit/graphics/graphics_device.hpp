@@ -8,16 +8,27 @@
 #include <string>
 
 namespace rb {
+    /**
+     * @brief Graphics device descriptor structure.
+     */
     struct graphics_device_desc {
         std::shared_ptr<window> window;
         std::string application_name{ "RabBit" };
         version application_version{ 1, 0, 0 };
     };
 
+    /**
+     * @brief Performs primitive-based rendering, creates resources, handles system-level variables, and creates shaders.
+     *
+     * @see graphics_device_manager::create
+     */
     class graphics_device {
     public:
         graphics_device(const graphics_device_desc& desc);
 
+        /**
+         * @brief Default virtual destructor.
+         */
         virtual ~graphics_device() = default;
 
         virtual std::shared_ptr<command_buffer> create_command_buffer() = 0;
