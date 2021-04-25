@@ -58,16 +58,18 @@ int main(int argc, char* argv[]) {
     camera_data camera_data;
     auto camera_buffer = create_uniform_buffer(graphics_device, camera_data);
 
+    local_data local_data;
+    auto local_buffer = create_uniform_buffer(graphics_device, local_data);
+
     material_data material_data;
     auto material_buffer = create_uniform_buffer(graphics_device, material_data);
-
-    local_data local_data;
 
     resource_heap_desc resource_heap_desc;
     resource_heap_desc.shader = shader;
     resource_heap_desc.resources = {
         { 0, camera_buffer },
-        { 1, material_buffer },
+        { 1, local_buffer },
+        { 2, material_buffer },
     };
     auto resource_heap = graphics_device->create_resource_heap(resource_heap_desc);
 
@@ -91,6 +93,8 @@ int main(int argc, char* argv[]) {
 
         command_buffer->begin();
 
+        command_buffer->update_buffer(local_buffer, &local_data, 0, sizeof(local_data));
+
         command_buffer->begin_render_pass(graphics_device);
 
         command_buffer->set_shader(shader);
@@ -98,8 +102,6 @@ int main(int argc, char* argv[]) {
         command_buffer->set_resource_heap(resource_heap);
 
         command_buffer->set_vertex_buffer(vertex_buffer);
-
-        command_buffer->push_constant(shader, shader_stage_flags::vertex, 0, sizeof(local_data), &local_data);
 
         command_buffer->draw(3, 1, 0, 0);
 
