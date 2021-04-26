@@ -15,16 +15,8 @@ const vertex_element& vertex_layout::operator[](std::size_t index) const {
     return _elements[index];
 }
 
-vertex_layout::iterator vertex_layout::begin() {
-    return _elements.begin();
-}
-
 vertex_layout::const_iterator vertex_layout::begin() const {
     return _elements.begin();
-}
-
-vertex_layout::iterator vertex_layout::end() {
-    return _elements.end();
 }
 
 vertex_layout::const_iterator vertex_layout::end() const {

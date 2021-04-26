@@ -16,8 +16,6 @@ namespace rb {
         using size_type = std::vector<vertex_element>::size_type;
         using difference_type = std::vector<vertex_element>::difference_type;
         using difference_type = std::vector<vertex_element>::difference_type;
-
-        using iterator = std::vector<vertex_element>::iterator;
         using const_iterator = std::vector<vertex_element>::const_iterator;
 
     public:
@@ -33,10 +31,7 @@ namespace rb {
 
         const vertex_element& operator[](std::size_t index) const;
 
-        iterator begin();
         const_iterator begin() const;
-
-        iterator end();
         const_iterator end() const;
 
         bool empty() const;
