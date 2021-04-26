@@ -29,5 +29,15 @@ namespace rb {
          * @brief Determine initial window title.
          */
         std::string window_title{ "RabBit " };
+
+        /**
+         * @brief Determine that vertical synchronization should be enabled.
+         */
+        bool vsync{ true };
+
+        /**
+         * @brief Determine fixed time interval.
+         */
+        float fixed_time{ 1.0f / 60.0f };
     };
 }

@@ -12,6 +12,9 @@
 #include <rabbit/math/mat4.hpp>
 #include <rabbit/engine/system.hpp>
 #include <rabbit/engine/entity.hpp>
+#include <rabbit/engine/settings.hpp>
+
+#include <chrono>
 
 using namespace rb;
 
@@ -57,6 +60,7 @@ application::application(const builder& builder) {
 }
 
 int application::run() {
+    auto& settings = _injector.get<rb::settings>();
     auto& window = _injector.get<rb::window>();
     auto& graphics_device = _injector.get<rb::graphics_device>();
 
@@ -100,8 +104,34 @@ int application::run() {
         system->initialize(registry);
     }
 
+    auto last_time = std::chrono::steady_clock::now();
+    auto current_time = last_time;
+    auto accumulation_time = 0.0f;
+
     while (window.is_open()) {
         window.poll_events();
+
+        current_time = std::chrono::steady_clock::now();
+        const auto elapsed_time = std::chrono::duration_cast<std::chrono::duration<float>>(current_time - last_time).count();
+        last_time = current_time;
+
+        for (auto& system : _systems) {
+            system->update(registry, elapsed_time);
+        }
+
+        accumulation_time += elapsed_time;
+
+        while (accumulation_time >= settings.fixed_time) {
+            for (auto& system : _systems) {
+                system->fixed_update(registry, settings.fixed_time);
+            }
+
+            accumulation_time -= settings.fixed_time;
+        }
+
+        for (auto& system : _systems) {
+            system->draw(registry, graphics_device);
+        }
 
         command_buffer->begin();
 

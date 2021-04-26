@@ -365,7 +365,7 @@ void graphics_device_vulkan::_query_surface(const settings& desc) {
     _swapchain_extent = surface_capabilities.currentExtent;
 }
 
-void graphics_device_vulkan::_create_swapchain(const settings& desc) {
+void graphics_device_vulkan::_create_swapchain(const settings& settings) {
     RB_MAYBE_UNUSED VkResult result;
 
     // Get window size.
@@ -386,10 +386,15 @@ void graphics_device_vulkan::_create_swapchain(const settings& desc) {
 
     _present_mode = VK_PRESENT_MODE_FIFO_RELAXED_KHR;
 
-    for (std::uint32_t index{ 0 }; index < present_mode_count; ++index) {
-        if (present_modes[index] == VK_PRESENT_MODE_MAILBOX_KHR) {
-            // _present_mode = VK_PRESENT_MODE_MAILBOX_KHR;
-            break;
+    if (!settings.vsync) {
+        _present_mode = VK_PRESENT_MODE_FIFO_KHR;
+
+        // Search for better solution.
+        for (std::uint32_t index{ 0 }; index < present_mode_count; ++index) {
+            if (present_modes[index] == VK_PRESENT_MODE_MAILBOX_KHR) {
+                _present_mode = VK_PRESENT_MODE_MAILBOX_KHR;
+                break;
+            }
         }
     }
 
