@@ -23,7 +23,7 @@ std::shared_ptr<void> texture_loader::load(const std::string& filename, const js
 
     texture_desc desc;
     desc.data = pixels.get();
-    desc.size = { static_cast<unsigned int>(width), static_cast<unsigned int>(height) };
+    desc.size = { static_cast<unsigned int>(width), static_cast<unsigned int>(height), 0 };
     desc.format = texture_format::rgba8;
     desc.filter = texture_filter::anisotropic;
     desc.wrap = texture_wrap::repeat;

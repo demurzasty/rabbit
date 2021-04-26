@@ -1,5 +1,6 @@
 #include <rabbit/graphics/texture.hpp>
 #include <rabbit/core/config.hpp>
+#include <rabbit/math/vec2.hpp>
 
 using namespace rb;
 
@@ -11,7 +12,7 @@ texture::texture(const texture_desc& desc)
     RB_ASSERT(_size.x > 0 && _size.y > 0, "Size of texture must be greater than 0");
 }
 
-const vec2u& texture::size() const {
+const vec3u& texture::size() const {
     return _size;
 }
 

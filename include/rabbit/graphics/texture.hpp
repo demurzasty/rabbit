@@ -1,6 +1,7 @@
 #pragma once
 
 #include "texture_desc.hpp"
+#include "../math/fwd.hpp"
 
 #include <cstddef>
 
@@ -12,7 +13,7 @@ namespace rb {
         /**
          * @brief Returns texture size.
          */
-        const vec2u& size() const;
+        const vec3u& size() const;
 
         /**
          * @brief Returns texture texel size.
@@ -43,7 +44,7 @@ namespace rb {
         texture(const texture_desc& desc);
 
     private:
-        const vec2u _size;
+        const vec3u _size;
         const texture_format _format;
         const texture_filter _filter;
         const texture_wrap _wrap;
