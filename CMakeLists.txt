@@ -48,6 +48,7 @@ set (SRC
 	"src/graphics/builtin_shaders.cpp"
 	"src/graphics/graphics_device_factory.cpp"
 	"src/graphics/graphics_device.cpp"
+	"src/graphics/mesh.cpp"
 	"src/graphics/resource_heap.cpp"
 	"src/graphics/shader.cpp"
 	"src/graphics/texture.cpp"
