@@ -53,6 +53,7 @@ set (SRC
 	"src/graphics/shader.cpp"
 	"src/graphics/texture.cpp"
 	"src/graphics/vertex_layout.cpp"
+	"src/loaders/mesh_loader.cpp"
 	"src/loaders/texture_loader.cpp"
 	"src/platform/window_factory.cpp"
 )

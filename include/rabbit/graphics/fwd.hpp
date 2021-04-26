@@ -19,6 +19,9 @@ namespace rb {
     struct graphics_device_desc;
     class graphics_device;
 
+    struct mesh_desc;
+    class mesh;
+
     enum class polygon_mode;
 
     struct resource_heap_desc;

@@ -64,41 +64,6 @@ int application::run() {
     auto& window = _injector.get<rb::window>();
     auto& graphics_device = _injector.get<rb::graphics_device>();
 
-    auto shader = graphics_device.create_shader(builtin_shaders::get(builtin_shader::forward));
-
-    camera_data camera_data;
-    auto camera_buffer = create_uniform_buffer(graphics_device, camera_data);
-
-    local_data local_data;
-    auto local_buffer = create_uniform_buffer(graphics_device, local_data);
-
-    material_data material_data;
-    auto material_buffer = create_uniform_buffer(graphics_device, material_data);
-
-    resource_heap_desc resource_heap_desc;
-    resource_heap_desc.shader = shader;
-    resource_heap_desc.resources = {
-        { 0, camera_buffer },
-        { 1, local_buffer },
-        { 2, material_buffer },
-    };
-    auto resource_heap = graphics_device.create_resource_heap(resource_heap_desc);
-
-    const vertex vertices[] = {
-        { { -1.0f, -1.0f, 0.0f }, { 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f } },
-        { { 0.0f, 1.0f, 0.0f }, { 0.5f, 0.0f }, { 0.0f, 0.0f, 1.0f } },
-        { { 1.0f, -1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f } }
-    };
-
-    buffer_desc buffer_desc;
-    buffer_desc.type = buffer_type::vertex;
-    buffer_desc.size = sizeof(vertices);
-    buffer_desc.stride = sizeof(vertex);
-    buffer_desc.data = vertices;
-    auto vertex_buffer = graphics_device.create_buffer(buffer_desc);
-
-    auto command_buffer = graphics_device.create_command_buffer();
-
     registry registry;
     for (auto& system : _systems) {
         system->initialize(registry);
@@ -132,26 +97,6 @@ int application::run() {
         for (auto& system : _systems) {
             system->draw(registry, graphics_device);
         }
-
-        command_buffer->begin();
-
-        command_buffer->update_buffer(local_buffer, &local_data, 0, sizeof(local_data));
-
-        command_buffer->begin_render_pass(graphics_device);
-
-        command_buffer->set_shader(shader);
-
-        command_buffer->set_resource_heap(resource_heap);
-
-        command_buffer->set_vertex_buffer(vertex_buffer);
-
-        command_buffer->draw(3, 1, 0, 0);
-
-        command_buffer->end_render_pass();
-
-        command_buffer->end();
-
-        graphics_device.submit(command_buffer);
 
         graphics_device.present();
     }
