@@ -6,6 +6,7 @@
 #include <map>
 #include <memory>
 #include <functional>
+#include <type_traits>
 
 namespace rb {
     /**
@@ -33,6 +34,8 @@ namespace rb {
          */
         template<typename T>
         void install() {
+            static_assert(!std::is_abstract_v<T>, "Installation type must be non-abstract");
+
             _beans.emplace(type_id<T>().hash(), bean{
                 nullptr,
                 [](injector& injector) { return injector.resolve<T>(); }
@@ -44,6 +47,9 @@ namespace rb {
          */
         template<typename Interface, typename Implementation>
         void install() {
+            static_assert(!std::is_abstract_v<Implementation>, "Installation type must be non-abstract");
+            static_assert(std::is_base_of_v<Interface, Implementation>, "Interface type must be base of Implementation");
+
             _beans.emplace(typeid(Interface), bean{
                 nullptr,
                 [](injector& injector) { return injector.resolve<Implementation>(); }
