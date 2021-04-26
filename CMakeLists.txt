@@ -43,7 +43,6 @@ set (SRC
 	"src/engine/application.cpp"
 	"src/engine/builder.cpp"
 	"src/engine/system.cpp"
-	"src/platform/window_factory.cpp"
 	"src/graphics/buffer.cpp"
 	"src/graphics/builtin_shaders.cpp"
 	"src/graphics/graphics_device_factory.cpp"
@@ -52,6 +51,8 @@ set (SRC
 	"src/graphics/shader.cpp"
 	"src/graphics/texture.cpp"
 	"src/graphics/vertex_layout.cpp"
+	"src/loaders/texture_loader.cpp"
+	"src/platform/window_factory.cpp"
 )
 
 if (RB_WINDOWS)
