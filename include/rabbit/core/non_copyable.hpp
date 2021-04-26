@@ -1,7 +1,9 @@
 #pragma once
 
+#include "config.hpp"
+
 namespace rb {
-    struct non_copyable {
+    struct RB_NOVTABLE non_copyable {
         non_copyable() = default;
 
         non_copyable(const non_copyable&) = delete;
