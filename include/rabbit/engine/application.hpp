@@ -3,6 +3,8 @@
 #include "fwd.hpp"
 #include "../core/injector.hpp"
 
+#include <vector>
+
 namespace rb {
     class application {
     public:
@@ -18,5 +20,6 @@ namespace rb {
 
     private:
         injector _injector;
+        std::vector<std::shared_ptr<rb::system>> _systems;
     };
 }

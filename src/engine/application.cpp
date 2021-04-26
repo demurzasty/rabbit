@@ -10,6 +10,8 @@
 #include <rabbit/math/vec2.hpp>
 #include <rabbit/math/vec3.hpp>
 #include <rabbit/math/mat4.hpp>
+#include <rabbit/engine/system.hpp>
+#include <rabbit/engine/entity.hpp>
 
 using namespace rb;
 
@@ -47,6 +49,10 @@ std::shared_ptr<buffer> create_uniform_buffer(graphics_device& graphics_device, 
 application::application(const builder& builder) {
     for (auto& installation : builder._installations) {
         installation(_injector);
+    }
+
+    for (auto& system_factory : builder._system_factories) {
+        _systems.push_back(system_factory(_injector));
     }
 }
 
@@ -88,6 +94,11 @@ int application::run() {
     auto vertex_buffer = graphics_device.create_buffer(buffer_desc);
 
     auto command_buffer = graphics_device.create_command_buffer();
+
+    registry registry;
+    for (auto& system : _systems) {
+        system->initialize(registry);
+    }
 
     while (window.is_open()) {
         window.poll_events();

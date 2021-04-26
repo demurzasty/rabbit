@@ -35,9 +35,18 @@ namespace rb {
             return *this;
         }
 
+        template<typename System>
+        builder& system() {
+            _system_factories.push_back([](injector& injector) {
+                return injector.resolve<System>();
+            });
+            return *this;
+        }
+
         application build() const;
 
     private:
         std::vector<std::function<void(injector&)>> _installations;
+        std::vector<std::function<std::shared_ptr<rb::system>(injector&)>> _system_factories;
     };
 }
