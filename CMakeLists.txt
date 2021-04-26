@@ -40,6 +40,8 @@ endforeach (GLSL_SRC)
 add_custom_target (shaders DEPENDS ${SPIRV_BINARY_FILES})
 
 set (SRC
+	"src/engine/application.cpp"
+	"src/engine/builder.cpp"
 	"src/platform/window_factory.cpp"
 	"src/graphics/buffer.cpp"
 	"src/graphics/builtin_shaders.cpp"
