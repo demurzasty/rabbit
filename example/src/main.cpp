@@ -10,6 +10,7 @@
 #include <rabbit/math/vec2.hpp>
 #include <rabbit/math/vec3.hpp>
 #include <rabbit/math/mat4.hpp>
+#include <rabbit/core/injector.hpp>
 
 #include <chrono>
 
@@ -87,6 +88,8 @@ int main(int argc, char* argv[]) {
     auto vertex_buffer = graphics_device->create_buffer(buffer_desc);
 
     auto command_buffer = graphics_device->create_command_buffer();
+
+    injector injector;
 
     while (window->is_open()) {
         window->poll_events();
