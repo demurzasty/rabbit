@@ -107,7 +107,7 @@ namespace rb {
          */
         template<typename Func>
         void invoke(Func func) {
-            using resolver = resolver<T>;
+            using resolver = resolver<void>;
 
             resolver r{ *this };
             if constexpr (std::is_invocable_v<Func>) {

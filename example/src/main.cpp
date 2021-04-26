@@ -5,6 +5,8 @@
 #include <rabbit/engine/application.hpp>
 #include <rabbit/engine/builder.hpp>
 #include <rabbit/engine/system.hpp>
+#include <rabbit/asset/asset_manager.hpp>
+#include <rabbit/loaders/texture_loader.hpp>
 
 using namespace rb;
 
@@ -20,6 +22,8 @@ int main(int argc, char* argv[]) {
         .singleton<settings>()
         .singleton<window>(window_factory{})
         .singleton<graphics_device>(graphics_device_factory{})
+        .singleton<asset_manager>()
+        .loader<texture, texture_loader>()
         .system<test_system>()
         .build();
 
