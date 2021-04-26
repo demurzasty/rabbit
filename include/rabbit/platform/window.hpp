@@ -2,6 +2,7 @@
 
 #include "fwd.hpp"
 #include "../math/fwd.hpp"
+#include "../core/non_copyable.hpp"
 
 #include <string>
 
@@ -11,7 +12,7 @@ namespace rb {
      *
      * @see window
      */
-    class window {
+    class window : public non_copyable {
     public:
 		/**
 		 * @brief Default virtual destructor.

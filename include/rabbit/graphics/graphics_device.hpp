@@ -3,6 +3,7 @@
 #include "fwd.hpp"
 #include "../platform/fwd.hpp"
 #include "../engine/fwd.hpp"
+#include "../core/non_copyable.hpp"
 
 #include <memory>
 #include <string>
@@ -13,7 +14,7 @@ namespace rb {
      *
      * @see graphics_device_manager::create
      */
-    class graphics_device {
+    class graphics_device : public non_copyable {
     public:
         graphics_device(settings& settings, window& window);
 
