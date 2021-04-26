@@ -72,8 +72,8 @@ void command_buffer_vulkan::update_buffer(const std::shared_ptr<buffer>& buffer,
     vkCmdUpdateBuffer(_command_buffer, native_buffer, offset, size, data);
 }
 
-void command_buffer_vulkan::begin_render_pass(const std::shared_ptr<graphics_device>& graphics_device) {
-    auto native_graphics_device = std::static_pointer_cast<graphics_device_vulkan>(graphics_device);
+void command_buffer_vulkan::begin_render_pass(graphics_device& graphics_device) {
+    auto& native_graphics_device = static_cast<graphics_device_vulkan&>(graphics_device);
 
     VkClearValue clear_values[2];
     clear_values[0].color = { { 0.0f, 0.0f, 0.0f, 1.0f } };
@@ -82,10 +82,10 @@ void command_buffer_vulkan::begin_render_pass(const std::shared_ptr<graphics_dev
     VkRenderPassBeginInfo render_pass_begin_info;
 	render_pass_begin_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	render_pass_begin_info.pNext = nullptr;
-	render_pass_begin_info.renderPass = native_graphics_device->render_pass();
-	render_pass_begin_info.framebuffer = native_graphics_device->framebuffer();
+	render_pass_begin_info.renderPass = native_graphics_device.render_pass();
+	render_pass_begin_info.framebuffer = native_graphics_device.framebuffer();
 	render_pass_begin_info.renderArea.offset = { 0, 0 };
-	render_pass_begin_info.renderArea.extent = native_graphics_device->swapchain_extent();
+	render_pass_begin_info.renderArea.extent = native_graphics_device.swapchain_extent();
 	render_pass_begin_info.clearValueCount = sizeof(clear_values) / sizeof(*clear_values);
 	render_pass_begin_info.pClearValues = clear_values;
 

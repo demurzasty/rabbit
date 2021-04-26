@@ -10,7 +10,7 @@
 namespace rb {
     class graphics_device_vulkan : public graphics_device {
     public:
-        graphics_device_vulkan(const graphics_device_desc& desc);
+        graphics_device_vulkan(settings& settings, window& window);
 
         ~graphics_device_vulkan();
 
@@ -35,25 +35,25 @@ namespace rb {
         VkFramebuffer framebuffer() const;
 
     private:
-        void _initialize_volk(const graphics_device_desc& desc);
+        void _initialize_volk(const settings& settings);
 
-        void _create_instance(const graphics_device_desc& desc);
+        void _create_instance(const settings& settings);
 
-        void _choose_physical_device(const graphics_device_desc& desc);
+        void _choose_physical_device(const settings& settings);
 
-        void _create_surface(const graphics_device_desc& desc);
+        void _create_surface(const settings& settings);
 
-        void _create_device(const graphics_device_desc& desc);
+        void _create_device(const settings& settings);
 
-        void _create_allocator(const graphics_device_desc& desc);
+        void _create_allocator(const settings& settings);
 
-        void _query_surface(const graphics_device_desc& desc);
+        void _query_surface(const settings& settings);
 
-        void _create_swapchain(const graphics_device_desc& desc);
+        void _create_swapchain(const settings& settings);
 
-        void _create_command_pool(const graphics_device_desc& desc);
+        void _create_command_pool(const settings& settings);
 
-        void _create_synchronization_objects(const graphics_device_desc& desc);
+        void _create_synchronization_objects(const settings& settings);
 
     private:
         VkInstance _instance;

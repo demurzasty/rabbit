@@ -2,21 +2,12 @@
 
 #include "fwd.hpp"
 #include "../platform/fwd.hpp"
-#include "../core/version.hpp"
+#include "../engine/fwd.hpp"
 
 #include <memory>
 #include <string>
 
 namespace rb {
-    /**
-     * @brief Graphics device descriptor structure.
-     */
-    struct graphics_device_desc {
-        std::shared_ptr<window> window;
-        std::string application_name{ "RabBit" };
-        version application_version{ 1, 0, 0 };
-    };
-
     /**
      * @brief Performs primitive-based rendering, creates resources, handles system-level variables, and creates shaders.
      *
@@ -24,7 +15,7 @@ namespace rb {
      */
     class graphics_device {
     public:
-        graphics_device(const graphics_device_desc& desc);
+        graphics_device(settings& settings, window& window);
 
         /**
          * @brief Default virtual destructor.
@@ -45,9 +36,9 @@ namespace rb {
 
         virtual void present() = 0;
 
-        const std::shared_ptr<window>& associated_window() const;
+        window& associated_window();
 
     private:
-        std::shared_ptr<window> _window;
+        window& _window;
     };
 }

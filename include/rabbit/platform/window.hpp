@@ -1,26 +1,11 @@
 #pragma once
 
 #include "fwd.hpp"
-#include "../math/vec2.hpp"
+#include "../math/fwd.hpp"
 
 #include <string>
 
 namespace rb {
-    /**
-     * @brief Window description.
-     */
-    struct window_desc {
-        /**
-         * @brief Determine initial window size, excluding OS window decorations.
-         */
-        vec2u size{ 1280, 720 };
-
-        /**
-         * @brief Determine initial window title.
-         */
-        std::string title{ "RabBit " };
-    };
-
     /**
      * @brief Window base class. Can be created using window_manager.
      *

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../core/version.hpp"
 #include "../math/vec2.hpp"
 
 #include <string>
@@ -9,6 +10,16 @@ namespace rb {
      * @brief Application settings.
      */
     struct settings {
+        /**
+         * @brief Application name.
+         */
+        std::string application_name{ "RabBit" };
+
+        /**
+         * @brief Application version.
+         */
+        version application_version{ 1, 0, 0 };
+
         /**
          * @brief Determine initial window size, excluding OS window decorations.
          */

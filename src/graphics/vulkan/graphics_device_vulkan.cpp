@@ -7,6 +7,7 @@
 
 #include <rabbit/core/config.hpp>
 #include <rabbit/platform/window.hpp>
+#include <rabbit/engine/settings.hpp>
 
 #if RB_WINDOWS
 #   define WIN32_LEAN_AND_MEAN
@@ -32,18 +33,18 @@ namespace {
     }
 }
 
-graphics_device_vulkan::graphics_device_vulkan(const graphics_device_desc& desc)
-    : graphics_device(desc) {
-    _initialize_volk(desc);
-    _create_instance(desc);
-    _choose_physical_device(desc);
-    _create_surface(desc);
-    _create_device(desc);
-    _create_allocator(desc);
-    _query_surface(desc);
-    _create_swapchain(desc);
-    _create_command_pool(desc);
-    _create_synchronization_objects(desc);
+graphics_device_vulkan::graphics_device_vulkan(settings& settings, window& window)
+    : graphics_device(settings, window) {
+    _initialize_volk(settings);
+    _create_instance(settings);
+    _choose_physical_device(settings);
+    _create_surface(settings);
+    _create_device(settings);
+    _create_allocator(settings);
+    _query_surface(settings);
+    _create_swapchain(settings);
+    _create_command_pool(settings);
+    _create_synchronization_objects(settings);
 }
 
 graphics_device_vulkan::~graphics_device_vulkan() {
@@ -155,18 +156,18 @@ VkFramebuffer graphics_device_vulkan::framebuffer() const {
     return _framebuffers[_image_index];
 }
 
-void graphics_device_vulkan::_initialize_volk(const graphics_device_desc& desc) {
+void graphics_device_vulkan::_initialize_volk(const settings& settings) {
     RB_MAYBE_UNUSED const auto result = volkInitialize();
     RB_ASSERT(result == VK_SUCCESS, "Cannot initialize volk library");
 }
 
-void graphics_device_vulkan::_create_instance(const graphics_device_desc& desc) {
-    const auto [major, minor, patch] = desc.application_version;
+void graphics_device_vulkan::_create_instance(const settings& settings) {
+    const auto [major, minor, patch] = settings.application_version;
 
     VkApplicationInfo app_info;
     app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
     app_info.pNext = nullptr;
-    app_info.pApplicationName = desc.application_name.c_str();
+    app_info.pApplicationName = settings.application_name.c_str();
     app_info.applicationVersion = VK_MAKE_VERSION(major, minor, patch);
     app_info.pEngineName = "RabBit";
     app_info.engineVersion = VK_MAKE_VERSION(RB_VERSION_MAJOR, RB_VERSION_MINOR, RB_VERSION_PATCH);
@@ -210,7 +211,7 @@ void graphics_device_vulkan::_create_instance(const graphics_device_desc& desc) 
     volkLoadInstance(_instance);
 }
 
-void graphics_device_vulkan::_choose_physical_device(const graphics_device_desc& desc) {
+void graphics_device_vulkan::_choose_physical_device(const settings& desc) {
     // Query physical device count. We should pick one.
     std::uint32_t physical_device_count{ 0 };
     RB_MAYBE_UNUSED auto result = vkEnumeratePhysicalDevices(_instance, &physical_device_count, nullptr);
@@ -228,7 +229,7 @@ void graphics_device_vulkan::_choose_physical_device(const graphics_device_desc&
     _physical_device = physical_devices[0];
 }
 
-void graphics_device_vulkan::_create_surface(const graphics_device_desc& desc) {
+void graphics_device_vulkan::_create_surface(const settings& desc) {
 #if RB_WINDOWS
     // Fill Win32 surface create informations.
     VkWin32SurfaceCreateInfoKHR surface_info;
@@ -236,7 +237,7 @@ void graphics_device_vulkan::_create_surface(const graphics_device_desc& desc) {
     surface_info.pNext = nullptr;
     surface_info.flags = 0;
     surface_info.hinstance = GetModuleHandle(nullptr);
-    surface_info.hwnd = associated_window()->native_handle();
+    surface_info.hwnd = associated_window().native_handle();
 
     // Create new Vulkan surface.
     RB_MAYBE_UNUSED const auto result = vkCreateWin32SurfaceKHR(_instance, &surface_info, nullptr, &_surface);
@@ -246,7 +247,7 @@ void graphics_device_vulkan::_create_surface(const graphics_device_desc& desc) {
 #endif
 }
 
-void graphics_device_vulkan::_create_device(const graphics_device_desc& desc) {
+void graphics_device_vulkan::_create_device(const settings& desc) {
     std::uint32_t queue_family_count{ 0 };
     vkGetPhysicalDeviceQueueFamilyProperties(_physical_device, &queue_family_count, nullptr);
 
@@ -324,7 +325,7 @@ void graphics_device_vulkan::_create_device(const graphics_device_desc& desc) {
     vkGetDeviceQueue(_device, _present_family, 0, &_present_queue);
 }
 
-void graphics_device_vulkan::_create_allocator(const graphics_device_desc& desc) {
+void graphics_device_vulkan::_create_allocator(const settings& desc) {
     // Create Vulkan memory allocator
     VmaAllocatorCreateInfo allocator_info{};
     allocator_info.instance = _instance;
@@ -335,7 +336,7 @@ void graphics_device_vulkan::_create_allocator(const graphics_device_desc& desc)
     RB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan memory allocator");
 }
 
-void graphics_device_vulkan::_query_surface(const graphics_device_desc& desc) {
+void graphics_device_vulkan::_query_surface(const settings& desc) {
     // Query surface format count of picked physical device.
     std::uint32_t surface_format_count{ 0 };
     auto result = vkGetPhysicalDeviceSurfaceFormatsKHR(_physical_device, _surface, &surface_format_count, nullptr);
@@ -364,11 +365,11 @@ void graphics_device_vulkan::_query_surface(const graphics_device_desc& desc) {
     _swapchain_extent = surface_capabilities.currentExtent;
 }
 
-void graphics_device_vulkan::_create_swapchain(const graphics_device_desc& desc) {
+void graphics_device_vulkan::_create_swapchain(const settings& desc) {
     RB_MAYBE_UNUSED VkResult result;
 
     // Get window size.
-    const auto window_size = associated_window()->size();
+    const auto window_size = associated_window().size();
 
     // Query surface capabilities.
     VkSurfaceCapabilitiesKHR surface_capabilities;
@@ -574,7 +575,7 @@ void graphics_device_vulkan::_create_swapchain(const graphics_device_desc& desc)
     }
 }
 
-void graphics_device_vulkan::_create_command_pool(const graphics_device_desc& desc) {
+void graphics_device_vulkan::_create_command_pool(const settings& desc) {
     VkCommandPoolCreateInfo pool_info{};
     pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     pool_info.queueFamilyIndex = _graphics_family;
@@ -584,7 +585,7 @@ void graphics_device_vulkan::_create_command_pool(const graphics_device_desc& de
     RB_ASSERT(result == VK_SUCCESS, "Failed to create command pool");
 }
 
-void graphics_device_vulkan::_create_synchronization_objects(const graphics_device_desc& desc) {
+void graphics_device_vulkan::_create_synchronization_objects(const settings& desc) {
     VkSemaphoreCreateInfo semaphore_info;
 	semaphore_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 	semaphore_info.pNext = nullptr;

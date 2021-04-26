@@ -5,5 +5,5 @@
 namespace rb {
     struct window_desc;
     class window;
-    class window_manager;
+    class window_factory;
 }

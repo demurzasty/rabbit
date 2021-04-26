@@ -3,11 +3,10 @@
 
 using namespace rb;
 
-graphics_device::graphics_device(const graphics_device_desc& desc)
-    : _window(desc.window) {
-    RB_ASSERT(_window, "No window has been provided");
+graphics_device::graphics_device(settings& settings, window& window)
+    : _window(window) {
 }
 
-const std::shared_ptr<window>& graphics_device::associated_window() const {
+window& graphics_device::associated_window() {
     return _window;
 }

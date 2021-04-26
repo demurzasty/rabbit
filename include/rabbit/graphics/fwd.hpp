@@ -14,7 +14,7 @@ namespace rb {
     enum class cull_mode;
     enum class front_face;
 
-    class graphics_device_manager;
+    class graphics_device_factory;
 
     struct graphics_device_desc;
     class graphics_device;

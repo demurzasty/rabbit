@@ -1,6 +1,7 @@
 #pragma once
 
 #include <rabbit/platform/window.hpp>
+#include <rabbit/engine/settings.hpp>
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
@@ -8,7 +9,7 @@
 namespace rb {
     class window_win32 : public window {
     public:
-        window_win32(const window_desc& desc);
+        window_win32(settings& settings);
 
         ~window_win32();
 

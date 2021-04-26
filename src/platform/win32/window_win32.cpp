@@ -6,7 +6,7 @@ using namespace rb;
 
 static LRESULT CALLBACK window_proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-window_win32::window_win32(const window_desc& desc) {
+window_win32::window_win32(settings& settings) {
 	WNDCLASS wc = {};
 	wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
 	wc.lpfnWndProc = &window_proc;
@@ -16,26 +16,26 @@ window_win32::window_win32(const window_desc& desc) {
 	RegisterClass(&wc);
 
 	HDC screenDC = GetDC(NULL);
-	const int left = (GetDeviceCaps(screenDC, HORZRES) - desc.size.x) / 2;
-	const int top = (GetDeviceCaps(screenDC, VERTRES) - desc.size.y) / 2;
+	const int left = (GetDeviceCaps(screenDC, HORZRES) - settings.window_size.x) / 2;
+	const int top = (GetDeviceCaps(screenDC, VERTRES) - settings.window_size.y) / 2;
 	ReleaseDC(NULL, screenDC);
 
 	RECT rect;
 	rect.left = rect.top = 0;
-	rect.right = desc.size.x;
-	rect.bottom = desc.size.y;
+	rect.right = settings.window_size.x;
+	rect.bottom = settings.window_size.y;
 
 	const DWORD style = WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_VISIBLE;
 
-	auto width = desc.size.x;
-	auto height = desc.size.y;
+	auto width = settings.window_size.x;
+	auto height = settings.window_size.y;
 
 	if (AdjustWindowRect(&rect, style, FALSE)) {
 		width = rect.right - rect.left;
 		height = rect.bottom - rect.top;
 	}
 
-	_hwnd = CreateWindowEx(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE, "RabBit", desc.title.c_str(), WS_CLIPSIBLINGS | WS_CLIPCHILDREN | style, left, top, width, height, NULL, NULL, GetModuleHandle(NULL), this);
+	_hwnd = CreateWindowEx(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE, "RabBit", settings.window_title.c_str(), WS_CLIPSIBLINGS | WS_CLIPCHILDREN | style, left, top, width, height, NULL, NULL, GetModuleHandle(NULL), this);
 	RB_ASSERT(_hwnd, "Cannot create window");
 }
 

@@ -17,7 +17,7 @@ namespace rb {
 
         void update_buffer(const std::shared_ptr<buffer>& buffer, const void* data, std::size_t offset, std::size_t size) override;
 
-        void begin_render_pass(const std::shared_ptr<graphics_device>& graphics_device) override;
+        void begin_render_pass(graphics_device& graphics_device) override;
 
         void end_render_pass() override;
 

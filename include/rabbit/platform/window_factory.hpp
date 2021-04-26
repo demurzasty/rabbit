@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fwd.hpp"
+#include "../core/fwd.hpp"
 
 #include <memory>
 #include <vector>
@@ -11,11 +12,8 @@ namespace rb {
      *
      * @see window
      */
-    class window_manager final {
+    class window_factory final {
     public:
-        std::shared_ptr<window> create(const window_desc& desc);
-
-    private:
-        std::vector<std::shared_ptr<window>> _windows;
+        std::shared_ptr<window> operator()(injector& injector) const;
     };
 }

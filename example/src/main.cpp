@@ -1,6 +1,6 @@
-#include <rabbit/platform/window_manager.hpp>
+#include <rabbit/platform/window_factory.hpp>
 #include <rabbit/platform/window.hpp>
-#include <rabbit/graphics/graphics_device_manager.hpp>
+#include <rabbit/graphics/graphics_device_factory.hpp>
 #include <rabbit/graphics/graphics_device.hpp>
 #include <rabbit/graphics/command_buffer.hpp>
 #include <rabbit/graphics/builtin_shaders.hpp>
@@ -11,6 +11,7 @@
 #include <rabbit/math/vec3.hpp>
 #include <rabbit/math/mat4.hpp>
 #include <rabbit/core/injector.hpp>
+#include <rabbit/engine/settings.hpp>
 
 #include <chrono>
 
@@ -38,23 +39,25 @@ struct vertex {
 };
 
 template<typename T>
-std::shared_ptr<buffer> create_uniform_buffer(std::shared_ptr<graphics_device> graphics_device, const T& data) {
+std::shared_ptr<buffer> create_uniform_buffer(graphics_device& graphics_device, const T& data) {
     buffer_desc desc;
     desc.type = buffer_type::uniform;
     desc.size = sizeof(T);
     desc.stride = desc.size;
     desc.data = &data;
-    return graphics_device->create_buffer(desc);
+    return graphics_device.create_buffer(desc);
 }
 
 int main(int argc, char* argv[]) {
-    window_manager window_manager;
-    auto window = window_manager.create({});
+    injector injector;
+    injector.install<settings>();
+    injector.install<window>(window_factory{});
+    injector.install<graphics_device>(graphics_device_factory{});
 
-    graphics_device_manager graphics_device_manager;
-    auto graphics_device = graphics_device_manager.create({ window });
+    auto& window = injector.get<rb::window>();
+    auto& graphics_device = injector.get<rb::graphics_device>();
 
-    auto shader = graphics_device->create_shader(builtin_shaders::get(builtin_shader::forward));
+    auto shader = graphics_device.create_shader(builtin_shaders::get(builtin_shader::forward));
 
     camera_data camera_data;
     auto camera_buffer = create_uniform_buffer(graphics_device, camera_data);
@@ -72,7 +75,7 @@ int main(int argc, char* argv[]) {
         { 1, local_buffer },
         { 2, material_buffer },
     };
-    auto resource_heap = graphics_device->create_resource_heap(resource_heap_desc);
+    auto resource_heap = graphics_device.create_resource_heap(resource_heap_desc);
 
     const vertex vertices[] = {
         { { -1.0f, -1.0f, 0.0f }, { 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f } },
@@ -85,14 +88,12 @@ int main(int argc, char* argv[]) {
     buffer_desc.size = sizeof(vertices);
     buffer_desc.stride = sizeof(vertex);
     buffer_desc.data = vertices;
-    auto vertex_buffer = graphics_device->create_buffer(buffer_desc);
+    auto vertex_buffer = graphics_device.create_buffer(buffer_desc);
 
-    auto command_buffer = graphics_device->create_command_buffer();
+    auto command_buffer = graphics_device.create_command_buffer();
 
-    injector injector;
-
-    while (window->is_open()) {
-        window->poll_events();
+    while (window.is_open()) {
+        window.poll_events();
 
         command_buffer->begin();
 
@@ -112,8 +113,8 @@ int main(int argc, char* argv[]) {
 
         command_buffer->end();
 
-        graphics_device->submit(command_buffer);
+        graphics_device.submit(command_buffer);
 
-        graphics_device->present();
+        graphics_device.present();
     }
 }
