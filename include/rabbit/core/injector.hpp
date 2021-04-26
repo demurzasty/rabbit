@@ -1,12 +1,10 @@
 #pragma once
 
 #include "config.hpp"
+#include "type_info.hpp"
 
 #include <map>
 #include <memory>
-#include <typeinfo>
-#include <typeindex>
-#include <type_traits>
 #include <functional>
 
 namespace rb {
@@ -35,7 +33,7 @@ namespace rb {
          */
         template<typename T>
         void install() {
-            _beans.emplace(typeid(T), bean{
+            _beans.emplace(type_id<T>().hash(), bean{
                 nullptr,
                 [](injector& injector) { return injector.resolve<T>(); }
             });
@@ -57,7 +55,7 @@ namespace rb {
          */
         template<typename T, typename Func>
         void install(Func factory) {
-            _beans.emplace(typeid(T), bean{
+            _beans.emplace(type_id<T>().hash(), bean{
                 nullptr,
                 [factory](injector& injector) { return factory(injector); }
             });
@@ -68,7 +66,7 @@ namespace rb {
          */
         template<typename T>
         void install(const std::shared_ptr<T>& instance) {
-            _beans.emplace(typeid(T), bean{
+            _beans.emplace(type_id<T>().hash(), bean{
                 instance,
                 nullptr
             });
@@ -127,7 +125,7 @@ namespace rb {
         template<typename T>
         T& get() {
             RB_ASSERT(installed<T>(), "Type is not installed");
-            auto& bean = _beans.at(typeid(T));
+            auto& bean = _beans.at(type_id<T>().hash());
             if (!bean.instance) {
                 bean.instance = bean.factory(*this);
             }
@@ -144,7 +142,7 @@ namespace rb {
          */
         template<typename T>
         bool installed() const {
-            return _beans.find(typeid(T)) != _beans.end();
+            return _beans.find(type_id<T>().hash()) != _beans.end();
         }
 
         /**
@@ -153,10 +151,10 @@ namespace rb {
         template<typename T>
         bool resolved() const {
             RB_ASSERT(installed<T>(), "Type is not installed");
-            return _beans.at(typeid(T)).instance != nullptr;
+            return _beans.at(type_id<T>().hash()).instance != nullptr;
         }
 
     private:
-        std::map<std::type_index, bean> _beans;
+        std::map<id_type, bean> _beans;
     };
 }
