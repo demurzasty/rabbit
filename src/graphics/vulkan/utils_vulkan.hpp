@@ -27,5 +27,15 @@ namespace rb {
         static VkFrontFace front_face(front_face front_face);
 
         static VkCompareOp compare_operator(compare_operator compare_operator);
+
+        static VkImageType image_type(texture_type texture_type);
+
+        static VkImageViewType image_view_type(texture_type texture_type);
+
+        static VkImageCreateFlags image_create_flags(texture_type texture_type);
+
+        static VkFilter filter(texture_filter texture_filter);
+
+        static VkSamplerAddressMode sampler_address_mode(texture_wrap texture_wrap);
     };
 }

@@ -49,6 +49,11 @@ namespace rb {
         std::size_t mipmaps() const;
 
         /**
+         * @brief Returns layer count.
+         */
+        std::size_t layers() const;
+
+        /**
          * @brief Tell whether texture is render target.
          */
         bool is_render_target() const;
@@ -68,6 +73,7 @@ namespace rb {
         const texture_filter _filter;
         const texture_wrap _wrap;
         const std::size_t _mipmaps;
+        const std::size_t _layers;
         const bool _is_render_target;
     };
 }

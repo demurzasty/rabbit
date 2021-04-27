@@ -17,6 +17,7 @@ namespace rb {
         texture_filter filter{ texture_filter::linear };
         texture_wrap wrap{ texture_wrap::repeat };
         std::size_t mipmaps{ 1 };
+        std::size_t layers{ 1 };
         bool is_render_target{ false };
     };
 }

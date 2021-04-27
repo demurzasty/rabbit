@@ -21,7 +21,10 @@ texture_vulkan::texture_vulkan(VkDevice device,
 
     if (desc.data) {
         _update_image(graphics_queue, command_pool, desc);
-        _generate_mipmaps(graphics_queue, command_pool, desc);
+
+        if (desc.mipmaps == 0) {
+            _generate_mipmaps(graphics_queue, command_pool, desc);
+        }
     }
 
     _create_image_view(desc);
@@ -57,17 +60,15 @@ VkSampler texture_vulkan::sampler() const {
 }
 
 void texture_vulkan::_create_image(const texture_desc& desc) {
-    const auto mip_levels = static_cast<const uint32_t>(std::log2(std::max(desc.size.x, desc.size.y))) + 1;
-
     VkImageCreateInfo image_info;
     image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     image_info.pNext = nullptr;
-    image_info.flags = 0;
-    image_info.imageType = VK_IMAGE_TYPE_2D;
+    image_info.flags = utils_vulkan::image_create_flags(type());
+    image_info.imageType = utils_vulkan::image_type(type());
     image_info.format = utils_vulkan::format(format());
     image_info.extent = { desc.size.x, desc.size.y, 1 };
-    image_info.mipLevels = mip_levels;
-    image_info.arrayLayers = 1;
+    image_info.mipLevels = static_cast<std::uint32_t>(mipmaps());
+    image_info.arrayLayers = static_cast<std::uint32_t>(layers());
     image_info.samples = VK_SAMPLE_COUNT_1_BIT;
     image_info.tiling = VK_IMAGE_TILING_OPTIMAL;
     image_info.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -88,7 +89,7 @@ void texture_vulkan::_update_image(VkQueue graphics_queue, VkCommandPool command
     buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     buffer_info.pNext = nullptr;
     buffer_info.flags = 0;
-    buffer_info.size = desc.size.x * desc.size.y * bytes_per_pixel();
+    buffer_info.size = desc.size.x * desc.size.y * bytes_per_pixel() * layers();
     buffer_info.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
     buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     buffer_info.queueFamilyIndexCount = 0;
@@ -116,18 +117,20 @@ void texture_vulkan::_update_image(VkQueue graphics_queue, VkCommandPool command
 
     auto command_buffer = _begin_single_time_commands(command_pool);
 
-    VkBufferImageCopy region{};
-    region.bufferOffset = 0;
-    region.bufferRowLength = 0;
-    region.bufferImageHeight = 0;
-    region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    region.imageSubresource.mipLevel = 0;
-    region.imageSubresource.baseArrayLayer = 0;
-    region.imageSubresource.layerCount = 1;
-    region.imageOffset = { 0, 0, 0 };
-    region.imageExtent = { desc.size.x, desc.size.y, 1 };
+    for (std::size_t layer{ 0 }; layer < layers(); ++layer) {
+        VkBufferImageCopy region{};
+        region.bufferOffset = desc.size.x * desc.size.y * bytes_per_pixel() * layer;
+        region.bufferRowLength = 0;
+        region.bufferImageHeight = 0;
+        region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        region.imageSubresource.mipLevel = 0;
+        region.imageSubresource.baseArrayLayer = static_cast<std::uint32_t>(layer);
+        region.imageSubresource.layerCount = 1;
+        region.imageOffset = { 0, 0, 0 };
+        region.imageExtent = { desc.size.x, desc.size.y, 1 };
 
-    vkCmdCopyBufferToImage(command_buffer, staging_buffer, _image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+        vkCmdCopyBufferToImage(command_buffer, staging_buffer, _image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+    }
 
     _end_single_time_commands(graphics_queue, command_pool, command_buffer);
 
@@ -250,7 +253,7 @@ void texture_vulkan::_create_image_view(const texture_desc& desc) {
     image_view_info.pNext = nullptr;
     image_view_info.flags = 0;
     image_view_info.image = _image;
-    image_view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    image_view_info.viewType = utils_vulkan::image_view_type(type());
     image_view_info.format = utils_vulkan::format(format());
     image_view_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
     image_view_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -260,7 +263,7 @@ void texture_vulkan::_create_image_view(const texture_desc& desc) {
     image_view_info.subresourceRange.baseMipLevel = 0;
     image_view_info.subresourceRange.levelCount = static_cast<std::uint32_t>(mipmaps());
     image_view_info.subresourceRange.baseArrayLayer = 0;
-    image_view_info.subresourceRange.layerCount = 1;
+    image_view_info.subresourceRange.layerCount = static_cast<uint32_t>(layers());
 
     RB_MAYBE_UNUSED auto result = vkCreateImageView(_device, &image_view_info, nullptr, &_image_view);
     RB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan image view");
@@ -273,12 +276,12 @@ void texture_vulkan::_create_sampler(const texture_desc& desc) {
     sampler_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
     sampler_info.pNext = nullptr;
     sampler_info.flags = 0;
-    sampler_info.magFilter = VK_FILTER_LINEAR;
-    sampler_info.minFilter = VK_FILTER_LINEAR;
-    sampler_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-    sampler_info.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    sampler_info.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    sampler_info.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler_info.magFilter = utils_vulkan::filter(filter());
+    sampler_info.minFilter = utils_vulkan::filter(filter());
+    sampler_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR; // TODO: Do mapping.
+    sampler_info.addressModeU = utils_vulkan::sampler_address_mode(wrap());
+    sampler_info.addressModeV = utils_vulkan::sampler_address_mode(wrap());
+    sampler_info.addressModeW = utils_vulkan::sampler_address_mode(wrap());
     sampler_info.mipLodBias = 0.0f;
     sampler_info.anisotropyEnable = VK_FALSE;
     sampler_info.maxAnisotropy = 1.0f;
@@ -288,6 +291,10 @@ void texture_vulkan::_create_sampler(const texture_desc& desc) {
     sampler_info.maxLod = static_cast<float>(mipmaps());
     sampler_info.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
     sampler_info.unnormalizedCoordinates = VK_FALSE;
+
+    if (filter() == texture_filter::anisotropic) {
+        // TODO: Enable anisotropy.
+    }
 
     RB_MAYBE_UNUSED auto result = vkCreateSampler(_device, &sampler_info, nullptr, &_sampler);
     RB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan sampler");

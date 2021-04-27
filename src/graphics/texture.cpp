@@ -21,6 +21,7 @@ texture::texture(const texture_desc& desc)
     , _filter(desc.filter)
     , _wrap(desc.wrap)
     , _mipmaps(desc.mipmaps > 0 ? desc.mipmaps : calculate_mipmap_levels(desc.size))
+    , _layers(desc.layers)
     , _is_render_target(desc.is_render_target) {
     RB_ASSERT(_size.x > 0 && _size.y > 0, "Size of texture must be greater than 0");
 }
@@ -41,8 +42,20 @@ texture_format texture::format() const {
     return _format;
 }
 
+texture_filter texture::filter() const {
+    return _filter;
+}
+
+texture_wrap texture::wrap() const {
+    return _wrap;
+}
+
 std::size_t texture::mipmaps() const {
     return _mipmaps;
+}
+
+std::size_t texture::layers() const {
+    return _layers;
 }
 
 bool texture::is_render_target() const {

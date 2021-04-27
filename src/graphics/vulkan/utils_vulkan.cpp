@@ -11,6 +11,7 @@
 #include <rabbit/graphics/cull_mode.hpp>
 #include <rabbit/graphics/front_face.hpp>
 #include <rabbit/graphics/topology.hpp>
+#include <rabbit/graphics/texture_type.hpp>
 
 #define VMA_IMPLEMENTATION
 #include <vk_mem_alloc.h>
@@ -167,4 +168,80 @@ VkCompareOp utils_vulkan::compare_operator(rb::compare_operator compare_operator
 
     RB_ASSERT(false, "Failed to map Vulkan compare operator");
     return VK_COMPARE_OP_LESS;
+}
+
+VkImageType utils_vulkan::image_type(texture_type texture_type) {
+    switch (texture_type) {
+        case texture_type::texture_1d:
+        case texture_type::texture_1d_array:
+            return VK_IMAGE_TYPE_1D;
+        case texture_type::texture_2d:
+        case texture_type::texture_2d_array:
+        case texture_type::texture_cube:
+            return VK_IMAGE_TYPE_2D;
+        case texture_type::texture_3d:
+            return VK_IMAGE_TYPE_3D;
+    }
+
+    RB_ASSERT(false, "Failed to map Vulkan image type");
+    return VK_IMAGE_TYPE_2D;
+}
+
+VkImageViewType utils_vulkan::image_view_type(texture_type texture_type) {
+    switch (texture_type) {
+        case texture_type::texture_1d:
+            return VK_IMAGE_VIEW_TYPE_1D;
+        case texture_type::texture_1d_array:
+            return VK_IMAGE_VIEW_TYPE_1D_ARRAY;
+        case texture_type::texture_2d:
+            return VK_IMAGE_VIEW_TYPE_2D;
+        case texture_type::texture_2d_array:
+            return VK_IMAGE_VIEW_TYPE_2D_ARRAY;
+        case texture_type::texture_3d:
+            return VK_IMAGE_VIEW_TYPE_3D;
+        case texture_type::texture_cube:
+            return VK_IMAGE_VIEW_TYPE_CUBE;
+    }
+
+    RB_ASSERT(false, "Failed to map Vulkan image view type");
+    return VK_IMAGE_VIEW_TYPE_2D;
+}
+
+VkImageCreateFlags utils_vulkan::image_create_flags(texture_type texture_type) {
+    VkImageCreateFlags flags{ 0 };
+
+    if (texture_type == texture_type::texture_cube) {
+        flags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
+    }
+
+    if (texture_type == texture_type::texture_2d_array) {
+        flags |= VK_IMAGE_CREATE_2D_ARRAY_COMPATIBLE_BIT;
+    }
+
+    return flags;
+}
+
+VkFilter utils_vulkan::filter(texture_filter texture_filter) {
+    switch (texture_filter) {
+        case texture_filter::nearest:
+            return VK_FILTER_NEAREST;
+        case texture_filter::linear:
+        case texture_filter::anisotropic:
+            return VK_FILTER_LINEAR;
+    }
+
+    RB_ASSERT(false, "Failed to map Vulkan filter");
+    return VK_FILTER_NEAREST;
+}
+
+VkSamplerAddressMode utils_vulkan::sampler_address_mode(texture_wrap texture_wrap) {
+    switch (texture_wrap) {
+        case texture_wrap::repeat:
+            return VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        case texture_wrap::clamp:
+            return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    }
+
+    RB_ASSERT(false, "Failed to map Vulkan sampler address mode");
+    return VK_SAMPLER_ADDRESS_MODE_REPEAT;
 }
