@@ -8,7 +8,10 @@ namespace rb {
      */
     enum class builtin_shader {
         forward,
-        skybox
+        skybox,
+        brdf,
+        irradiance,
+        prefilter
     };
 
     /**
