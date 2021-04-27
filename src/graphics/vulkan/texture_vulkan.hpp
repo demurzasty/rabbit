@@ -39,10 +39,6 @@ namespace rb {
 
         void _transition_image_layout(const texture_desc& desc, VkQueue graphics_queue, VkCommandPool command_pool, VkImageLayout old_layout, VkImageLayout new_layout);
 
-        VkCommandBuffer _begin_single_time_commands(VkCommandPool command_pool);
-
-        void _end_single_time_commands(VkQueue graphics_queue, VkCommandPool command_pool, VkCommandBuffer command_buffer);
-
     private:
         VkDevice _device;
         VmaAllocator _allocator;

@@ -122,7 +122,7 @@ void texture_vulkan::_update_image(VkQueue graphics_queue, VkCommandPool command
 
     vmaUnmapMemory(_allocator, staging_buffer_allocation);
 
-    auto command_buffer = _begin_single_time_commands(command_pool);
+    auto command_buffer = utils_vulkan::begin_single_time_commands(_device, command_pool);
 
     for (std::size_t layer{ 0 }; layer < layers(); ++layer) {
         VkImageMemoryBarrier barrier{};
@@ -174,13 +174,13 @@ void texture_vulkan::_update_image(VkQueue graphics_queue, VkCommandPool command
             VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
     }
 
-    _end_single_time_commands(graphics_queue, command_pool, command_buffer);
+    utils_vulkan::end_single_time_commands(_device, graphics_queue, command_pool, command_buffer);
 
     vmaDestroyBuffer(_allocator, staging_buffer, staging_buffer_allocation);
 }
 
 void texture_vulkan::_generate_mipmaps(VkQueue graphics_queue, VkCommandPool command_pool, const texture_desc& desc) {
-    auto command_buffer = _begin_single_time_commands(command_pool);
+    auto command_buffer = utils_vulkan::begin_single_time_commands(_device, command_pool);
 
     VkImageMemoryBarrier barrier{};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -284,7 +284,7 @@ void texture_vulkan::_generate_mipmaps(VkQueue graphics_queue, VkCommandPool com
         0, nullptr,
         1, &barrier);
 
-    _end_single_time_commands(graphics_queue, command_pool, command_buffer);
+    utils_vulkan::end_single_time_commands(_device, graphics_queue, command_pool, command_buffer);
 }
 
 void texture_vulkan::_create_image_view(const texture_desc& desc) {
@@ -430,7 +430,7 @@ void texture_vulkan::_create_framebuffer(const texture_desc& desc) {
 }
 
 void texture_vulkan::_transition_image_layout(const texture_desc& desc, VkQueue graphics_queue, VkCommandPool command_pool, VkImageLayout old_layout, VkImageLayout new_layout) {
-    auto command_buffer = _begin_single_time_commands(command_pool);
+    auto command_buffer = utils_vulkan::begin_single_time_commands(_device, command_pool);
 
     VkImageMemoryBarrier barrier{};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -466,42 +466,5 @@ void texture_vulkan::_transition_image_layout(const texture_desc& desc, VkQueue 
 
     vkCmdPipelineBarrier(command_buffer, source_stage, destination_stage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
 
-    _end_single_time_commands(graphics_queue, command_pool, command_buffer);
-}
-
-VkCommandBuffer texture_vulkan::_begin_single_time_commands(VkCommandPool command_pool) {
-    // Create temporary buffer
-    VkCommandBufferAllocateInfo allocate_info{};
-    allocate_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocate_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocate_info.commandPool = command_pool;
-    allocate_info.commandBufferCount = 1;
-
-    VkCommandBuffer command_buffer;
-    vkAllocateCommandBuffers(_device, &allocate_info, &command_buffer);
-
-    VkCommandBufferBeginInfo begin_info;
-    begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    begin_info.pNext = nullptr;
-    begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-    begin_info.pInheritanceInfo = nullptr;
-
-    // Begin registering commands
-    vkBeginCommandBuffer(command_buffer, &begin_info);
-    return command_buffer;
-}
-
-void texture_vulkan::_end_single_time_commands(VkQueue graphics_queue, VkCommandPool command_pool, VkCommandBuffer command_buffer) {
-    // End registering commands
-    vkEndCommandBuffer(command_buffer);
-
-    VkSubmitInfo submit_info{};
-    submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submit_info.commandBufferCount = 1;
-    submit_info.pCommandBuffers = &command_buffer;
-
-    vkQueueSubmit(graphics_queue, 1, &submit_info, VK_NULL_HANDLE);
-    vkQueueWaitIdle(graphics_queue);
-
-    vkFreeCommandBuffers(_device, command_pool, 1, &command_buffer);
+    utils_vulkan::end_single_time_commands(_device, graphics_queue, command_pool, command_buffer);
 }

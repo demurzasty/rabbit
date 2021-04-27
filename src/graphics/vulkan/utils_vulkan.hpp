@@ -8,6 +8,10 @@
 
 namespace rb {
     struct utils_vulkan {
+        static VkCommandBuffer begin_single_time_commands(VkDevice device, VkCommandPool command_pool);
+
+        static void end_single_time_commands(VkDevice device, VkQueue graphics_queue, VkCommandPool command_pool, VkCommandBuffer command_buffer);
+
         static VkBufferUsageFlags buffer_usage_flags(const buffer_type type);
 
         static VkFormat format(const texture_format& format);

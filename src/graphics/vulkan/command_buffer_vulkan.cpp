@@ -5,6 +5,7 @@
 #include "buffer_vulkan.hpp"
 #include "utils_vulkan.hpp"
 
+#include <rabbit/math/vec4.hpp>
 #include <rabbit/core/config.hpp>
 
 using namespace rb;
@@ -94,6 +95,17 @@ void command_buffer_vulkan::begin_render_pass(graphics_device& graphics_device) 
 
 void command_buffer_vulkan::end_render_pass() {
     vkCmdEndRenderPass(_command_buffer);
+}
+
+void command_buffer_vulkan::set_viewport(const vec4f& viewport) {
+    VkViewport native_viewport;
+    native_viewport.x = viewport.x;
+    native_viewport.y = viewport.y;
+    native_viewport.width = viewport.z;
+    native_viewport.height = viewport.w;
+    native_viewport.minDepth = 0.0f;
+    native_viewport.maxDepth = 1.0f;
+    vkCmdSetViewport(_command_buffer, 0, 1, &native_viewport);
 }
 
 void command_buffer_vulkan::set_shader(const std::shared_ptr<shader>& shader) {

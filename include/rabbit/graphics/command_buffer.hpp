@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fwd.hpp"
+#include "../math/fwd.hpp"
 
 #include <memory>
 
@@ -59,6 +60,13 @@ namespace rb {
          * @warning Record this command outside of a render pass.
          */
         virtual void update_buffer(const std::shared_ptr<buffer>& buffer, const void* data, std::size_t offset, std::size_t size) = 0;
+
+        /**
+         * @brief Sets the active viewport.
+         *
+         * @param viewport Viewport to set.
+         */
+        virtual void set_viewport(const vec4f& viewport) = 0;
 
         /**
          * @brief Sets the active shader.

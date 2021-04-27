@@ -21,6 +21,8 @@ namespace rb {
 
         void end_render_pass() override;
 
+        void set_viewport(const vec4f& viewport) override;
+
         void set_shader(const std::shared_ptr<shader>& shader) override;
 
         void set_resource_heap(const std::shared_ptr<resource_heap>& resource_heap) override;
