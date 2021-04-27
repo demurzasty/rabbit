@@ -84,6 +84,13 @@ namespace rb {
         virtual void set_vertex_buffer(const std::shared_ptr<buffer>& vertex_buffer) = 0;
 
         /**
+         * @brief Sets the specified index buffer for subsequent drawing operations.
+         *
+         * @param index_buffer Specifies the index buffer to set. This buffer must have been created with the index type and its content must not be uninitialized.
+         */
+        virtual void set_index_buffer(const std::shared_ptr<buffer>& index_buffer) = 0;
+
+        /**
          * @brief Pushes a contant value to active shader pipeline.
          *
          * @warning Available only on Vulkan implementation.

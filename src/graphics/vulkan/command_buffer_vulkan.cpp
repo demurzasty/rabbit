@@ -127,6 +127,12 @@ void command_buffer_vulkan::set_vertex_buffer(const std::shared_ptr<buffer>& ver
     vkCmdBindVertexBuffers(_command_buffer, 0, 1, &buffer, &offset);
 }
 
+void command_buffer_vulkan::set_index_buffer(const std::shared_ptr<buffer>& index_buffer) {
+    const auto native_buffer = std::static_pointer_cast<buffer_vulkan>(index_buffer);
+
+    vkCmdBindIndexBuffer(_command_buffer, native_buffer->buffer(), 0, VK_INDEX_TYPE_UINT32);
+}
+
 void command_buffer_vulkan::push_constant(const std::shared_ptr<shader>& shader, std::uint32_t stage_flags, std::size_t offset, std::size_t size, const void* data) {
     const auto native_shader = std::static_pointer_cast<shader_vulkan>(shader);
 
