@@ -35,6 +35,7 @@ namespace rb {
 
     enum class texture_filter;
     enum class texture_format;
+    enum class texture_type;
     enum class texture_wrap;
     struct texture_desc;
     class texture;

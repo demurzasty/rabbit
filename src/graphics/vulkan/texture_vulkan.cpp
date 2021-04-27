@@ -26,9 +26,19 @@ texture_vulkan::texture_vulkan(VkDevice device,
 
     _create_image_view(desc);
     _create_sampler(desc);
+
+    if (desc.is_render_target) {
+        _create_render_pass(desc);
+        _create_framebuffer(desc);
+    }
 }
 
 texture_vulkan::~texture_vulkan() {
+    if (is_render_target()) {
+        vkDestroyFramebuffer(_device, _framebuffer, nullptr);
+        vkDestroyRenderPass(_device, _render_pass, nullptr);
+    }
+
     vkDestroySampler(_device, _sampler, nullptr);
     vkDestroyImageView(_device, _image_view, nullptr);
     vmaDestroyImage(_allocator, _image, _allocation);
@@ -281,6 +291,67 @@ void texture_vulkan::_create_sampler(const texture_desc& desc) {
 
     RB_MAYBE_UNUSED auto result = vkCreateSampler(_device, &sampler_info, nullptr, &_sampler);
     RB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan sampler");
+}
+
+void texture_vulkan::_create_render_pass(const texture_desc& desc) {
+    VkAttachmentDescription color_attachment;
+    color_attachment.flags = 0;
+    color_attachment.format = utils_vulkan::format(format());
+    color_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+    color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    color_attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    color_attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    color_attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    color_attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+    VkAttachmentReference color_attachment_reference;
+    color_attachment_reference.attachment = 0;
+    color_attachment_reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+    VkSubpassDescription subpass{};
+    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    subpass.colorAttachmentCount = 1;
+    subpass.pColorAttachments = &color_attachment_reference;
+    subpass.pDepthStencilAttachment = VK_NULL_HANDLE;
+
+    VkSubpassDependency subpass_dependency{};
+    subpass_dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    subpass_dependency.dstSubpass = 0;
+    subpass_dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    subpass_dependency.srcAccessMask = 0;
+    subpass_dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    subpass_dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+    VkRenderPassCreateInfo render_pass_info;
+    render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    render_pass_info.pNext = nullptr;
+    render_pass_info.flags = 0;
+    render_pass_info.attachmentCount = 1;
+    render_pass_info.pAttachments = &color_attachment;
+    render_pass_info.subpassCount = 1;
+    render_pass_info.pSubpasses = &subpass;
+    render_pass_info.dependencyCount = 1;
+    render_pass_info.pDependencies = &subpass_dependency;
+
+    RB_MAYBE_UNUSED const auto result = vkCreateRenderPass(_device, &render_pass_info, nullptr, &_render_pass);
+    RB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan framebuffer");
+}
+
+void texture_vulkan::_create_framebuffer(const texture_desc& desc) {
+    VkFramebufferCreateInfo framebuffer_info;
+    framebuffer_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    framebuffer_info.pNext = nullptr;
+    framebuffer_info.flags = 0;
+    framebuffer_info.renderPass = _render_pass;
+    framebuffer_info.attachmentCount = 1;
+    framebuffer_info.pAttachments = &_image_view;
+    framebuffer_info.width = desc.size.x;
+    framebuffer_info.height = desc.size.y;
+    framebuffer_info.layers = 1;
+
+    RB_MAYBE_UNUSED const auto result = vkCreateFramebuffer(_device, &framebuffer_info, nullptr, &_framebuffer);
+    RB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan framebuffer");
 }
 
 void texture_vulkan::_transition_image_layout(const texture_desc& desc, VkQueue graphics_queue, VkCommandPool command_pool, VkImageLayout old_layout, VkImageLayout new_layout) {

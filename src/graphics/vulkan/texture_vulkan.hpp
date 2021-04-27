@@ -27,7 +27,11 @@ namespace rb {
 
         void _create_image_view(const texture_desc& desc);
 
+        void _create_framebuffer(const texture_desc& desc);
+
         void _create_sampler(const texture_desc& desc);
+
+        void _create_render_pass(const texture_desc& desc);
 
         void _transition_image_layout(const texture_desc& desc, VkQueue graphics_queue, VkCommandPool command_pool, VkImageLayout old_layout, VkImageLayout new_layout);
 
@@ -42,5 +46,7 @@ namespace rb {
         VkImage _image;
         VkImageView _image_view;
         VkSampler _sampler;
+        VkRenderPass _render_pass{ VK_NULL_HANDLE };
+        VkFramebuffer _framebuffer{ VK_NULL_HANDLE };
     };
 }

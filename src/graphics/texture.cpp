@@ -16,10 +16,12 @@ namespace {
 
 texture::texture(const texture_desc& desc)
     : _size(desc.size)
+    , _type(desc.type)
     , _format(desc.format)
     , _filter(desc.filter)
     , _wrap(desc.wrap)
-    , _mipmaps(desc.mipmaps > 0 ? desc.mipmaps : calculate_mipmap_levels(desc.size)) {
+    , _mipmaps(desc.mipmaps > 0 ? desc.mipmaps : calculate_mipmap_levels(desc.size))
+    , _is_render_target(desc.is_render_target) {
     RB_ASSERT(_size.x > 0 && _size.y > 0, "Size of texture must be greater than 0");
 }
 
@@ -31,12 +33,20 @@ vec2f texture::texel() const {
     return { 1.0f / _size.x, 1.0f / _size.y };
 }
 
+texture_type texture::type() const {
+    return _type;
+}
+
 texture_format texture::format() const {
     return _format;
 }
 
 std::size_t texture::mipmaps() const {
     return _mipmaps;
+}
+
+bool texture::is_render_target() const {
+    return _is_render_target;
 }
 
 std::size_t texture::bytes_per_pixel() const {
