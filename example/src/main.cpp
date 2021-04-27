@@ -95,11 +95,21 @@ public:
     void draw(registry& registry, graphics_device& graphics_device) override {
         _command_buffer->begin();
 
+        camera_data camera_data;
+        camera_data.view = mat4f::translation({ 0.0f, 0.0f, -5.0f });
+        _command_buffer->update_buffer(_camera_buffer, &camera_data, 0, sizeof(camera_data));
+
+        camera_data.view[12] = 0.0f;
+        camera_data.view[13] = 0.0f;
+        camera_data.view[14] = 0.0f;
+        _command_buffer->update_buffer(_skybox_camera_buffer, &camera_data, 0, sizeof(camera_data));
+
         local_data local_data;
         local_data.world = mat4f::rotation_y(_rotation);
         _command_buffer->update_buffer(_local_buffer, &local_data, 0, sizeof(local_data));
 
         _command_buffer->begin_render_pass(graphics_device);
+
 
         _command_buffer->set_shader(_forward_shader);
 
@@ -108,6 +118,14 @@ public:
         _command_buffer->set_vertex_buffer(_helmet_mesh->vertex_buffer());
 
         _command_buffer->draw(_helmet_mesh->vertex_buffer()->count(), 1, 0, 0);
+
+
+        _command_buffer->set_shader(_skybox_shader);
+
+        _command_buffer->set_resource_heap(_skybox_resource_heap);
+
+        _command_buffer->set_vertex_buffer(_skybox_vertex_buffer);
+
 
         _command_buffer->end_render_pass();
 
@@ -205,6 +223,12 @@ private:
         buffer_desc.stride = sizeof(std::uint32_t);
         buffer_desc.data = cube_indices;
         _skybox_index_buffer = _graphics_device.create_buffer(buffer_desc);
+
+        buffer_desc.type = buffer_type::uniform;
+        buffer_desc.size = sizeof(camera_data);
+        buffer_desc.stride = sizeof(camera_data);
+        buffer_desc.data = nullptr;
+        _skybox_camera_buffer = _graphics_device.create_buffer(buffer_desc);
     }
 
 private:
@@ -224,6 +248,7 @@ private:
     std::shared_ptr<resource_heap> _skybox_resource_heap;
     std::shared_ptr<buffer> _skybox_vertex_buffer;
     std::shared_ptr<buffer> _skybox_index_buffer;
+    std::shared_ptr<buffer> _skybox_camera_buffer;
 
     std::shared_ptr<command_buffer> _command_buffer;
     int _fps = 0;
