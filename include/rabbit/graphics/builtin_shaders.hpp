@@ -7,7 +7,8 @@ namespace rb {
      * @brief Builtin shaders list.
      */
     enum class builtin_shader {
-        forward
+        forward,
+        skybox
     };
 
     /**
