@@ -8,6 +8,9 @@
 namespace rb {
     class texture {
     public:
+        /**
+         * @brief Default virtual destructor.
+         */
         virtual ~texture() = default;
 
         /**

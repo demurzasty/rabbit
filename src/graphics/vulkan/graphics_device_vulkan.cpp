@@ -19,9 +19,11 @@ using namespace rb;
 // TODO: Move surface creation into separate classes for every platform.
 
 namespace {
+#if _DEBUG
     const char* validation_layers[] = {
         "VK_LAYER_KHRONOS_validation"
     };
+#endif
 
     VKAPI_ATTR
     VkBool32 VKAPI_CALL debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -182,6 +184,7 @@ void graphics_device_vulkan::_create_instance(const settings& settings) {
 #endif
     };
 
+#ifdef _DEBUG
     VkDebugUtilsMessengerCreateInfoEXT debug_info;
     debug_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
     debug_info.pNext = nullptr;
@@ -194,14 +197,24 @@ void graphics_device_vulkan::_create_instance(const settings& settings) {
         VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
     debug_info.pfnUserCallback = &debug_callback;
     debug_info.pUserData = nullptr;
+#endif
 
     VkInstanceCreateInfo instance_info;
     instance_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+#ifdef _DEBUG
     instance_info.pNext = &debug_info;
+#else
+    instance_info.pNext = nullptr;
+#endif
     instance_info.flags = 0;
     instance_info.pApplicationInfo = &app_info;
+#ifdef _DEBUG
     instance_info.enabledLayerCount = sizeof(validation_layers) / sizeof(*validation_layers);
     instance_info.ppEnabledLayerNames = validation_layers;
+#else
+    instance_info.enabledLayerCount = 0;
+    instance_info.ppEnabledLayerNames = nullptr;
+#endif
     instance_info.enabledExtensionCount = sizeof(enabled_extensions) / sizeof(*enabled_extensions);
     instance_info.ppEnabledExtensionNames = enabled_extensions;
 
@@ -308,8 +321,13 @@ void graphics_device_vulkan::_create_device(const settings& desc) {
     device_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     device_info.pNext = nullptr;
     device_info.flags = 0;
+#ifdef _DEBUG
     device_info.enabledLayerCount = sizeof(validation_layers) / sizeof(*validation_layers);
     device_info.ppEnabledLayerNames = validation_layers;
+#else
+    device_info.enabledLayerCount = 0;
+    device_info.ppEnabledLayerNames = nullptr;
+#endif
     device_info.enabledExtensionCount = sizeof(device_extensions) / sizeof(*device_extensions);
     device_info.ppEnabledExtensionNames = device_extensions;
     device_info.pEnabledFeatures = nullptr;
