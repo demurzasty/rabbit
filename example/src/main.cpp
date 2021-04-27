@@ -74,6 +74,8 @@ public:
         _command_buffer = _graphics_device.create_command_buffer();
 
         _helmet_mesh = _asset_manager.load<mesh>("meshes/helmet.obj");
+
+        _skybox_texture = _asset_manager.load<texture>("cubemaps/daylight.json");
     }
 
     void update(registry& registry, float elapsed_time) override {
@@ -138,6 +140,7 @@ private:
     std::shared_ptr<buffer> _local_buffer;
     std::shared_ptr<mesh> _helmet_mesh;
     std::shared_ptr<texture> _helmet_albedo_map;
+    std::shared_ptr<texture> _skybox_texture;
     std::shared_ptr<command_buffer> _command_buffer;
     int _fps = 0;
     float _time = 0.0f;
