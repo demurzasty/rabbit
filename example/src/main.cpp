@@ -75,7 +75,7 @@ public:
 
         _helmet_mesh = _asset_manager.load<mesh>("meshes/helmet.obj");
 
-        _skybox_texture = _asset_manager.load<texture>("cubemaps/daylight.json");
+        _prepare_skybox();
     }
 
     void update(registry& registry, float elapsed_time) override {
@@ -129,6 +129,84 @@ private:
         return _graphics_device.create_buffer(desc);
     }
 
+    void _prepare_skybox() {
+        _skybox_texture = _asset_manager.load<texture>("cubemaps/daylight.json");
+        _skybox_shader = _graphics_device.create_shader(builtin_shaders::get(builtin_shader::skybox));
+
+        resource_heap_desc resource_heap_desc;
+        resource_heap_desc.shader = _skybox_shader;
+        resource_heap_desc.resources = {
+            { 0, _camera_buffer },
+            { 1, _skybox_texture }
+        };
+        _skybox_resource_heap = _graphics_device.create_resource_heap(resource_heap_desc);
+
+        vec3f cube_vertices[24] = {
+            { -1.0f, 1.0f, 1.0f },
+            { 1.0f, 1.0f, 1.0f },
+            { 1.0f, -1.0f, 1.0f },
+            { -1.0f, -1.0f, 1.0f },
+
+            { -1.0f, 1.0f, -1.0f },
+            { -1.0f, 1.0f, 1.0f },
+            { -1.0f, -1.0f, 1.0f },
+            { -1.0f, -1.0f, -1.0f },
+
+            { 1.0f, 1.0f, -1.0f },
+            { -1.0f, 1.0f, -1.0f },
+            { -1.0f, -1.0f, -1.0f },
+            { 1.0f, -1.0f, -1.0f },
+
+            { 1.0f, 1.0f, 1.0f },
+            { 1.0f, 1.0f, -1.0f },
+            { 1.0f, -1.0f, -1.0f },
+            { 1.0f, -1.0f, 1.0f },
+
+            { -1.0f, 1.0f, -1.0f },
+            { 1.0f, 1.0f, -1.0f },
+            { 1.0f, 1.0f, 1.0f },
+            { -1.0f, 1.0f, 1.0f },
+
+            { -1.0f, -1.0f, 1.0f },
+            { 1.0f, -1.0f, 1.0f },
+            { 1.0f, -1.0f, -1.0f },
+            { -1.0f, -1.0f, -1.0f },
+        };
+
+        buffer_desc buffer_desc;
+        buffer_desc.type = buffer_type::vertex;
+        buffer_desc.size = sizeof(cube_vertices);
+        buffer_desc.stride = sizeof(vec3f);
+        buffer_desc.data = cube_vertices;
+        _skybox_vertex_buffer = _graphics_device.create_buffer(buffer_desc);
+
+        std::uint32_t cube_indices[36] = {
+            0, 1, 2,
+            2, 3, 0,
+
+            4, 5, 6,
+            6, 7, 4,
+
+            8, 9, 10,
+            10, 11, 8,
+
+            12, 13, 14,
+            14, 15, 12,
+
+            16, 17, 18,
+            18, 19, 16,
+
+            20, 21, 22,
+            22, 23, 20
+        };
+
+        buffer_desc.type = buffer_type::index;
+        buffer_desc.size = sizeof(cube_indices);
+        buffer_desc.stride = sizeof(std::uint32_t);
+        buffer_desc.data = cube_indices;
+        _skybox_index_buffer = _graphics_device.create_buffer(buffer_desc);
+    }
+
 private:
     asset_manager& _asset_manager;
     window& _window;
@@ -140,7 +218,13 @@ private:
     std::shared_ptr<buffer> _local_buffer;
     std::shared_ptr<mesh> _helmet_mesh;
     std::shared_ptr<texture> _helmet_albedo_map;
+
     std::shared_ptr<texture> _skybox_texture;
+    std::shared_ptr<shader> _skybox_shader;
+    std::shared_ptr<resource_heap> _skybox_resource_heap;
+    std::shared_ptr<buffer> _skybox_vertex_buffer;
+    std::shared_ptr<buffer> _skybox_index_buffer;
+
     std::shared_ptr<command_buffer> _command_buffer;
     int _fps = 0;
     float _time = 0.0f;
