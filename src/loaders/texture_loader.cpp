@@ -68,6 +68,7 @@ std::shared_ptr<void> texture_loader::load(const std::string& filename, const js
         desc.wrap = texture_wrap::repeat;
         desc.mipmaps = 1;
         desc.layers = 6;
+        desc.type = texture_type::texture_cube;
         return _graphics_device.create_texture(desc);
     } else {
         int width, height, components;
@@ -84,6 +85,7 @@ std::shared_ptr<void> texture_loader::load(const std::string& filename, const js
         desc.filter = texture_filter::anisotropic;
         desc.wrap = texture_wrap::repeat;
         desc.mipmaps = 0;
+        desc.type = texture_type::texture_2d;
         return _graphics_device.create_texture(desc);
     }
 }

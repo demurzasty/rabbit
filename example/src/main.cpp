@@ -126,6 +126,10 @@ public:
 
         _command_buffer->set_vertex_buffer(_skybox_vertex_buffer);
 
+        _command_buffer->set_index_buffer(_skybox_index_buffer);
+
+        _command_buffer->draw_indexed(36, 1, 0, 0, 0);
+
 
         _command_buffer->end_render_pass();
 
@@ -150,14 +154,6 @@ private:
     void _prepare_skybox() {
         _skybox_texture = _asset_manager.load<texture>("cubemaps/daylight.json");
         _skybox_shader = _graphics_device.create_shader(builtin_shaders::get(builtin_shader::skybox));
-
-        resource_heap_desc resource_heap_desc;
-        resource_heap_desc.shader = _skybox_shader;
-        resource_heap_desc.resources = {
-            { 0, _camera_buffer },
-            { 1, _skybox_texture }
-        };
-        _skybox_resource_heap = _graphics_device.create_resource_heap(resource_heap_desc);
 
         vec3f cube_vertices[24] = {
             { -1.0f, 1.0f, 1.0f },
@@ -229,6 +225,14 @@ private:
         buffer_desc.stride = sizeof(camera_data);
         buffer_desc.data = nullptr;
         _skybox_camera_buffer = _graphics_device.create_buffer(buffer_desc);
+
+        resource_heap_desc resource_heap_desc;
+        resource_heap_desc.shader = _skybox_shader;
+        resource_heap_desc.resources = {
+            { 0, _skybox_camera_buffer },
+            { 1, _skybox_texture }
+        };
+        _skybox_resource_heap = _graphics_device.create_resource_heap(resource_heap_desc);
     }
 
 private:
