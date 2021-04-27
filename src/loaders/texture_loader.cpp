@@ -27,5 +27,6 @@ std::shared_ptr<void> texture_loader::load(const std::string& filename, const js
     desc.format = texture_format::rgba8;
     desc.filter = texture_filter::anisotropic;
     desc.wrap = texture_wrap::repeat;
+    desc.mipmaps = 0;
     return _graphics_device.create_texture(desc);
 }

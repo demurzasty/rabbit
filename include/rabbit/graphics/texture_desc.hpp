@@ -5,6 +5,8 @@
 #include "texture_wrap.hpp"
 #include "../math/vec3.hpp"
 
+#include <cstddef>
+
 namespace rb {
     struct texture_desc {
         const void* data{ nullptr };
@@ -12,5 +14,6 @@ namespace rb {
         texture_format format{ texture_format::rgba8 };
         texture_filter filter{ texture_filter::linear };
         texture_wrap wrap{ texture_wrap::repeat };
+        std::size_t mipmaps{ 1 };
     };
 }

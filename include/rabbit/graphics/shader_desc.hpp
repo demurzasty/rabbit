@@ -32,7 +32,7 @@ namespace rb {
         struct {
             polygon_mode polygon_mode{ polygon_mode::fill };
             cull_mode cull_mode{ cull_mode::back };
-            front_face front_face{ front_face::clockwise };
+            front_face front_face{ front_face::counter_clockwise };
         } rasterizer_state;
 
         struct {

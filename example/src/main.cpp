@@ -17,14 +17,16 @@
 #include <rabbit/graphics/resource_heap.hpp>
 #include <rabbit/graphics/command_buffer.hpp>
 #include <rabbit/graphics/mesh.hpp>
+#include <rabbit/platform/window.hpp>
 
+#include <chrono>
 #include <filesystem>
 
 using namespace rb;
 
 struct camera_data {
     mat4f projection{ mat4f::perspective(0.6108652382f, 1.7777f, 0.1f, 100.0f) };
-    mat4f view{ mat4f::translation({ 0.0f, 0.0f, -10.0f }) };
+    mat4f view{ mat4f::translation({ 0.0f, 0.0f, -5.0f }) };
 };
 
 struct local_data {
@@ -32,15 +34,16 @@ struct local_data {
 };
 
 struct material_data {
-    vec3f base_color{ 0.2f, 0.5f, 0.8f };
+    vec3f base_color{ 1.0f, 1.0f, 1.0f };
     float roughness{ 0.8f };
     float metallic{ 0.0f };
 };
 
 struct test_system : public system {
 public:
-    test_system(asset_manager& asset_manager, graphics_device& graphics_device)
+    test_system(asset_manager& asset_manager, window& window, graphics_device& graphics_device)
         : _asset_manager(asset_manager)
+        , _window(window)
         , _graphics_device(graphics_device) {
     }
 
@@ -56,12 +59,15 @@ public:
         material_data material_data;
         _material_buffer = _create_uniform_buffer(material_data);
 
+        _helmet_albedo_map = _asset_manager.load<texture>("textures/helmet/default_albedo_ao.png");
+
         resource_heap_desc resource_heap_desc;
         resource_heap_desc.shader = _forward_shader;
         resource_heap_desc.resources = {
             { 0, _camera_buffer },
             { 1, _local_buffer },
             { 2, _material_buffer },
+            { 3, _helmet_albedo_map }
         };
         _resource_heap = _graphics_device.create_resource_heap(resource_heap_desc);
 
@@ -70,8 +76,26 @@ public:
         _helmet_mesh = _asset_manager.load<mesh>("meshes/helmet.obj");
     }
 
+    void update(registry& registry, float elapsed_time) override {
+        _rotation += elapsed_time;
+
+        _time += elapsed_time;
+        if (_time >= 1.0f) {
+            char buffer[128];
+            sprintf(buffer, "RabBit FPS: %d", _fps);
+            _window.set_title(buffer);
+
+            _fps = 0;
+            _time -= 1.0f;
+        }
+    }
+
     void draw(registry& registry, graphics_device& graphics_device) override {
         _command_buffer->begin();
+
+        local_data local_data;
+        local_data.world = mat4f::rotation_y(_rotation);
+        _command_buffer->update_buffer(_local_buffer, &local_data, 0, sizeof(local_data));
 
         _command_buffer->begin_render_pass(graphics_device);
 
@@ -88,6 +112,8 @@ public:
         _command_buffer->end();
 
         graphics_device.submit(_command_buffer);
+
+        _fps++;
     }
 
 private:
@@ -103,6 +129,7 @@ private:
 
 private:
     asset_manager& _asset_manager;
+    window& _window;
     graphics_device& _graphics_device;
     std::shared_ptr<shader> _forward_shader;
     std::shared_ptr<resource_heap> _resource_heap;
@@ -110,20 +137,27 @@ private:
     std::shared_ptr<buffer> _material_buffer;
     std::shared_ptr<buffer> _local_buffer;
     std::shared_ptr<mesh> _helmet_mesh;
+    std::shared_ptr<texture> _helmet_albedo_map;
     std::shared_ptr<command_buffer> _command_buffer;
+    int _fps = 0;
+    float _time = 0.0f;
+    float _rotation = 0.0f;
 };
 
 int main(int argc, char* argv[]) {
     std::filesystem::current_path(DATA_DIRECTORY);
 
     auto app = builder{}
-        .singleton<settings>()
+        .singleton<settings>(-1)
         .singleton<window>(window_factory{})
         .singleton<graphics_device>(graphics_device_factory{})
         .singleton<asset_manager>()
         .loader<texture, texture_loader>()
         .loader<mesh, mesh_loader>()
         .system<test_system>()
+        .configure([](settings& settings) {
+            settings.vsync = true;
+        })
         .build();
 
     return app.run();

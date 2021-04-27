@@ -50,7 +50,7 @@ std::shared_ptr<buffer> create_uniform_buffer(graphics_device& graphics_device, 
 }
 
 application::application(const builder& builder) {
-    for (auto& installation : builder._installations) {
+    for (auto& [priority, installation] : builder._installations) {
         installation(_injector);
     }
 

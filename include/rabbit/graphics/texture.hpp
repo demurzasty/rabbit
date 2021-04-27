@@ -36,6 +36,11 @@ namespace rb {
         texture_wrap wrap() const;
 
         /**
+         * @brief Returns mipmap level count.
+         */
+        std::size_t mipmaps() const;
+
+        /**
          * @brief Returns bytes per pixel.
          */
         std::size_t bytes_per_pixel() const;
@@ -48,5 +53,6 @@ namespace rb {
         const texture_format _format;
         const texture_filter _filter;
         const texture_wrap _wrap;
+        const std::size_t _mipmaps;
     };
 }

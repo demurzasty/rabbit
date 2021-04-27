@@ -200,7 +200,10 @@ void shader_vulkan::_create_pipeline(const span<const VkPipelineShaderStageCreat
     depth_stencil_state_info.stencilTestEnable = desc.depth_stencil_state.stencil_test_enable ? VK_TRUE : VK_FALSE;
 
     VkPipelineColorBlendAttachmentState color_blend_attachment_state_info{};
-    color_blend_attachment_state_info.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+    color_blend_attachment_state_info.colorWriteMask = VK_COLOR_COMPONENT_R_BIT |
+        VK_COLOR_COMPONENT_G_BIT |
+        VK_COLOR_COMPONENT_B_BIT |
+        VK_COLOR_COMPONENT_A_BIT;
     color_blend_attachment_state_info.blendEnable = VK_FALSE;
 
     VkPipelineColorBlendStateCreateInfo color_blend_state_info{};

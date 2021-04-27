@@ -15,5 +15,5 @@ layout(binding = 3) uniform sampler2D u_albedo_map;
 layout (location = 0) out vec4 out_color;
 
 void main() {
-    out_color = vec4(u_base_color, 1.0);
+    out_color = vec4(u_base_color * texture(u_albedo_map, v_texcoord).rgb, 1.0);
 }

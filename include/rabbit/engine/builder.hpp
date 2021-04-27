@@ -5,6 +5,7 @@
 #include "../asset/asset_manager.hpp"
 
 #include <list>
+#include <map>
 #include <functional>
 
 namespace rb {
@@ -12,9 +13,24 @@ namespace rb {
         friend class application;
 
     public:
+        template<typename Func>
+        builder& configure(Func func) {
+            _installations.emplace(0, [func](injector& injector) {
+                injector.invoke(func);
+            });
+            return *this;
+        }
         template<typename T>
         builder& singleton() {
-            _installations.push_front([](injector& injector) {
+            _installations.emplace(1, [](injector& injector) {
+                injector.install<T>();
+            });
+            return *this;
+        }
+
+        template<typename T>
+        builder& singleton(int priority) {
+            _installations.emplace(priority, [](injector& injector) {
                 injector.install<T>();
             });
             return *this;
@@ -22,7 +38,7 @@ namespace rb {
 
         template<typename Interface, typename Implementation>
         builder& singleton() {
-            _installations.push_front([](injector& injector) {
+            _installations.emplace(1, [](injector& injector) {
                 injector.install<Interface, Implementation>();
             });
             return *this;
@@ -30,7 +46,7 @@ namespace rb {
 
         template<typename T, typename Factory>
         builder& singleton(Factory factory) {
-            _installations.push_front([factory](injector& injector) {
+            _installations.emplace(1, [factory](injector& injector) {
                 injector.install<T>(factory);
             });
             return *this;
@@ -38,7 +54,7 @@ namespace rb {
 
         template<typename Func>
         builder& initialize(Func func) {
-            _installations.push_back([func](injector& injector) {
+            _installations.emplace(2, [func](injector& injector) {
                 injector.invoke(func);
             });
             return *this;
@@ -62,7 +78,7 @@ namespace rb {
         application build() const;
 
     private:
-        std::list<std::function<void(injector&)>> _installations;
+        std::multimap<int, std::function<void(injector&)>> _installations;
         std::list<std::function<std::shared_ptr<rb::system>(injector&)>> _system_factories;
     };
 }
