@@ -98,5 +98,15 @@ namespace rb {
          * @param first_instance Zero-based offset of the first instance.
          */
         virtual void draw(std::size_t vertex_count, std::size_t instance_count, std::size_t first_vertex, std::size_t first_instance) = 0;
+
+        /**
+         * @brief Draws the specified amount of instances of primitives from the currently set vertex buffer.
+         * @param index_count Number of vertices to generate.
+         * @param instance_count Number of instances to generate.
+         * @param first_vertex Zero-based offset of the first vertex from the vertex buffer.
+         * @param vertex_offset Zero-based offset of the first vertex from the vertex buffer.
+         * @param first_instance Zero-based offset of the first instance.
+         */
+        virtual void draw_indexed(std::size_t index_count, std::size_t instance_count, std::size_t first_index, std::size_t vertex_offset, std::size_t first_instance) = 0;
     };
 }

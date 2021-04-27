@@ -31,6 +31,8 @@ namespace rb {
 
         void draw(std::size_t vertex_count, std::size_t instance_count, std::size_t first_vertex, std::size_t first_instance) override;
 
+        void draw_indexed(std::size_t index_count, std::size_t instance_count, std::size_t first_index, std::size_t vertex_offset, std::size_t first_instance) override;
+
         VkCommandBuffer command_buffer() const;
 
         VkFence fence() const;

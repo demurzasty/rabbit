@@ -146,6 +146,15 @@ void command_buffer_vulkan::draw(std::size_t vertex_count, std::size_t instance_
         static_cast<std::uint32_t>(first_instance));
 }
 
+void command_buffer_vulkan::draw_indexed(std::size_t index_count, std::size_t instance_count, std::size_t first_index, std::size_t vertex_offset, std::size_t first_instance) {
+    vkCmdDrawIndexed(_command_buffer,
+        static_cast<std::uint32_t>(index_count),
+        static_cast<std::uint32_t>(instance_count),
+        static_cast<std::uint32_t>(first_index),
+        static_cast<std::int32_t>(vertex_offset),
+        static_cast<std::uint32_t>(first_instance));
+}
+
 VkCommandBuffer command_buffer_vulkan::command_buffer() const {
     return _command_buffer;
 }
