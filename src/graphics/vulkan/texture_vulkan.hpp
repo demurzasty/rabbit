@@ -5,6 +5,8 @@
 #include <volk.h>
 #include <vk_mem_alloc.h>
 
+#include <memory>
+
 namespace rb {
     class texture_vulkan : public texture {
     public:
@@ -15,6 +17,8 @@ namespace rb {
         VkImage image() const;
 
         VkImageView image_view() const;
+
+        VkImageView target_image_view(std::size_t layer) const;
 
         VkSampler sampler() const;
 
@@ -47,6 +51,7 @@ namespace rb {
         VkImageView _image_view;
         VkSampler _sampler;
         VkRenderPass _render_pass{ VK_NULL_HANDLE };
-        VkFramebuffer _framebuffer{ VK_NULL_HANDLE };
+        std::unique_ptr<VkImageView[]> _target_image_views;
+        std::unique_ptr<VkFramebuffer[]> _framebuffers;
     };
 }

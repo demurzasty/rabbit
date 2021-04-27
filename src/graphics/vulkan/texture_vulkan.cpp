@@ -38,7 +38,11 @@ texture_vulkan::texture_vulkan(VkDevice device,
 
 texture_vulkan::~texture_vulkan() {
     if (is_render_target()) {
-        vkDestroyFramebuffer(_device, _framebuffer, nullptr);
+        for (std::size_t layer{ 0 }; layer < layers(); ++layer) {
+            vkDestroyFramebuffer(_device, _framebuffers[layer], nullptr);
+            vkDestroyImageView(_device, _target_image_views[layer], nullptr);
+        }
+
         vkDestroyRenderPass(_device, _render_pass, nullptr);
     }
 
@@ -53,6 +57,11 @@ VkImage texture_vulkan::image() const {
 
 VkImageView texture_vulkan::image_view() const {
     return _image_view;
+}
+
+VkImageView texture_vulkan::target_image_view(std::size_t layer) const {
+    RB_ASSERT(layer < layers(), "Out of bound");
+    return _target_image_views[layer];
 }
 
 VkSampler texture_vulkan::sampler() const {
@@ -294,7 +303,7 @@ void texture_vulkan::_create_image_view(const texture_desc& desc) {
     image_view_info.subresourceRange.baseMipLevel = 0;
     image_view_info.subresourceRange.levelCount = static_cast<std::uint32_t>(mipmaps());
     image_view_info.subresourceRange.baseArrayLayer = 0;
-    image_view_info.subresourceRange.layerCount = static_cast<uint32_t>(layers());
+    image_view_info.subresourceRange.layerCount = static_cast<std::uint32_t>(layers());
 
     RB_MAYBE_UNUSED auto result = vkCreateImageView(_device, &image_view_info, nullptr, &_image_view);
     RB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan image view");
@@ -377,19 +386,47 @@ void texture_vulkan::_create_render_pass(const texture_desc& desc) {
 }
 
 void texture_vulkan::_create_framebuffer(const texture_desc& desc) {
-    VkFramebufferCreateInfo framebuffer_info;
-    framebuffer_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-    framebuffer_info.pNext = nullptr;
-    framebuffer_info.flags = 0;
-    framebuffer_info.renderPass = _render_pass;
-    framebuffer_info.attachmentCount = 1;
-    framebuffer_info.pAttachments = &_image_view;
-    framebuffer_info.width = desc.size.x;
-    framebuffer_info.height = desc.size.y;
-    framebuffer_info.layers = 1;
+    _target_image_views = std::make_unique<VkImageView[]>(desc.layers);
 
-    RB_MAYBE_UNUSED const auto result = vkCreateFramebuffer(_device, &framebuffer_info, nullptr, &_framebuffer);
-    RB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan framebuffer");
+    for (std::size_t layer{ 0 }; layer < desc.layers; ++layer) {
+        VkImageViewCreateInfo image_view_info;
+        image_view_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        image_view_info.pNext = nullptr;
+        image_view_info.flags = 0;
+        image_view_info.image = _image;
+        image_view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        image_view_info.format = utils_vulkan::format(format());
+        image_view_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+        image_view_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+        image_view_info.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+        image_view_info.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+        image_view_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        image_view_info.subresourceRange.baseMipLevel = 0;
+        image_view_info.subresourceRange.levelCount = static_cast<std::uint32_t>(mipmaps());
+        image_view_info.subresourceRange.baseArrayLayer = static_cast<std::uint32_t>(layer);
+        image_view_info.subresourceRange.layerCount = static_cast<std::uint32_t>(layers());
+
+        RB_MAYBE_UNUSED auto result = vkCreateImageView(_device, &image_view_info, nullptr, &_target_image_views[layer]);
+        RB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan image view");
+    }
+
+    _framebuffers = std::make_unique<VkFramebuffer[]>(desc.layers);
+
+    for (std::size_t layer{ 0 }; layer < layers(); ++layer) {
+        VkFramebufferCreateInfo framebuffer_info;
+        framebuffer_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        framebuffer_info.pNext = nullptr;
+        framebuffer_info.flags = 0;
+        framebuffer_info.renderPass = _render_pass;
+        framebuffer_info.attachmentCount = 1;
+        framebuffer_info.pAttachments = &_target_image_views[layer];
+        framebuffer_info.width = desc.size.x;
+        framebuffer_info.height = desc.size.y;
+        framebuffer_info.layers = 1;
+
+        RB_MAYBE_UNUSED const auto result = vkCreateFramebuffer(_device, &framebuffer_info, nullptr, &_framebuffers[layer]);
+        RB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan framebuffer");
+    }
 }
 
 void texture_vulkan::_transition_image_layout(const texture_desc& desc, VkQueue graphics_queue, VkCommandPool command_pool, VkImageLayout old_layout, VkImageLayout new_layout) {
