@@ -68,6 +68,15 @@ VkSampler texture_vulkan::sampler() const {
     return _sampler;
 }
 
+VkRenderPass texture_vulkan::render_pass() const {
+    return _render_pass;
+}
+
+VkFramebuffer texture_vulkan::framebuffer(std::size_t layer) const {
+    RB_ASSERT(layer < layers(), "Out of bound");
+    return _framebuffers[layer];
+}
+
 void texture_vulkan::_create_image(const texture_desc& desc) {
     VkImageCreateInfo image_info;
     image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;

@@ -45,6 +45,11 @@ namespace rb {
         virtual void begin_render_pass(graphics_device& graphics_device) = 0;
 
         /**
+         * @brief Begins with a new render pass.
+         */
+        virtual void begin_render_pass(const std::shared_ptr<texture>& render_target) = 0;
+
+        /**
          * @brief Ends the current render pass.
          */
         virtual void end_render_pass() = 0;

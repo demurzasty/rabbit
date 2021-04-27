@@ -22,6 +22,10 @@ namespace rb {
 
         VkSampler sampler() const;
 
+        VkRenderPass render_pass() const;
+
+        VkFramebuffer framebuffer(std::size_t layer) const;
+
     private:
         void _create_image(const texture_desc& desc);
 

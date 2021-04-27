@@ -19,6 +19,8 @@ namespace rb {
 
         void begin_render_pass(graphics_device& graphics_device) override;
 
+        void begin_render_pass(const std::shared_ptr<texture>& render_target) override;
+
         void end_render_pass() override;
 
         void set_viewport(const vec4f& viewport) override;
