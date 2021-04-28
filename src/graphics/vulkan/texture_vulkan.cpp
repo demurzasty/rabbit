@@ -90,6 +90,9 @@ void texture_vulkan::_create_image(const texture_desc& desc) {
     image_info.samples = VK_SAMPLE_COUNT_1_BIT;
     image_info.tiling = VK_IMAGE_TILING_OPTIMAL;
     image_info.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+    if (desc.is_render_target) { // TODO: Cleanup.
+        image_info.usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    }
     image_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     image_info.queueFamilyIndexCount = 0;
     image_info.pQueueFamilyIndices = 0;

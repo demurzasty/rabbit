@@ -18,6 +18,8 @@
 #include <rabbit/graphics/command_buffer.hpp>
 #include <rabbit/graphics/mesh.hpp>
 #include <rabbit/platform/window.hpp>
+#include <rabbit/graphics/texture.hpp>
+#include <rabbit/graphics/texture_desc.hpp>
 
 #include <chrono>
 #include <filesystem>
@@ -49,6 +51,18 @@ public:
 
     void initialize(registry& registry) override {
         _forward_shader = _graphics_device.create_shader(builtin_shaders::get(builtin_shader::forward));
+        _brdf_shader = _graphics_device.create_shader(builtin_shaders::get(builtin_shader::brdf));
+
+        texture_desc texture_desc;
+        texture_desc.type = texture_type::texture_2d;
+        texture_desc.filter = texture_filter::linear;
+        texture_desc.format = texture_format::rgba8;
+        texture_desc.wrap = texture_wrap::clamp;
+        texture_desc.mipmaps = 1;
+        texture_desc.layers = 1;
+        texture_desc.is_render_target = true;
+        texture_desc.size = { 512, 512, 0 };
+        _brdf = _graphics_device.create_texture(texture_desc);
 
         camera_data camera_data;
         _camera_buffer = _create_uniform_buffer(camera_data);
@@ -76,6 +90,23 @@ public:
         _helmet_mesh = _asset_manager.load<mesh>("meshes/helmet.obj");
 
         _prepare_skybox();
+
+        const vec2f quad_vertices[] = {
+            { -1.0f, 1.0f },
+            { -1.0f, -1.0f },
+            { 1.0f, -1.0f },
+
+            { 1.0f, -1.0f },
+            { 1.0f, 1.0f },
+            { -1.0f, 1.0f }
+        };
+
+        buffer_desc buffer_desc;
+        buffer_desc.type = buffer_type::vertex;
+        buffer_desc.size = sizeof(quad_vertices);
+        buffer_desc.stride = sizeof(vec2f);
+        buffer_desc.data = quad_vertices;
+        _quad_buffer = _graphics_device.create_buffer(buffer_desc);
     }
 
     void update(registry& registry, float elapsed_time) override {
@@ -93,6 +124,27 @@ public:
     }
 
     void draw(registry& registry, graphics_device& graphics_device) override {
+        if (!_brdf_generated) {
+            _command_buffer->begin();
+
+            _command_buffer->set_viewport({ 0.0f, 0.0f, 512.0f, 512.0f });
+
+            _command_buffer->begin_render_pass(_brdf);
+
+            _command_buffer->set_shader(_brdf_shader);
+
+            _command_buffer->set_vertex_buffer(_quad_buffer);
+
+            _command_buffer->draw(6, 1, 0, 0);
+
+            _command_buffer->end_render_pass();
+            _command_buffer->end();
+
+            _graphics_device.submit(_command_buffer);
+            _brdf_generated = true;
+            return;
+        }
+
         _command_buffer->begin();
 
         camera_data camera_data;
@@ -239,6 +291,12 @@ private:
     asset_manager& _asset_manager;
     window& _window;
     graphics_device& _graphics_device;
+
+    std::shared_ptr<shader> _brdf_shader;
+    std::shared_ptr<texture> _brdf;
+    std::shared_ptr<buffer> _quad_buffer;
+    bool _brdf_generated{ false };
+
     std::shared_ptr<shader> _forward_shader;
     std::shared_ptr<resource_heap> _resource_heap;
     std::shared_ptr<buffer> _camera_buffer;
