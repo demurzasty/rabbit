@@ -2,4 +2,5 @@
 
 namespace rb {
     class loader;
+    class asset_manager;
 }
