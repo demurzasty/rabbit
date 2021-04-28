@@ -69,6 +69,8 @@ if (RB_VULKAN)
 		"src/graphics/vulkan/buffer_vulkan.cpp"
 		"src/graphics/vulkan/command_buffer_vulkan.cpp"
 		"src/graphics/vulkan/graphics_device_vulkan.cpp"
+		"src/graphics/vulkan/render_pass_vulkan.cpp"
+		"src/graphics/vulkan/graphics_device_vulkan.cpp"
 		"src/graphics/vulkan/resource_heap_vulkan.cpp"
 		"src/graphics/vulkan/shader_vulkan.cpp"
 		"src/graphics/vulkan/texture_vulkan.cpp"

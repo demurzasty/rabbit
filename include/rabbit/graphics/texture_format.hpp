@@ -5,6 +5,8 @@ namespace rb {
      * @brief Defines various types of texture formats.
      */
     enum class texture_format {
+        undefined,
+
         /**
          * @brief 8-bit R pixel format with one channel
          */

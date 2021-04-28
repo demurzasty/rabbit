@@ -19,6 +19,9 @@ namespace rb {
     struct graphics_device_desc;
     class graphics_device;
 
+    struct render_pass_desc;
+    class render_pass;
+
     struct mesh_desc;
     class mesh;
 
