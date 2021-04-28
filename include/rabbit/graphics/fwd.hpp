@@ -22,6 +22,9 @@ namespace rb {
     struct render_pass_desc;
     class render_pass;
 
+    struct material_desc;
+    class material;
+
     struct mesh_desc;
     class mesh;
 
