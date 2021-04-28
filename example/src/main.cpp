@@ -121,6 +121,16 @@ public:
         buffer_desc.stride = sizeof(vec2f);
         buffer_desc.data = quad_vertices;
         _quad_buffer = _graphics_device.create_buffer(buffer_desc);
+
+        auto command_buffer = _graphics_device.create_command_buffer();
+
+        command_buffer->begin();
+
+        command_buffer->end();
+
+        _graphics_device.submit(command_buffer);
+
+        int a = 5;
     }
 
     void update(registry& registry, float elapsed_time) override {

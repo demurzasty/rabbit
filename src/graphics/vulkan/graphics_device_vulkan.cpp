@@ -96,7 +96,9 @@ std::shared_ptr<texture> graphics_device_vulkan::create_texture(const texture_de
 }
 
 std::shared_ptr<shader> graphics_device_vulkan::create_shader(const shader_desc& desc) {
-    return std::make_shared<shader_vulkan>(_device, _render_pass, _swapchain_extent, desc);
+    const auto native_render_pass = std::static_pointer_cast<render_pass_vulkan>(desc.render_pass);
+    const auto render_pass = native_render_pass ? native_render_pass->render_pass() : _render_pass;
+    return std::make_shared<shader_vulkan>(_device, render_pass, _swapchain_extent, desc);
 }
 
 std::shared_ptr<resource_heap> graphics_device_vulkan::create_resource_heap(const resource_heap_desc& desc) {
@@ -114,13 +116,13 @@ void graphics_device_vulkan::submit(const std::shared_ptr<command_buffer>& comma
 	VkSubmitInfo submit_info;
 	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	submit_info.pNext = nullptr;
-	submit_info.waitSemaphoreCount = 1;
-	submit_info.pWaitSemaphores = &_present_semaphore;
-	submit_info.pWaitDstStageMask = &wait_stage;
+	submit_info.waitSemaphoreCount = 0;
+	submit_info.pWaitSemaphores = nullptr;
+	submit_info.pWaitDstStageMask = nullptr;
 	submit_info.commandBufferCount = 1;
 	submit_info.pCommandBuffers = &vulkan_command_buffer;
-	submit_info.signalSemaphoreCount = 1;
-	submit_info.pSignalSemaphores = &_render_semaphore;
+	submit_info.signalSemaphoreCount = 0;
+	submit_info.pSignalSemaphores = nullptr;
 
     RB_MAYBE_UNUSED const auto result = vkQueueSubmit(_graphics_queue, 1, &submit_info, vulkan_fence);
     RB_ASSERT(result == VK_SUCCESS, "Failed to queue submit");
@@ -128,6 +130,22 @@ void graphics_device_vulkan::submit(const std::shared_ptr<command_buffer>& comma
 
 void graphics_device_vulkan::present() {
     RB_MAYBE_UNUSED VkResult result;
+
+    VkPipelineStageFlags wait_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+
+	VkSubmitInfo submit_info;
+	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submit_info.pNext = nullptr;
+	submit_info.waitSemaphoreCount = 1;
+	submit_info.pWaitSemaphores = &_present_semaphore;
+	submit_info.pWaitDstStageMask = &wait_stage;
+	submit_info.commandBufferCount = 0;
+	submit_info.pCommandBuffers = nullptr;
+	submit_info.signalSemaphoreCount = 1;
+	submit_info.pSignalSemaphores = &_render_semaphore;
+
+    result = vkQueueSubmit(_graphics_queue, 1, &submit_info, VK_NULL_HANDLE);
+    RB_ASSERT(result == VK_SUCCESS, "Failed to queue submit");
 
     VkPresentInfoKHR present_info;
     present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;

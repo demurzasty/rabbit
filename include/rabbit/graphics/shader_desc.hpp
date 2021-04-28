@@ -25,6 +25,11 @@ namespace rb {
         std::vector<shader_binding_desc> bindings;
         std::vector<shader_push_constant_desc> push_constants;
 
+        /**
+         * @brief If not provided, default will be used.
+         */
+        std::shared_ptr<render_pass> render_pass;
+
         struct {
             topology topology{ topology::triangles };
         } input_assembly;
