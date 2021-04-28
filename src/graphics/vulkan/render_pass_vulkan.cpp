@@ -22,7 +22,7 @@ render_pass_vulkan::render_pass_vulkan(VkDevice device, const render_pass_desc& 
         color_attachments[index].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         color_attachments[index].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         color_attachments[index].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        color_attachments[index].finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        color_attachments[index].finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
         color_references[index].attachment = static_cast<std::uint32_t>(index);
         color_references[index].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
