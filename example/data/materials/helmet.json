@@ -1,0 +1,10 @@
+{
+    "base_color": [1.0, 1.0, 1.0 ],
+    "roughness": 1.0,
+    "metallic": 1.0,
+    "albedo_map": "textures/helmet/default_albedo_ao.png",
+    "normal_map": "textures/helmet/Default_normal.jpg",
+    "roughness_map": "textures/helmet/Default_roughness.png",
+    "metallic_map": "textures/helmet/Default_metal.png",
+    "emissive_map": "textures/helmet/Default_emissive.jpg"
+}
