@@ -5,6 +5,7 @@
 #include "buffer_vulkan.hpp"
 #include "utils_vulkan.hpp"
 #include "texture_vulkan.hpp"
+#include "render_pass_vulkan.hpp"
 
 #include <rabbit/math/vec4.hpp>
 #include <rabbit/core/config.hpp>
@@ -75,7 +76,7 @@ void command_buffer_vulkan::update_buffer(const std::shared_ptr<buffer>& buffer,
 }
 
 void command_buffer_vulkan::begin_render_pass(graphics_device& graphics_device) {
-    auto& native_graphics_device = static_cast<graphics_device_vulkan&>(graphics_device);
+    const auto& native_graphics_device = static_cast<graphics_device_vulkan&>(graphics_device);
 
     VkClearValue clear_values[2];
     clear_values[0].color = { { 0.0f, 0.0f, 0.0f, 1.0f } };
@@ -94,8 +95,9 @@ void command_buffer_vulkan::begin_render_pass(graphics_device& graphics_device) 
     vkCmdBeginRenderPass(_command_buffer, &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 }
 
-void command_buffer_vulkan::begin_render_pass(const std::shared_ptr<texture>& render_target) {
+void command_buffer_vulkan::begin_render_pass(const std::shared_ptr<texture>& render_target, const std::shared_ptr<render_pass>& render_pass) {
     const auto native_render_target = std::static_pointer_cast<texture_vulkan>(render_target);
+    const auto native_render_pass = std::static_pointer_cast<render_pass_vulkan>(render_pass);
 
     const auto& size = native_render_target->size();
 
@@ -105,7 +107,7 @@ void command_buffer_vulkan::begin_render_pass(const std::shared_ptr<texture>& re
     VkRenderPassBeginInfo render_pass_begin_info;
 	render_pass_begin_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	render_pass_begin_info.pNext = nullptr;
-	render_pass_begin_info.renderPass = native_render_target->render_pass();
+	render_pass_begin_info.renderPass = native_render_pass->render_pass();
 	render_pass_begin_info.framebuffer = native_render_target->framebuffer(0);
 	render_pass_begin_info.renderArea.offset = { 0, 0 };
 	render_pass_begin_info.renderArea.extent = { size.x, size.y };

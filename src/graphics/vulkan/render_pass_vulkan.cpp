@@ -42,7 +42,7 @@ render_pass_vulkan::render_pass_vulkan(VkDevice device, const render_pass_desc& 
     }
 
     VkAttachmentReference depth_reference;
-    depth_reference.attachment = static_cast<std::uint32_t>(desc.color_attachments.size()) + 1;
+    depth_reference.attachment = static_cast<std::uint32_t>(desc.color_attachments.size());
     depth_reference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
     VkSubpassDescription subpass{};
@@ -76,7 +76,7 @@ render_pass_vulkan::render_pass_vulkan(VkDevice device, const render_pass_desc& 
     render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
     render_pass_info.pNext = nullptr;
     render_pass_info.flags = 0;
-    if (desc.depth_attachment.format != texture_format::undefined) {
+    if (desc.depth_attachment.format == texture_format::undefined) {
         render_pass_info.attachmentCount = static_cast<std::uint32_t>(desc.color_attachments.size());
     } else {
         render_pass_info.attachmentCount = static_cast<std::uint32_t>(desc.color_attachments.size()) + 1;

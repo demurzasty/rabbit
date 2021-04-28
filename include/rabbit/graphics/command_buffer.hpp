@@ -47,7 +47,7 @@ namespace rb {
         /**
          * @brief Begins with a new render pass.
          */
-        virtual void begin_render_pass(const std::shared_ptr<texture>& render_target) = 0;
+        virtual void begin_render_pass(const std::shared_ptr<texture>& render_target, const std::shared_ptr<render_pass>& render_pass) = 0;
 
         /**
          * @brief Ends the current render pass.

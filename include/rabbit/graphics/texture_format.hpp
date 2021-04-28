@@ -23,6 +23,11 @@ namespace rb {
         rgba8,
 
         /**
+         * @brief 32-bit RGBA pixel format with alpha, using 8 bits per channel.
+         */
+        bgra8,
+
+        /**
          * @brief 32-bit depth-stencil pixel format, using 24 bits for depth, and 8 bits for stencil.
          */
         d24s8

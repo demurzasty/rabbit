@@ -20,6 +20,8 @@
 #include <rabbit/platform/window.hpp>
 #include <rabbit/graphics/texture.hpp>
 #include <rabbit/graphics/texture_desc.hpp>
+#include <rabbit/graphics/render_pass.hpp>
+#include <rabbit/graphics/render_pass_desc.hpp>
 
 #include <chrono>
 #include <filesystem>
@@ -50,6 +52,18 @@ public:
     }
 
     void initialize(registry& registry) override {
+        render_pass_desc render_pass_desc;
+        render_pass_desc.color_attachments = {
+            { texture_format::bgra8, attachment_load_operator::clear, attachment_store_operator::store }
+        };
+        render_pass_desc.depth_attachment = {
+            texture_format::d24s8, attachment_load_operator::clear, attachment_store_operator::undefined
+        };
+        render_pass_desc.stencil_attachment = {
+            texture_format::d24s8, attachment_load_operator::clear, attachment_store_operator::undefined
+        };
+        _render_pass = _graphics_device.create_render_pass(render_pass_desc);
+
         _forward_shader = _graphics_device.create_shader(builtin_shaders::get(builtin_shader::forward));
         _brdf_shader = _graphics_device.create_shader(builtin_shaders::get(builtin_shader::brdf));
 
@@ -124,26 +138,26 @@ public:
     }
 
     void draw(registry& registry, graphics_device& graphics_device) override {
-        if (!_brdf_generated) {
-            _command_buffer->begin();
+        // if (!_brdf_generated) {
+        //     _command_buffer->begin();
 
-            _command_buffer->set_viewport({ 0.0f, 0.0f, 512.0f, 512.0f });
+        //     _command_buffer->set_viewport({ 0.0f, 0.0f, 512.0f, 512.0f });
 
-            _command_buffer->begin_render_pass(_brdf);
+        //     _command_buffer->begin_render_pass(_brdf);
 
-            _command_buffer->set_shader(_brdf_shader);
+        //     _command_buffer->set_shader(_brdf_shader);
 
-            _command_buffer->set_vertex_buffer(_quad_buffer);
+        //     _command_buffer->set_vertex_buffer(_quad_buffer);
 
-            _command_buffer->draw(6, 1, 0, 0);
+        //     _command_buffer->draw(6, 1, 0, 0);
 
-            _command_buffer->end_render_pass();
-            _command_buffer->end();
+        //     _command_buffer->end_render_pass();
+        //     _command_buffer->end();
 
-            _graphics_device.submit(_command_buffer);
-            _brdf_generated = true;
-            return;
-        }
+        //     _graphics_device.submit(_command_buffer);
+        //     _brdf_generated = true;
+        //     return;
+        // }
 
         _command_buffer->begin();
 
@@ -291,6 +305,8 @@ private:
     asset_manager& _asset_manager;
     window& _window;
     graphics_device& _graphics_device;
+
+    std::shared_ptr<render_pass> _render_pass;
 
     std::shared_ptr<shader> _brdf_shader;
     std::shared_ptr<texture> _brdf;

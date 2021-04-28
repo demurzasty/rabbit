@@ -69,6 +69,7 @@ VkFormat utils_vulkan::format(const texture_format& format) {
         case texture_format::r8: return VK_FORMAT_R8_UNORM;
         case texture_format::rg8: return VK_FORMAT_R8G8_UNORM;
         case texture_format::rgba8: return VK_FORMAT_R8G8B8A8_UNORM;
+        case texture_format::bgra8: return VK_FORMAT_B8G8R8A8_UNORM;
         case texture_format::d24s8: return VK_FORMAT_D24_UNORM_S8_UINT;
     }
 
