@@ -14,6 +14,8 @@ namespace rb {
 
         ~graphics_device_vulkan();
 
+        std::shared_ptr<render_pass> create_render_pass(const render_pass_desc& desc) override;
+
         std::shared_ptr<command_buffer> create_command_buffer() override;
 
         std::shared_ptr<buffer> create_buffer(const buffer_desc& desc) override;

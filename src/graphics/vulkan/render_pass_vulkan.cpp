@@ -9,8 +9,7 @@
 using namespace rb;
 
 render_pass_vulkan::render_pass_vulkan(VkDevice device, const render_pass_desc& desc)
-    : rb::render_pass(desc),
-     _device(device) {
+    : _device(device) {
     auto color_attachments = std::make_unique<VkAttachmentDescription[]>(desc.color_attachments.size());
     auto color_references = std::make_unique<VkAttachmentReference[]>(desc.color_attachments.size());
 

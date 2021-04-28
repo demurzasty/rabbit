@@ -13,11 +13,6 @@ namespace rb {
     class render_pass {
     public:
         /**
-         * @brief Constructs graphics pipeline with provided descriptor.
-         */
-        render_pass(const render_pass_desc& desc);
-
-        /**
          * @brief Default virtual destructor.
          */
         virtual ~render_pass() = default;

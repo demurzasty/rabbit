@@ -23,6 +23,8 @@ namespace rb {
          */
         virtual ~graphics_device() = default;
 
+        virtual std::shared_ptr<render_pass> create_render_pass(const render_pass_desc& desc) = 0;
+
         virtual std::shared_ptr<command_buffer> create_command_buffer() = 0;
 
         virtual std::shared_ptr<buffer> create_buffer(const buffer_desc& desc) = 0;

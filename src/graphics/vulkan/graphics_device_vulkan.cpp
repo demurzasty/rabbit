@@ -1,4 +1,5 @@
 #include "graphics_device_vulkan.hpp"
+#include "render_pass_vulkan.hpp"
 #include "command_buffer_vulkan.hpp"
 #include "buffer_vulkan.hpp"
 #include "texture_vulkan.hpp"
@@ -76,6 +77,10 @@ graphics_device_vulkan::~graphics_device_vulkan() {
     vkDestroyDevice(_device, nullptr);
     vkDestroySurfaceKHR(_instance, _surface, nullptr);
     vkDestroyInstance(_instance, nullptr);
+}
+
+std::shared_ptr<render_pass> graphics_device_vulkan::create_render_pass(const render_pass_desc& desc) {
+    return std::make_shared<render_pass_vulkan>(_device, desc);
 }
 
 std::shared_ptr<command_buffer> graphics_device_vulkan::create_command_buffer() {
