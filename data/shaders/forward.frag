@@ -4,7 +4,7 @@
 
 layout (location = 0) in vec2 v_texcoord;
 
-layout (binding = 2) uniform MaterialData {
+layout (std140, binding = 2) uniform MaterialData {
     vec3 u_base_color;
     float u_roughness;
     float u_metallic;

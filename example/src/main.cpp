@@ -8,8 +8,17 @@
 #include <rabbit/asset/asset_manager.hpp>
 #include <rabbit/loaders/texture_loader.hpp>
 #include <rabbit/loaders/mesh_loader.hpp>
+#include <rabbit/loaders/material_loader.hpp>
 #include <rabbit/graphics/graphics_device.hpp>
 #include <rabbit/platform/window.hpp>
+#include <rabbit/systems/renderer.hpp>
+#include <rabbit/engine/entity.hpp>
+
+#include <rabbit/components/camera.hpp>
+#include <rabbit/components/geometry.hpp>
+#include <rabbit/components/transform.hpp>
+
+#include <rabbit/math/math.hpp>
 
 #include <filesystem>
 
@@ -24,6 +33,16 @@ public:
     }
 
     void initialize(registry& registry) override {
+        auto helmet = registry.create();
+        auto& helmet_transform = registry.emplace<transform>(helmet);
+        auto& helmet_geometry = registry.emplace<geometry>(helmet);
+
+        helmet_geometry.mesh = _asset_manager.load<mesh>("meshes/helmet.obj");
+        helmet_geometry.material = _asset_manager.load<material>("materials/helmet.json");
+
+        auto camera = registry.create();
+        registry.emplace<rb::camera>(camera);
+        registry.emplace<transform>(camera).position = { 0.0f, 0.0f, 5.0f };
     }
 
     void update(registry& registry, float elapsed_time) override {
@@ -75,10 +94,12 @@ int main(int argc, char* argv[]) {
         .singleton<asset_manager>()
         .loader<texture, texture_loader>()
         .loader<mesh, mesh_loader>()
-        .system<test_system>()
+        .loader<material, material_loader>()
+        .system<renderer>()
         .configure([](settings& settings) {
             settings.vsync = true;
         })
+        .system<test_system>()
         .build();
 
     return app.run();

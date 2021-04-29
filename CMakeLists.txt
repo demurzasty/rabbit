@@ -58,6 +58,7 @@ set (SRC
 	"src/loaders/mesh_loader.cpp"
 	"src/loaders/texture_loader.cpp"
 	"src/platform/window_factory.cpp"
+	"src/systems/renderer.cpp"
 )
 
 if (RB_WINDOWS)

@@ -198,7 +198,7 @@ namespace rb {
          *
          * @return A new rotation matrix with the specified yaw, pitch, and roll.
          */
-        static mat4<T> rotation(T radians) {
+        static mat4<T> rotation(const vec3<T>& radians) {
             return rotation_x(radians.x) * rotation_z(radians.z) * rotation_y(radians.y);
         }
 
