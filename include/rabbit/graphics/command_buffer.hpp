@@ -78,7 +78,7 @@ namespace rb {
          *
          * @param shader Specifies the shader which is to be bound for subsequent draw or compute commands.
          */
-        virtual void set_shader(const std::shared_ptr<shader>& shader) = 0;
+        virtual void set_shader(const std::shared_ptr<shader>& shader);
 
         /**
          * @brief Binds the specified resource heap to the active shader.
@@ -87,21 +87,21 @@ namespace rb {
          *
          * @warning Any previously bound resources are invalid after this call.
          */
-        virtual void set_resource_heap(const std::shared_ptr<resource_heap>& resource_heap) = 0;
+        virtual void set_resource_heap(const std::shared_ptr<resource_heap>& resource_heap);
 
         /**
          * @brief Sets the specified vertex buffer for subsequent drawing operations.
          *
          * @param vertex_buffer Specifies the vertex buffer to set. This buffer must have been created with the vertex type and its content must not be uninitialized.
          */
-        virtual void set_vertex_buffer(const std::shared_ptr<buffer>& vertex_buffer) = 0;
+        virtual void set_vertex_buffer(const std::shared_ptr<buffer>& vertex_buffer);
 
         /**
          * @brief Sets the specified index buffer for subsequent drawing operations.
          *
          * @param index_buffer Specifies the index buffer to set. This buffer must have been created with the index type and its content must not be uninitialized.
          */
-        virtual void set_index_buffer(const std::shared_ptr<buffer>& index_buffer) = 0;
+        virtual void set_index_buffer(const std::shared_ptr<buffer>& index_buffer);
 
         /**
          * @brief Pushes a contant value to active shader pipeline.
@@ -128,5 +128,11 @@ namespace rb {
          * @param first_instance Zero-based offset of the first instance.
          */
         virtual void draw_indexed(std::size_t index_count, std::size_t instance_count, std::size_t first_index, std::size_t vertex_offset, std::size_t first_instance) = 0;
+
+    private:
+        std::shared_ptr<shader> _shader;
+        std::shared_ptr<buffer> _vertex_buffer;
+        std::shared_ptr<buffer> _index_buffer;
+        std::shared_ptr<resource_heap> _resource_heap;
     };
 }

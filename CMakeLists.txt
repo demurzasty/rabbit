@@ -46,6 +46,7 @@ set (SRC
 	"src/engine/system.cpp"
 	"src/graphics/buffer.cpp"
 	"src/graphics/builtin_shaders.cpp"
+	"src/graphics/command_buffer.cpp"
 	"src/graphics/graphics_device_factory.cpp"
 	"src/graphics/graphics_device.cpp"
 	"src/graphics/material.cpp"

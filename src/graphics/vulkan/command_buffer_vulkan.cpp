@@ -133,12 +133,16 @@ void command_buffer_vulkan::set_viewport(const vec4f& viewport) {
 }
 
 void command_buffer_vulkan::set_shader(const std::shared_ptr<shader>& shader) {
+    command_buffer::set_shader(shader);
+
     const auto native_shader = std::static_pointer_cast<shader_vulkan>(shader);
 
     vkCmdBindPipeline(_command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, native_shader->pipeline());
 }
 
 void command_buffer_vulkan::set_resource_heap(const std::shared_ptr<resource_heap>& resource_heap) {
+    command_buffer::set_resource_heap(resource_heap);
+
     const auto native_resource_heap = std::static_pointer_cast<resource_heap_vulkan>(resource_heap);
     const auto native_shader = std::static_pointer_cast<shader_vulkan>(resource_heap->associated_shader());
 
@@ -155,6 +159,8 @@ void command_buffer_vulkan::set_resource_heap(const std::shared_ptr<resource_hea
 }
 
 void command_buffer_vulkan::set_vertex_buffer(const std::shared_ptr<buffer>& vertex_buffer) {
+    command_buffer::set_vertex_buffer(vertex_buffer);
+
     const auto native_buffer = std::static_pointer_cast<buffer_vulkan>(vertex_buffer);
 
     const auto buffer = native_buffer->buffer();
@@ -164,6 +170,8 @@ void command_buffer_vulkan::set_vertex_buffer(const std::shared_ptr<buffer>& ver
 }
 
 void command_buffer_vulkan::set_index_buffer(const std::shared_ptr<buffer>& index_buffer) {
+    command_buffer::set_index_buffer(index_buffer);
+
     const auto native_buffer = std::static_pointer_cast<buffer_vulkan>(index_buffer);
 
     vkCmdBindIndexBuffer(_command_buffer, native_buffer->buffer(), 0, VK_INDEX_TYPE_UINT32);

@@ -20,10 +20,6 @@ renderer::renderer(graphics_device& graphics_device)
     : _graphics_device(graphics_device) {
 }
 
-renderer::~renderer() {
-    _command_buffer.reset();
-}
-
 void renderer::initialize(registry& registry) {
     _command_buffer = _graphics_device.create_command_buffer();
 

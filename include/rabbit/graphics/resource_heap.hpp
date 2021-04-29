@@ -38,6 +38,7 @@ namespace rb {
 
     private:
         const std::shared_ptr<shader> _shader;
+        const std::map<std::size_t, resource_view> _resources;
     };
 }
 

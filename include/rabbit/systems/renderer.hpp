@@ -13,8 +13,6 @@ namespace rb {
     public:
         renderer(graphics_device& graphics_device);
 
-        ~renderer();
-
         void initialize(registry& registry);
 
         void draw(registry& registry, graphics_device& graphics_device) override;
