@@ -1,6 +1,7 @@
 #pragma once
 
-#include <rabbit/graphics/fwd.hpp>
+#include "../graphics/mesh.hpp"
+#include "../graphics/material.hpp"
 
 #include <memory>
 

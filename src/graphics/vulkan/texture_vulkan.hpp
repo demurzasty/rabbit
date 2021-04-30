@@ -10,7 +10,11 @@
 namespace rb {
     class texture_vulkan : public texture {
     public:
-        texture_vulkan(VkDevice device, VkQueue graphics_queue, VkCommandPool command_pool, VmaAllocator allocator, const texture_desc& desc);
+        texture_vulkan(VkDevice device,
+            VkQueue graphics_queue,
+            VkCommandPool command_pool,
+            VmaAllocator allocator,
+            const texture_desc& desc);
 
         ~texture_vulkan();
 
@@ -21,8 +25,6 @@ namespace rb {
         VkImageView target_image_view(std::size_t layer) const;
 
         VkSampler sampler() const;
-
-        VkRenderPass render_pass() const;
 
         VkFramebuffer framebuffer(std::size_t layer) const;
 

@@ -59,8 +59,8 @@ namespace rb {
         /**
          * @brief Install dependency using factory.
          */
-        template<typename T, typename Func>
-        void install(Func factory) {
+        template<typename T, typename Factory, std::enable_if_t<!std::is_same_v<std::decay_t<T>, std::decay_t<Factory>>, int> = 0>
+        void install(Factory factory) {
             _beans.emplace(type_id<T>().hash(), bean{
                 nullptr,
                 [factory](injector& injector) { return factory(injector); }
@@ -74,6 +74,16 @@ namespace rb {
         void install(const std::shared_ptr<T>& instance) {
             _beans.emplace(type_id<T>().hash(), bean{
                 instance,
+                nullptr
+            });
+        }
+        /**
+         * @brief Install dependency with provided instance.
+         */
+        template<typename T>
+        void install(const T& instance) {
+            _beans.emplace(type_id<T>().hash(), bean{
+                std::make_shared<T>(instance),
                 nullptr
             });
         }

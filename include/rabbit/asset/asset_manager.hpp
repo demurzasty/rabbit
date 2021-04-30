@@ -1,8 +1,9 @@
+
 #pragma once
 
-#include "fwd.hpp"
-#include "../core/fwd.hpp"
+#include "loader.hpp"
 #include "../core/injector.hpp"
+#include "../core/type_info.hpp"
 
 #include <string>
 #include <memory>
@@ -36,4 +37,3 @@ namespace rb {
         std::unordered_map<std::string, std::weak_ptr<void>> _assets;
     };
 }
-

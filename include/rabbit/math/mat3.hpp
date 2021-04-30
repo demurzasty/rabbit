@@ -1,7 +1,5 @@
 #pragma once
 
-#include "fwd.hpp"
-
 namespace rb {
     template<typename T>
     struct mat3 {
@@ -28,4 +26,6 @@ namespace rb {
 
         T values[9];
     };
+
+    using mat3f = mat3<float>;
 }

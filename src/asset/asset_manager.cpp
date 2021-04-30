@@ -1,6 +1,4 @@
 #include <rabbit/asset/asset_manager.hpp>
-#include <rabbit/asset/loader.hpp>
-#include <rabbit/core/json.hpp>
 
 #include <fstream>
 
@@ -32,4 +30,3 @@ json asset_manager::_load_metadata(const std::string& filename) const {
 
     return metadata;
 }
-

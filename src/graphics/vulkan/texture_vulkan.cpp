@@ -3,10 +3,6 @@
 
 #include <rabbit/core/config.hpp>
 
-#include <cmath>
-#include <algorithm>
-#include <cstring>
-
 using namespace rb;
 
 texture_vulkan::texture_vulkan(VkDevice device,
@@ -19,7 +15,7 @@ texture_vulkan::texture_vulkan(VkDevice device,
     , _allocator(allocator) {
     _create_image(desc);
 
-    if (desc.data) {
+    if (desc.pixels) {
         _update_image(graphics_queue, command_pool, desc);
 
         if (desc.mipmaps == 0) {
@@ -66,10 +62,6 @@ VkImageView texture_vulkan::target_image_view(std::size_t layer) const {
 
 VkSampler texture_vulkan::sampler() const {
     return _sampler;
-}
-
-VkRenderPass texture_vulkan::render_pass() const {
-    return _render_pass;
 }
 
 VkFramebuffer texture_vulkan::framebuffer(std::size_t layer) const {
@@ -130,7 +122,7 @@ void texture_vulkan::_update_image(VkQueue graphics_queue, VkCommandPool command
     result = vmaMapMemory(_allocator, staging_buffer_allocation, &data);
     RB_ASSERT(result == VK_SUCCESS, "Failed to map staging buffer memory");
 
-    std::memcpy(data, desc.data, buffer_info.size);
+    std::memcpy(data, desc.pixels, buffer_info.size);
 
     vmaUnmapMemory(_allocator, staging_buffer_allocation);
 
@@ -335,8 +327,8 @@ void texture_vulkan::_create_sampler(const texture_desc& desc) {
     sampler_info.addressModeV = utils_vulkan::sampler_address_mode(wrap());
     sampler_info.addressModeW = utils_vulkan::sampler_address_mode(wrap());
     sampler_info.mipLodBias = 0.0f;
-    sampler_info.anisotropyEnable = VK_FALSE;
-    sampler_info.maxAnisotropy = 1.0f;
+    sampler_info.anisotropyEnable = desc.anisotropy > 1 ? VK_TRUE : VK_FALSE;
+    sampler_info.maxAnisotropy = static_cast<float>(desc.anisotropy);
     sampler_info.compareEnable = VK_FALSE;
     sampler_info.compareOp = VK_COMPARE_OP_ALWAYS;
     sampler_info.minLod = 0.0f;
@@ -344,12 +336,52 @@ void texture_vulkan::_create_sampler(const texture_desc& desc) {
     sampler_info.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
     sampler_info.unnormalizedCoordinates = VK_FALSE;
 
-    if (filter() == texture_filter::anisotropic) {
-        // TODO: Enable anisotropy.
-    }
-
     RB_MAYBE_UNUSED auto result = vkCreateSampler(_device, &sampler_info, nullptr, &_sampler);
     RB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan sampler");
+}
+
+void texture_vulkan::_create_framebuffer(const texture_desc& desc) {
+    _target_image_views = std::make_unique<VkImageView[]>(desc.layers);
+
+    for (std::size_t layer{ 0 }; layer < desc.layers; ++layer) {
+        VkImageViewCreateInfo image_view_info;
+        image_view_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        image_view_info.pNext = nullptr;
+        image_view_info.flags = 0;
+        image_view_info.image = _image;
+        image_view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        image_view_info.format = utils_vulkan::format(format());
+        image_view_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+        image_view_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+        image_view_info.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+        image_view_info.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+        image_view_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        image_view_info.subresourceRange.baseMipLevel = 0;
+        image_view_info.subresourceRange.levelCount = static_cast<std::uint32_t>(mipmaps());
+        image_view_info.subresourceRange.baseArrayLayer = static_cast<std::uint32_t>(layer);
+        image_view_info.subresourceRange.layerCount = static_cast<std::uint32_t>(layers());
+
+        RB_MAYBE_UNUSED auto result = vkCreateImageView(_device, &image_view_info, nullptr, &_target_image_views[layer]);
+        RB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan image view");
+    }
+
+    _framebuffers = std::make_unique<VkFramebuffer[]>(desc.layers);
+
+    for (std::size_t layer{ 0 }; layer < layers(); ++layer) {
+        VkFramebufferCreateInfo framebuffer_info;
+        framebuffer_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        framebuffer_info.pNext = nullptr;
+        framebuffer_info.flags = 0;
+        framebuffer_info.renderPass = _render_pass;
+        framebuffer_info.attachmentCount = 1;
+        framebuffer_info.pAttachments = &_target_image_views[layer];
+        framebuffer_info.width = desc.size.x;
+        framebuffer_info.height = desc.size.y;
+        framebuffer_info.layers = 1;
+
+        RB_MAYBE_UNUSED const auto result = vkCreateFramebuffer(_device, &framebuffer_info, nullptr, &_framebuffers[layer]);
+        RB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan framebuffer");
+    }
 }
 
 void texture_vulkan::_create_render_pass(const texture_desc& desc) {
@@ -397,50 +429,6 @@ void texture_vulkan::_create_render_pass(const texture_desc& desc) {
 
     RB_MAYBE_UNUSED const auto result = vkCreateRenderPass(_device, &render_pass_info, nullptr, &_render_pass);
     RB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan framebuffer");
-}
-
-void texture_vulkan::_create_framebuffer(const texture_desc& desc) {
-    _target_image_views = std::make_unique<VkImageView[]>(desc.layers);
-
-    for (std::size_t layer{ 0 }; layer < desc.layers; ++layer) {
-        VkImageViewCreateInfo image_view_info;
-        image_view_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        image_view_info.pNext = nullptr;
-        image_view_info.flags = 0;
-        image_view_info.image = _image;
-        image_view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        image_view_info.format = utils_vulkan::format(format());
-        image_view_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-        image_view_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-        image_view_info.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-        image_view_info.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-        image_view_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        image_view_info.subresourceRange.baseMipLevel = 0;
-        image_view_info.subresourceRange.levelCount = static_cast<std::uint32_t>(mipmaps());
-        image_view_info.subresourceRange.baseArrayLayer = static_cast<std::uint32_t>(layer);
-        image_view_info.subresourceRange.layerCount = static_cast<std::uint32_t>(layers());
-
-        RB_MAYBE_UNUSED auto result = vkCreateImageView(_device, &image_view_info, nullptr, &_target_image_views[layer]);
-        RB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan image view");
-    }
-
-    _framebuffers = std::make_unique<VkFramebuffer[]>(desc.layers);
-
-    for (std::size_t layer{ 0 }; layer < layers(); ++layer) {
-        VkFramebufferCreateInfo framebuffer_info;
-        framebuffer_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebuffer_info.pNext = nullptr;
-        framebuffer_info.flags = 0;
-        framebuffer_info.renderPass = _render_pass;
-        framebuffer_info.attachmentCount = 1;
-        framebuffer_info.pAttachments = &_target_image_views[layer];
-        framebuffer_info.width = desc.size.x;
-        framebuffer_info.height = desc.size.y;
-        framebuffer_info.layers = 1;
-
-        RB_MAYBE_UNUSED const auto result = vkCreateFramebuffer(_device, &framebuffer_info, nullptr, &_framebuffers[layer]);
-        RB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan framebuffer");
-    }
 }
 
 void texture_vulkan::_transition_image_layout(const texture_desc& desc, VkQueue graphics_queue, VkCommandPool command_pool, VkImageLayout old_layout, VkImageLayout new_layout) {

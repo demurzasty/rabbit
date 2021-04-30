@@ -1,7 +1,8 @@
+
 #pragma once
 
 #include <rabbit/platform/window.hpp>
-#include <rabbit/engine/settings.hpp>
+#include <rabbit/core/settings.hpp>
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>

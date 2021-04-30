@@ -1,19 +1,14 @@
 #include "graphics_device_vulkan.hpp"
-#include "render_pass_vulkan.hpp"
-#include "command_buffer_vulkan.hpp"
-#include "buffer_vulkan.hpp"
+#include "material_vulkan.hpp"
+#include "mesh_vulkan.hpp"
 #include "texture_vulkan.hpp"
-#include "shader_vulkan.hpp"
-#include "resource_heap_vulkan.hpp"
+#include "renderer_vulkan.hpp"
 
 #include <rabbit/core/config.hpp>
-#include <rabbit/platform/window.hpp>
-#include <rabbit/engine/settings.hpp>
+#include <rabbit/core/version.hpp>
 
-#if RB_WINDOWS
-#   define WIN32_LEAN_AND_MEAN
-#   include <Windows.h>
-#endif
+#define VMA_IMPLEMENTATION
+#include <vk_mem_alloc.h>
 
 using namespace rb;
 
@@ -36,16 +31,15 @@ namespace {
     }
 }
 
-graphics_device_vulkan::graphics_device_vulkan(settings& settings, window& window)
-    : graphics_device(settings, window) {
+graphics_device_vulkan::graphics_device_vulkan(settings& settings, window& window) {
     _initialize_volk(settings);
     _create_instance(settings);
     _choose_physical_device(settings);
-    _create_surface(settings);
+    _create_surface(settings, window);
     _create_device(settings);
     _create_allocator(settings);
     _query_surface(settings);
-    _create_swapchain(settings);
+    _create_swapchain(settings, window);
     _create_command_pool(settings);
     _create_synchronization_objects(settings);
 }
@@ -79,53 +73,20 @@ graphics_device_vulkan::~graphics_device_vulkan() {
     vkDestroyInstance(_instance, nullptr);
 }
 
-std::shared_ptr<render_pass> graphics_device_vulkan::create_render_pass(const render_pass_desc& desc) {
-    return std::make_shared<render_pass_vulkan>(_device, desc);
-}
-
-std::shared_ptr<command_buffer> graphics_device_vulkan::create_command_buffer() {
-    return std::make_shared<command_buffer_vulkan>(_device, _command_pool);
-}
-
-std::shared_ptr<buffer> graphics_device_vulkan::create_buffer(const buffer_desc& desc) {
-    return std::make_shared<buffer_vulkan>(_device, _allocator, desc);
+std::shared_ptr<renderer> graphics_device_vulkan::create_renderer() {
+    return std::make_shared<renderer_vulkan>(*this);
 }
 
 std::shared_ptr<texture> graphics_device_vulkan::create_texture(const texture_desc& desc) {
     return std::make_shared<texture_vulkan>(_device, _graphics_queue, _command_pool, _allocator, desc);
 }
 
-std::shared_ptr<shader> graphics_device_vulkan::create_shader(const shader_desc& desc) {
-    const auto native_render_pass = std::static_pointer_cast<render_pass_vulkan>(desc.render_pass);
-    const auto render_pass = native_render_pass ? native_render_pass->render_pass() : _render_pass;
-    return std::make_shared<shader_vulkan>(_device, render_pass, _swapchain_extent, desc);
+std::shared_ptr<mesh> graphics_device_vulkan::create_mesh(const mesh_desc& desc) {
+    return std::make_shared<mesh_vulkan>(_device, _allocator, desc);
 }
 
-std::shared_ptr<resource_heap> graphics_device_vulkan::create_resource_heap(const resource_heap_desc& desc) {
-    return std::make_shared<resource_heap_vulkan>(_device, desc);
-}
-
-void graphics_device_vulkan::submit(const std::shared_ptr<command_buffer>& command_buffer) {
-    auto native_command_buffer = std::static_pointer_cast<command_buffer_vulkan>(command_buffer);
-
-    auto vulkan_command_buffer = native_command_buffer->command_buffer();
-    auto vulkan_fence = native_command_buffer->fence();
-
-    VkPipelineStageFlags wait_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-
-	VkSubmitInfo submit_info;
-	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	submit_info.pNext = nullptr;
-	submit_info.waitSemaphoreCount = 0;
-	submit_info.pWaitSemaphores = nullptr;
-	submit_info.pWaitDstStageMask = nullptr;
-	submit_info.commandBufferCount = 1;
-	submit_info.pCommandBuffers = &vulkan_command_buffer;
-	submit_info.signalSemaphoreCount = 0;
-	submit_info.pSignalSemaphores = nullptr;
-
-    RB_MAYBE_UNUSED const auto result = vkQueueSubmit(_graphics_queue, 1, &submit_info, vulkan_fence);
-    RB_ASSERT(result == VK_SUCCESS, "Failed to queue submit");
+std::shared_ptr<material> graphics_device_vulkan::create_material(const material_desc& desc) {
+    return std::make_shared<material_vulkan>(_device, _allocator, desc);
 }
 
 void graphics_device_vulkan::present() {
@@ -169,16 +130,46 @@ void graphics_device_vulkan::present() {
     RB_ASSERT(result == VK_SUCCESS, "Failed to reset acquire next swapchain image");
 }
 
+void graphics_device_vulkan::submit(VkCommandBuffer command_buffer, VkFence fence) {
+    VkPipelineStageFlags wait_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+
+	VkSubmitInfo submit_info;
+	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submit_info.pNext = nullptr;
+	submit_info.waitSemaphoreCount = 0;
+	submit_info.pWaitSemaphores = nullptr;
+	submit_info.pWaitDstStageMask = nullptr;
+	submit_info.commandBufferCount = 1;
+	submit_info.pCommandBuffers = &command_buffer;
+	submit_info.signalSemaphoreCount = 0;
+	submit_info.pSignalSemaphores = nullptr;
+
+    RB_MAYBE_UNUSED const auto result = vkQueueSubmit(_graphics_queue, 1, &submit_info, fence);
+    RB_ASSERT(result == VK_SUCCESS, "Failed to queue submit");
+}
+
+VkDevice graphics_device_vulkan::device() const {
+    return _device;
+}
+
+VkCommandPool graphics_device_vulkan::command_pool() const {
+    return _command_pool;
+}
+
+VmaAllocator graphics_device_vulkan::allocator() const {
+    return _allocator;
+}
+
 VkRenderPass graphics_device_vulkan::render_pass() const {
     return _render_pass;
 }
 
-VkExtent2D graphics_device_vulkan::swapchain_extent() const {
-    return _swapchain_extent;
-}
-
 VkFramebuffer graphics_device_vulkan::framebuffer() const {
     return _framebuffers[_image_index];
+}
+
+VkExtent2D graphics_device_vulkan::swapchain_extent() const {
+    return _swapchain_extent;
 }
 
 void graphics_device_vulkan::_initialize_volk(const settings& settings) {
@@ -187,7 +178,7 @@ void graphics_device_vulkan::_initialize_volk(const settings& settings) {
 }
 
 void graphics_device_vulkan::_create_instance(const settings& settings) {
-    const auto [major, minor, patch] = settings.application_version;
+    const auto [major, minor, patch] = std::make_tuple(1u, 0u, 0u); // settings.application_version;
 
     VkApplicationInfo app_info;
     app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -265,7 +256,7 @@ void graphics_device_vulkan::_choose_physical_device(const settings& desc) {
     _physical_device = physical_devices[0];
 }
 
-void graphics_device_vulkan::_create_surface(const settings& desc) {
+void graphics_device_vulkan::_create_surface(const settings& desc, window& window) {
 #if RB_WINDOWS
     // Fill Win32 surface create informations.
     VkWin32SurfaceCreateInfoKHR surface_info;
@@ -273,7 +264,7 @@ void graphics_device_vulkan::_create_surface(const settings& desc) {
     surface_info.pNext = nullptr;
     surface_info.flags = 0;
     surface_info.hinstance = GetModuleHandle(nullptr);
-    surface_info.hwnd = associated_window().native_handle();
+    surface_info.hwnd = window.native_handle();
 
     // Create new Vulkan surface.
     RB_MAYBE_UNUSED const auto result = vkCreateWin32SurfaceKHR(_instance, &surface_info, nullptr, &_surface);
@@ -406,11 +397,11 @@ void graphics_device_vulkan::_query_surface(const settings& desc) {
     _swapchain_extent = surface_capabilities.currentExtent;
 }
 
-void graphics_device_vulkan::_create_swapchain(const settings& settings) {
+void graphics_device_vulkan::_create_swapchain(const settings& settings, window& window) {
     RB_MAYBE_UNUSED VkResult result;
 
     // Get window size.
-    const auto window_size = associated_window().size();
+    const auto window_size = window.size();
 
     // Query surface capabilities.
     VkSurfaceCapabilitiesKHR surface_capabilities;

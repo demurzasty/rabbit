@@ -1,7 +1,7 @@
+
 #include <rabbit/loaders/mesh_loader.hpp>
 #include <rabbit/core/config.hpp>
 #include <rabbit/graphics/mesh.hpp>
-#include <rabbit/graphics/graphics_device.hpp>
 #include <rabbit/math/vec2.hpp>
 #include <rabbit/math/vec3.hpp>
 
@@ -10,6 +10,7 @@
 #include <vector>
 
 // TODO: Add indices writing (generate if necessary)
+// TODO: Generate indices and optimize mesh.
 // TODO: Add more formats (.dae, .gltf)
 
 using namespace rb;
@@ -77,26 +78,11 @@ std::shared_ptr<void> mesh_loader::load(const std::string& filename, const json&
         { vertex_attribute::normal, vertex_format::vec3f() }
     };
 
-    buffer_desc buffer_desc;
-    buffer_desc.data = vertices.data();
-    buffer_desc.size = vertices.size() * sizeof(mesh_vertex);
-    buffer_desc.stride = sizeof(mesh_vertex);
-    // buffer_desc.is_mutable = false;
-    buffer_desc.type = buffer_type::vertex;
-    auto vertex_buffer = _graphics_device.create_buffer(buffer_desc);
-
-    // TODO: generate indices and optimize mesh
-    // buffer_desc.data = vertices.data();
-    // buffer_desc.size = vertices.size() * sizeof(mesh_vertex);
-    // buffer_desc.stride = sizeof(mesh_vertex);
-    // buffer_desc.is_mutable = false;
-    // buffer_desc.type = buffer_type::vertex;
-    // auto vertex_buffer = _graphics_device.make_buffer(buffer_desc);
-
     mesh_desc desc;
+    desc.topology = topology::triangles;
     desc.vertex_layout = vertex_layout;
-    desc.vertex_buffer = vertex_buffer;
-    desc.index_buffer = nullptr;
+    desc.vertex_data = vertices.data();
+    desc.vertex_count = vertices.size();
 
-    return std::make_shared<mesh>(desc);
+    return _graphics_device.create_mesh(desc);
 }

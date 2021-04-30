@@ -1,6 +1,5 @@
 #pragma once
 
-#include "fwd.hpp"
 #include "vec3.hpp"
 #include "vec4.hpp"
 
@@ -400,4 +399,6 @@ namespace rb {
             b.x * a[3] + b.y * a[7] + b.z * a[11] + b.w * a[15]
         };
     }
+
+    using mat4f = mat4<float>;
 }

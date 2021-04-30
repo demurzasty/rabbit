@@ -1,8 +1,6 @@
 #include <rabbit/loaders/texture_loader.hpp>
 #include <rabbit/core/config.hpp>
 #include <rabbit/graphics/texture.hpp>
-#include <rabbit/graphics/graphics_device.hpp>
-#include <rabbit/core/json.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -62,9 +60,9 @@ std::shared_ptr<void> texture_loader::load(const std::string& filename, const js
             stbi_image_free(pixels);
         }
 
-        desc.data = buffer.get();
+        desc.pixels = buffer.get();
         desc.format = texture_format::rgba8;
-        desc.filter = texture_filter::anisotropic;
+        desc.filter = texture_filter::linear;
         desc.wrap = texture_wrap::repeat;
         desc.mipmaps = 1;
         desc.layers = 6;
@@ -79,10 +77,10 @@ std::shared_ptr<void> texture_loader::load(const std::string& filename, const js
 
         RB_ASSERT(pixels, "Cannot load image");
 
-        desc.data = pixels.get();
+        desc.pixels = pixels.get();
         desc.size = { static_cast<unsigned int>(width), static_cast<unsigned int>(height), 1 };
         desc.format = texture_format::rgba8;
-        desc.filter = texture_filter::anisotropic;
+        desc.filter = texture_filter::linear;
         desc.wrap = texture_wrap::repeat;
         desc.mipmaps = 0;
         desc.type = texture_type::texture_2d;

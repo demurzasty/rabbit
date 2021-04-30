@@ -1,8 +1,11 @@
 #pragma once
 
-#include "camera_type.hpp"
-
 namespace rb {
+    enum class camera_type {
+        orthogonal,
+        perspective
+    };
+
     struct camera {
         camera_type type{ camera_type::perspective };
         float size{ 11.25 };

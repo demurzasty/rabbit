@@ -1,8 +1,7 @@
+
 #include <rabbit/loaders/material_loader.hpp>
-#include <rabbit/asset/asset_manager.hpp>
 #include <rabbit/core/config.hpp>
 #include <rabbit/graphics/material.hpp>
-#include <rabbit/graphics/material_desc.hpp>
 #include <rabbit/core/json.hpp>
 
 #include <array>
@@ -10,8 +9,9 @@
 
 using namespace rb;
 
-material_loader::material_loader(asset_manager& asset_manager)
-    : _asset_manager(asset_manager) {
+material_loader::material_loader(asset_manager& asset_manager, graphics_device& graphics_device)
+    : _asset_manager(asset_manager)
+    , _graphics_device(graphics_device) {
 }
 
 std::shared_ptr<void> material_loader::load(const std::string& filename, const json& metadata) {
@@ -58,5 +58,5 @@ std::shared_ptr<void> material_loader::load(const std::string& filename, const j
         desc.emissive_map = _asset_manager.load<texture>(json["emissive_map"]);
     }
 
-    return std::make_shared<material>(desc);
+    return _graphics_device.create_material(desc);
 }

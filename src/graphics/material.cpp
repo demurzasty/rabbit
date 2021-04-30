@@ -1,5 +1,4 @@
 #include <rabbit/graphics/material.hpp>
-#include <rabbit/graphics/material_desc.hpp>
 
 using namespace rb;
 

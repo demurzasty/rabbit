@@ -1,7 +1,5 @@
 #pragma once
 
-#include "fwd.hpp"
-
 namespace rb {
     template<typename T>
     struct vec3 {
@@ -37,4 +35,8 @@ namespace rb {
     constexpr T dot(const vec3<T>& a, const vec3<T>& b) {
         return a.x * b.x + a.y * b.y + a.z * b.z;
     }
+
+    using vec3i = vec3<int>;
+    using vec3u = vec3<unsigned int>;
+    using vec3f = vec3<float>;
 }

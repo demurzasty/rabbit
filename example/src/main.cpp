@@ -1,32 +1,16 @@
-#include <rabbit/platform/window_factory.hpp>
-#include <rabbit/graphics/graphics_device_factory.hpp>
-#include <rabbit/core/injector.hpp>
-#include <rabbit/engine/settings.hpp>
-#include <rabbit/engine/application.hpp>
-#include <rabbit/engine/builder.hpp>
-#include <rabbit/engine/system.hpp>
-#include <rabbit/asset/asset_manager.hpp>
-#include <rabbit/loaders/texture_loader.hpp>
-#include <rabbit/loaders/mesh_loader.hpp>
-#include <rabbit/loaders/material_loader.hpp>
-#include <rabbit/graphics/graphics_device.hpp>
-#include <rabbit/platform/window.hpp>
-#include <rabbit/systems/renderer.hpp>
-#include <rabbit/engine/entity.hpp>
-
+#include <rabbit/core/builder.hpp>
 #include <rabbit/components/camera.hpp>
 #include <rabbit/components/geometry.hpp>
 #include <rabbit/components/transform.hpp>
-
-#include <rabbit/math/math.hpp>
+#include <rabbit/analitycs/profiler.hpp>
 
 #include <filesystem>
 
 using namespace rb;
 
-struct test_system : public system {
+class initialize_system : public system {
 public:
-    test_system(asset_manager& asset_manager)
+    initialize_system(asset_manager& asset_manager)
         : _asset_manager(asset_manager) {
     }
 
@@ -43,26 +27,22 @@ public:
         registry.emplace<transform>(camera).position = { 0.0f, 0.0f, 5.0f };
     }
 
+    void update(registry& registry, float elapsed_time) override {
+        registry.view<transform, geometry>().each([elapsed_time](transform& transform, geometry& geometry) {
+            transform.rotation.y += elapsed_time;
+        });
+    }
+
 private:
     asset_manager& _asset_manager;
+    profiler _profiler;
 };
 
 int main(int argc, char* argv[]) {
     std::filesystem::current_path(DATA_DIRECTORY);
 
-    auto app = builder{}
-        .singleton<settings>(-1)
-        .singleton<window>(window_factory{})
-        .singleton<graphics_device>(graphics_device_factory{})
-        .singleton<asset_manager>()
-        .loader<texture, texture_loader>()
-        .loader<mesh, mesh_loader>()
-        .loader<material, material_loader>()
-        .system<renderer>()
-        .configure([](settings& settings) {
-            settings.vsync = true;
-        })
-        .system<test_system>()
+    auto app = builder::create_default({})
+        .system<initialize_system>()
         .build();
 
     return app.run();

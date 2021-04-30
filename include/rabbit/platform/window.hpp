@@ -1,18 +1,19 @@
 #pragma once
 
-#include "fwd.hpp"
-#include "../math/fwd.hpp"
-#include "../core/non_copyable.hpp"
+#include "window_handle.hpp"
+#include "../math/vec2.hpp"
 
 #include <string>
 
 namespace rb {
     /**
-     * @brief Window base class. Can be created using window_manager.
+     * @brief Window base class.
      *
-     * @see window
+     *        Can be provided by window_service_provider through injector.
+     *
+     * @see window_provider
      */
-    class window : public non_copyable {
+    class window {
     public:
 		/**
 		 * @brief Default virtual destructor.

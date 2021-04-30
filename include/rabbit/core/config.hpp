@@ -1,8 +1,12 @@
 #pragma once
 
 #ifndef RB_ASSERT
-#   include <cassert>
-#   define RB_ASSERT(cond, msg) assert(cond)
+#   ifdef _DEBUG
+#       include <cassert>
+#       define RB_ASSERT(cond, msg) assert(cond)
+#   else
+#       define RB_ASSERT(cond, msg) ((void)0)
+#   endif
 #endif
 
 #ifndef RB_MAYBE_UNUSED

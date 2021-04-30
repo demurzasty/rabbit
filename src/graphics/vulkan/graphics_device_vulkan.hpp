@@ -1,10 +1,13 @@
 #pragma once
 
 #include <rabbit/graphics/graphics_device.hpp>
+#include <rabbit/core/settings.hpp>
+#include <rabbit/platform/window.hpp>
 
 #include <volk.h>
 #include <vk_mem_alloc.h>
 
+// TODO: Replace std::vector.
 #include <vector>
 
 namespace rb {
@@ -14,27 +17,29 @@ namespace rb {
 
         ~graphics_device_vulkan();
 
-        std::shared_ptr<render_pass> create_render_pass(const render_pass_desc& desc) override;
-
-        std::shared_ptr<command_buffer> create_command_buffer() override;
-
-        std::shared_ptr<buffer> create_buffer(const buffer_desc& desc) override;
+        std::shared_ptr<renderer> create_renderer() override;
 
         std::shared_ptr<texture> create_texture(const texture_desc& desc) override;
 
-        std::shared_ptr<shader> create_shader(const shader_desc& desc) override;
+        std::shared_ptr<mesh> create_mesh(const mesh_desc& desc) override;
 
-        std::shared_ptr<resource_heap> create_resource_heap(const resource_heap_desc& desc) override;
+        std::shared_ptr<material> create_material(const material_desc& desc) override;
 
-        void submit(const std::shared_ptr<command_buffer>& command_buffer) override;
+        void submit(VkCommandBuffer command_buffer, VkFence fence);
 
         void present() override;
 
+        VkDevice device() const;
+
+        VkCommandPool command_pool() const;
+
+        VmaAllocator allocator() const;
+
         VkRenderPass render_pass() const;
 
-        VkExtent2D swapchain_extent() const;
-
         VkFramebuffer framebuffer() const;
+
+        VkExtent2D swapchain_extent() const;
 
     private:
         void _initialize_volk(const settings& settings);
@@ -43,7 +48,7 @@ namespace rb {
 
         void _choose_physical_device(const settings& settings);
 
-        void _create_surface(const settings& settings);
+        void _create_surface(const settings& settings, window& window);
 
         void _create_device(const settings& settings);
 
@@ -51,7 +56,7 @@ namespace rb {
 
         void _query_surface(const settings& settings);
 
-        void _create_swapchain(const settings& settings);
+        void _create_swapchain(const settings& settings, window& window);
 
         void _create_command_pool(const settings& settings);
 

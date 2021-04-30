@@ -1,6 +1,7 @@
+
 #pragma once
 
-#include "../core/fwd.hpp"
+#include "../core/json.hpp"
 
 #include <string>
 #include <memory>

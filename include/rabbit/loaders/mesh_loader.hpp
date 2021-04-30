@@ -1,7 +1,8 @@
+
 #pragma once
 
 #include "../asset/loader.hpp"
-#include "../graphics/fwd.hpp"
+#include "../graphics/graphics_device.hpp"
 
 namespace rb {
     class mesh_loader : public loader {
