@@ -1,4 +1,5 @@
 #include <rabbit/asset/asset_manager.hpp>
+#include <rabbit/core/json.hpp>
 
 #include <fstream>
 

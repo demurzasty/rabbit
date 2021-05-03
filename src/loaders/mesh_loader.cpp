@@ -4,6 +4,7 @@
 #include <rabbit/graphics/mesh.hpp>
 #include <rabbit/math/vec2.hpp>
 #include <rabbit/math/vec3.hpp>
+#include <rabbit/core/json.hpp>
 
 #include <fstream>
 #include <sstream>

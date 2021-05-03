@@ -2,6 +2,4 @@
 
 #include <nlohmann/json.hpp>
 
-namespace rb {
-    using nlohmann::json;
-}
+#include "json_fwd.hpp"

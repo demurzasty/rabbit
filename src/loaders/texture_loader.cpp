@@ -1,6 +1,7 @@
 #include <rabbit/loaders/texture_loader.hpp>
 #include <rabbit/core/config.hpp>
 #include <rabbit/graphics/texture.hpp>
+#include <rabbit/core/json.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>

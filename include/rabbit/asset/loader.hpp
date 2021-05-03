@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "../core/json.hpp"
+#include "../core/json_fwd.hpp"
 
 #include <string>
 #include <memory>
