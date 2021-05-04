@@ -86,7 +86,7 @@ std::shared_ptr<mesh> graphics_device_vulkan::create_mesh(const mesh_desc& desc)
 }
 
 std::shared_ptr<material> graphics_device_vulkan::create_material(const material_desc& desc) {
-    return std::make_shared<material_vulkan>(_device, _allocator, desc);
+    return std::make_shared<material_vulkan>(_device, _allocator, _render_pass, desc);
 }
 
 void graphics_device_vulkan::present() {
