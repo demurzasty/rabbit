@@ -1,10 +1,35 @@
 #pragma once
 
 #include <memory>
+#include <future>
+#include <chrono>
+#include <atomic>
 
 namespace rb {
-    struct proxy {
-        std::shared_ptr<void> asset;
+    class proxy {
+    public:
+        proxy(std::shared_future<std::shared_ptr<void>> future)
+            : _future(future) {
+        }
+
+        bool ready() const {
+            return _is_ready || (_is_ready = _ready());
+        }
+
+        const std::shared_ptr<void>& get() {
+            return _future.get();
+        }
+
+    private:
+        bool _ready() const {
+            const auto status = _future.wait_for(std::chrono::nanoseconds{ 0 });
+            return status == std::future_status::ready ||
+                status == std::future_status::deferred;
+        }
+
+    private:
+        std::shared_future<std::shared_ptr<void>> _future;
+        mutable std::atomic<bool> _is_ready{ false };
     };
 
     /**
@@ -33,15 +58,19 @@ namespace rb {
         handle<T>& operator=(handle&&) = default;
 
         T* operator->() const {
-            return std::static_pointer_cast<T>(_proxy->asset);
+            return std::static_pointer_cast<T>(_proxy->get()).get();
         }
 
         operator bool() const {
-            return _proxy && _proxy->asset;
+            return _proxy.operator bool();
+        }
+
+        bool ready() const {
+            return _proxy && _proxy->ready();
         }
 
         std::shared_ptr<T> get() const {
-            return std::static_pointer_cast<T>(_proxy->asset);
+            return std::static_pointer_cast<T>(_proxy->get());
         }
 
     private:
