@@ -151,3 +151,15 @@ VkSamplerAddressMode utils_vulkan::sampler_address_mode(texture_wrap texture_wra
     RB_ASSERT(false, "Failed to map Vulkan sampler address mode");
     return VK_SAMPLER_ADDRESS_MODE_REPEAT;
 }
+
+VkIndexType utils_vulkan::index_type(rb::index_type index_type) {
+    switch (index_type) {
+        case index_type::uint16:
+            return VK_INDEX_TYPE_UINT16;
+        case index_type::uint32:
+            return VK_INDEX_TYPE_UINT32;
+    }
+
+    RB_ASSERT(false, "Failed to map Vulkan index type");
+    return VK_INDEX_TYPE_UINT32;
+}
