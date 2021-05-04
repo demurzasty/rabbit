@@ -29,5 +29,7 @@ namespace rb {
         static VkFilter filter(texture_filter texture_filter);
 
         static VkSamplerAddressMode sampler_address_mode(texture_wrap texture_wrap);
+
+        static VkIndexType index_type(index_type index_type);
     };
 }
