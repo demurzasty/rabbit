@@ -25,22 +25,22 @@ float material::metallic() const {
     return _metallic;
 }
 
-const std::shared_ptr<texture>& material::albedo_map() const {
+const handle<texture>& material::albedo_map() const {
     return _albedo_map;
 }
 
-const std::shared_ptr<texture>& material::normal_map() const {
+const handle<texture>& material::normal_map() const {
     return _normal_map;
 }
 
-const std::shared_ptr<texture>& material::roughness_map() const {
+const handle<texture>& material::roughness_map() const {
     return _roughness_map;
 }
 
-const std::shared_ptr<texture>& material::metallic_map() const {
+const handle<texture>& material::metallic_map() const {
     return _metallic_map;
 }
 
-const std::shared_ptr<texture>& material::emissive_map() const {
+const handle<texture>& material::emissive_map() const {
     return _emissive_map;
 }

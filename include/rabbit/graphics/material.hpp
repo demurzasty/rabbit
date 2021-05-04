@@ -1,9 +1,8 @@
 #pragma once
 
 #include "texture.hpp"
+#include "../asset/handle.hpp"
 #include "../math/vec3.hpp"
-
-#include <memory>
 
 namespace rb {
     /**
@@ -40,11 +39,11 @@ namespace rb {
          */
         float metallic{ 0.0f };
 
-        std::shared_ptr<texture> albedo_map;
-        std::shared_ptr<texture> normal_map;
-        std::shared_ptr<texture> roughness_map;
-        std::shared_ptr<texture> metallic_map;
-        std::shared_ptr<texture> emissive_map;
+        handle<texture> albedo_map;
+        handle<texture> normal_map;
+        handle<texture> roughness_map;
+        handle<texture> metallic_map;
+        handle<texture> emissive_map;
     };
 
     class material {
@@ -55,15 +54,15 @@ namespace rb {
 
         float metallic() const;
 
-        const std::shared_ptr<texture>& albedo_map() const;
+        const handle<texture>& albedo_map() const;
 
-        const std::shared_ptr<texture>& normal_map() const;
+        const handle<texture>& normal_map() const;
 
-        const std::shared_ptr<texture>& roughness_map() const;
+        const handle<texture>& roughness_map() const;
 
-        const std::shared_ptr<texture>& metallic_map() const;
+        const handle<texture>& metallic_map() const;
 
-        const std::shared_ptr<texture>& emissive_map() const;
+        const handle<texture>& emissive_map() const;
 
     protected:
         material(const material_desc& desc);
@@ -72,10 +71,10 @@ namespace rb {
         vec3f _base_color;
         float _roughness;
         float _metallic;
-        const std::shared_ptr<texture> _albedo_map;
-        const std::shared_ptr<texture> _normal_map;
-        const std::shared_ptr<texture> _roughness_map;
-        const std::shared_ptr<texture> _metallic_map;
-        const std::shared_ptr<texture> _emissive_map;
+        const handle<texture> _albedo_map;
+        const handle<texture> _normal_map;
+        const handle<texture> _roughness_map;
+        const handle<texture> _metallic_map;
+        const handle<texture> _emissive_map;
     };
 }

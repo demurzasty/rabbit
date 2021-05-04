@@ -9,14 +9,14 @@ asset_manager::asset_manager(injector& injector)
     : _injector(injector) {
 }
 
-std::shared_ptr<void> asset_manager::_load(id_type asset_id, const std::string& filename) {
+std::shared_ptr<proxy> asset_manager::_load(id_type asset_id, const std::string& filename) {
     auto& asset = _assets[filename];
     if (!asset.expired()) {
         return asset.lock();
     }
 
     auto& loader = _loaders.at(asset_id);
-    auto loaded_asset = loader->load(filename, _load_metadata(filename));
+    auto loaded_asset = std::make_shared<proxy>(proxy{ loader->load(filename, _load_metadata(filename)) });
     asset = loaded_asset;
     return loaded_asset;
 }
