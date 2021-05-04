@@ -23,6 +23,20 @@ renderer_vulkan::renderer_vulkan(graphics_device_vulkan& graphics_device)
     _create_command_buffer();
     _create_camera_buffer();
     _create_forward_pipeline();
+
+    unsigned char pixels[] = { 255, 255, 255, 255 };
+
+    texture_desc texture_desc;
+    texture_desc.pixels = pixels;
+    texture_desc.size = { 1, 1, 0 };
+    texture_desc.type = texture_type::texture_2d;
+    texture_desc.filter = texture_filter::nearest;
+    texture_desc.format = texture_format::rgba8;
+    texture_desc.wrap = texture_wrap::repeat;
+    texture_desc.mipmaps = 1;
+    texture_desc.layers = 1;
+    texture_desc.is_render_target = false;
+    _white_texture = _graphics_device.create_texture(texture_desc);
 }
 
 renderer_vulkan::~renderer_vulkan() {
@@ -308,7 +322,9 @@ void renderer_vulkan::_update_descriptor_set(renderer_vulkan::entity_local_data&
     write_infos[2].pTexelBufferView = nullptr;
     write_infos[2].dstSet = entity_local_data.descriptor_set;
 
-    auto texture = std::static_pointer_cast<texture_vulkan>(material->albedo_map());
+    auto texture = material->albedo_map() ?
+        std::static_pointer_cast<texture_vulkan>(material->albedo_map()) :
+        std::static_pointer_cast<texture_vulkan>(_white_texture);
 
     image_infos[0].sampler = texture->sampler();
     image_infos[0].imageView = texture->image_view();

@@ -86,6 +86,8 @@ namespace rb {
         VkBuffer _camera_buffer;
         VmaAllocation _camera_buffer_allocation;
 
+        std::shared_ptr<texture> _white_texture;
+
         std::unordered_map<entity, entity_local_data> _entity_local_data;
     };
 }
