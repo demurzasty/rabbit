@@ -15,6 +15,12 @@ namespace rb {
 
         VkBuffer buffer() const;
 
+        VkDescriptorSetLayout descriptor_set_layout() const;
+
+        VkPipelineLayout pipeline_layout() const;
+
+        VkPipeline pipeline() const;
+
     private:
         void _create_uniform_buffer(const material_desc& desc);
 
@@ -37,7 +43,7 @@ namespace rb {
         VkBuffer _uniform_buffer;
         VmaAllocation _uniform_buffer_allocation;
 
-        VkDescriptorSetLayout _descriptor_layout;
+        VkDescriptorSetLayout _descriptor_set_layout;
         VkPipelineLayout _pipeline_layout;
         VkPipeline _pipeline;
     };

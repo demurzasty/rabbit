@@ -23,13 +23,25 @@ material_vulkan::material_vulkan(VkDevice device,
 material_vulkan::~material_vulkan() {
     vkDestroyPipeline(_device, _pipeline, nullptr);
     vkDestroyPipelineLayout(_device, _pipeline_layout, nullptr);
-    vkDestroyDescriptorSetLayout(_device, _descriptor_layout, nullptr);
+    vkDestroyDescriptorSetLayout(_device, _descriptor_set_layout, nullptr);
 
     vmaDestroyBuffer(_allocator, _uniform_buffer, _uniform_buffer_allocation);
 }
 
 VkBuffer material_vulkan::buffer() const {
     return _uniform_buffer;
+}
+
+VkDescriptorSetLayout material_vulkan::descriptor_set_layout() const {
+    return _descriptor_set_layout;
+}
+
+VkPipelineLayout material_vulkan::pipeline_layout() const {
+    return _pipeline_layout;
+}
+
+VkPipeline material_vulkan::pipeline() const {
+    return _pipeline;
 }
 
 void material_vulkan::_create_uniform_buffer(const material_desc& desc) {
@@ -89,7 +101,7 @@ void material_vulkan::_create_pipeline(const material_desc& desc) {
     descriptor_set_layout_info.bindingCount = sizeof(layout_bindings) / sizeof(*layout_bindings);
     descriptor_set_layout_info.pBindings = layout_bindings;
 
-    RB_MAYBE_UNUSED auto result = vkCreateDescriptorSetLayout(_device, &descriptor_set_layout_info, nullptr, &_descriptor_layout);
+    RB_MAYBE_UNUSED auto result = vkCreateDescriptorSetLayout(_device, &descriptor_set_layout_info, nullptr, &_descriptor_set_layout);
     RB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan descriptor set layout");
 
     VkPipelineLayoutCreateInfo pipeline_layout_info;
@@ -97,7 +109,7 @@ void material_vulkan::_create_pipeline(const material_desc& desc) {
     pipeline_layout_info.pNext = nullptr;
     pipeline_layout_info.flags = 0;
     pipeline_layout_info.setLayoutCount = 1;
-    pipeline_layout_info.pSetLayouts = &_descriptor_layout;
+    pipeline_layout_info.pSetLayouts = &_descriptor_set_layout;
     pipeline_layout_info.pushConstantRangeCount = 0;
     pipeline_layout_info.pPushConstantRanges = nullptr;
 
