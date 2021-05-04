@@ -26,7 +26,7 @@ texture_loader::texture_loader(graphics_device& graphics_device)
     : _graphics_device(graphics_device) {
 }
 
-std::shared_ptr<void> texture_loader::load(const std::string& filename, const json& metadata) {
+std::function<std::shared_ptr<void>()> texture_loader::load(const std::string& filename, const json& metadata) {
     const auto file_extension = filename.substr(filename.find_last_of("."));
 
     texture_desc desc;
@@ -68,23 +68,29 @@ std::shared_ptr<void> texture_loader::load(const std::string& filename, const js
         desc.mipmaps = 1;
         desc.layers = 6;
         desc.type = texture_type::texture_cube;
-        return _graphics_device.create_texture(desc);
+        return nullptr;
+        // return _graphics_device.create_texture(desc);
     } else {
         int width, height, components;
-        std::unique_ptr<stbi_uc, decltype(&stbi_image_free)> pixels{
-            stbi_load(filename.c_str(), &width, &height, &components, STBI_rgb_alpha),
-            &stbi_image_free
-        };
+        auto pixels = stbi_load(filename.c_str(), &width, &height, &components, STBI_rgb_alpha);
+        // std::unique_ptr<stbi_uc, decltype(&stbi_image_free)> pixels{
+        //     stbi_load(filename.c_str(), &width, &height, &components, STBI_rgb_alpha),
+        //     &stbi_image_free
+        // };
 
         RB_ASSERT(pixels, "Cannot load image");
-
-        desc.pixels = pixels.get();
-        desc.size = { static_cast<unsigned int>(width), static_cast<unsigned int>(height), 1 };
-        desc.format = texture_format::rgba8;
-        desc.filter = texture_filter::linear;
-        desc.wrap = texture_wrap::repeat;
-        desc.mipmaps = 0;
-        desc.type = texture_type::texture_2d;
-        return _graphics_device.create_texture(desc);
+        return [this, pixels, width, height] {
+            texture_desc desc;
+            desc.pixels = pixels;
+            desc.size = { static_cast<unsigned int>(width), static_cast<unsigned int>(height), 1 };
+            desc.format = texture_format::rgba8;
+            desc.filter = texture_filter::linear;
+            desc.wrap = texture_wrap::repeat;
+            desc.mipmaps = 0;
+            desc.type = texture_type::texture_2d;
+            auto texture = _graphics_device.create_texture(desc);
+            stbi_image_free(pixels);
+            return texture;
+        };
     }
 }

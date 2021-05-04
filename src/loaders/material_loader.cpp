@@ -14,7 +14,7 @@ material_loader::material_loader(asset_manager& asset_manager, graphics_device& 
     , _graphics_device(graphics_device) {
 }
 
-std::shared_ptr<void> material_loader::load(const std::string& filename, const json& metadata) {
+std::function<std::shared_ptr<void>()> material_loader::load(const std::string& filename, const json& metadata) {
     std::ifstream stream{ filename, std::ios::in };
     RB_ASSERT(stream.is_open(), "Cannot open file");
 
@@ -58,5 +58,5 @@ std::shared_ptr<void> material_loader::load(const std::string& filename, const j
         desc.emissive_map = _asset_manager.load<texture>(json["emissive_map"]);
     }
 
-    return _graphics_device.create_material(desc);
+    return [this, desc] { return _graphics_device.create_material(desc); };
 }

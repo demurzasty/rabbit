@@ -17,7 +17,7 @@ std::shared_ptr<proxy> asset_manager::_load(id_type asset_id, const std::string&
 
     auto& loader = _loaders.at(asset_id);
     auto loaded_asset = std::make_shared<proxy>(
-        std::async(std::launch::deferred, [this, loader, filename] {
+        std::async(std::launch::async, [this, loader, filename] {
             return loader->load(filename, _load_metadata(filename));
         }).share()
     );

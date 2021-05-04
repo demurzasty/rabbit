@@ -4,31 +4,36 @@
 #include <future>
 #include <chrono>
 #include <atomic>
+#include <functional>
 
 namespace rb {
     class proxy {
     public:
-        proxy(std::shared_future<std::shared_ptr<void>> future)
+        proxy(std::shared_future<std::function<std::shared_ptr<void>()>> future)
             : _future(future) {
         }
 
         bool ready() const {
-            return _is_ready || (_is_ready = _ready());
+            return _is_ready || (_is_ready = _future_ready());
         }
 
         const std::shared_ptr<void>& get() {
-            return _future.get();
+            if (!_asset) {
+                _asset = _future.get()();
+            }
+            return _asset;
         }
 
     private:
-        bool _ready() const {
+        bool _future_ready() const {
             const auto status = _future.wait_for(std::chrono::nanoseconds{ 0 });
             return status == std::future_status::ready ||
                 status == std::future_status::deferred;
         }
 
     private:
-        std::shared_future<std::shared_ptr<void>> _future;
+        std::shared_future<std::function<std::shared_ptr<void>()>> _future;
+        mutable std::shared_ptr<void> _asset;
         mutable std::atomic<bool> _is_ready{ false };
     };
 

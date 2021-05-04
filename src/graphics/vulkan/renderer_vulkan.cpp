@@ -71,6 +71,14 @@ void renderer_vulkan::render(registry& registry) {
             return;
         }
 
+        if (!geometry.mesh.ready() || !geometry.material.ready()) {
+            return;
+        }
+
+        if (!geometry.material->albedo_map().ready()) {
+            return;
+        }
+
         auto& entity_local_data = _entity_local_data[entity];
 
         if (!entity_local_data.local_buffer) {
