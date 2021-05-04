@@ -2,6 +2,7 @@
 
 #include "window_handle.hpp"
 #include "../math/vec2.hpp"
+#include "../core/non_copyable.hpp"
 
 #include <string>
 
@@ -13,7 +14,7 @@ namespace rb {
      *
      * @see window_provider
      */
-    class window {
+    class window : public non_copyable {
     public:
 		/**
 		 * @brief Default virtual destructor.

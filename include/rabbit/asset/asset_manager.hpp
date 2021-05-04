@@ -2,6 +2,7 @@
 #pragma once
 
 #include "loader.hpp"
+#include "../core/non_copyable.hpp"
 #include "../core/injector.hpp"
 #include "../core/type_info.hpp"
 
@@ -12,7 +13,7 @@
 // TODO: Identify asset by unique id.
 
 namespace rb {
-    class asset_manager {
+    class asset_manager : public non_copyable {
     public:
         asset_manager(injector& injector);
 

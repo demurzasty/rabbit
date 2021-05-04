@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../core/non_copyable.hpp"
+
 #include <entt/config/config.h>
 #include <entt/core/hashed_string.hpp>
 
@@ -15,7 +17,7 @@ namespace rb {
         std::chrono::high_resolution_clock::time_point::duration duration;
     };
 
-    class profiler {
+    class profiler : public non_copyable {
     public:
         void record(entt::hashed_string::hash_type id,
             const char* name,

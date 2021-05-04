@@ -4,11 +4,12 @@
 #include "mesh.hpp"
 #include "material.hpp"
 #include "renderer.hpp"
+#include "../core/non_copyable.hpp"
 
 #include <memory>
 
 namespace rb {
-    class graphics_device {
+    class graphics_device : public non_copyable {
     public:
         virtual ~graphics_device() = default;
 
