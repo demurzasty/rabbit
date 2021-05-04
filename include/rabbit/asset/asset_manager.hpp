@@ -24,12 +24,17 @@ namespace rb {
         }
 
         template<typename Asset>
+        handle<Asset> load(std::launch launch, const std::string& filename) {
+            return { _load(launch, type_id<Asset>().hash(), filename) };
+        }
+
+        template<typename Asset>
         handle<Asset> load(const std::string& filename) {
-            return { _load(type_id<Asset>().hash(), filename) };
+            return load<Asset>(std::launch::async, filename);
         }
 
     private:
-        std::shared_ptr<proxy> _load(id_type asset_id, const std::string& filename);
+        std::shared_ptr<proxy> _load(std::launch launch, id_type asset_id, const std::string& filename);
 
         json _load_metadata(const std::string& filename) const;
 

@@ -28,6 +28,8 @@ namespace rb {
 
         VkFramebuffer framebuffer(std::size_t layer) const;
 
+        VkRenderPass render_pass() const;
+
     private:
         void _create_image(const texture_desc& desc);
 
@@ -42,8 +44,6 @@ namespace rb {
         void _create_sampler(const texture_desc& desc);
 
         void _create_render_pass(const texture_desc& desc);
-
-        void _transition_image_layout(const texture_desc& desc, VkQueue graphics_queue, VkCommandPool command_pool, VkImageLayout old_layout, VkImageLayout new_layout);
 
     private:
         VkDevice _device;

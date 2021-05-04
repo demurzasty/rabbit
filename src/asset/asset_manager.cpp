@@ -9,7 +9,7 @@ asset_manager::asset_manager(injector& injector)
     : _injector(injector) {
 }
 
-std::shared_ptr<proxy> asset_manager::_load(id_type asset_id, const std::string& filename) {
+std::shared_ptr<proxy> asset_manager::_load(std::launch launch, id_type asset_id, const std::string& filename) {
     auto& asset = _assets[filename];
     if (!asset.expired()) {
         return asset.lock();
@@ -17,7 +17,7 @@ std::shared_ptr<proxy> asset_manager::_load(id_type asset_id, const std::string&
 
     auto& loader = _loaders.at(asset_id);
     auto loaded_asset = std::make_shared<proxy>(
-        std::async(std::launch::async, [this, loader, filename] {
+        std::async(launch, [this, loader, filename] {
             return loader->load(filename, _load_metadata(filename));
         }).share()
     );
