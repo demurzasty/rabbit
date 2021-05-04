@@ -46,5 +46,9 @@ namespace rb {
         VkDescriptorSetLayout _descriptor_set_layout;
         VkPipelineLayout _pipeline_layout;
         VkPipeline _pipeline;
+
+        static VkShaderModule _vertex_shader_module;
+        static VkShaderModule _fragment_shader_module;
+        static std::size_t _material_count;
     };
 }

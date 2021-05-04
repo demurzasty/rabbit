@@ -8,6 +8,10 @@
 
 using namespace rb;
 
+VkShaderModule material_vulkan::_vertex_shader_module{ VK_NULL_HANDLE };
+VkShaderModule material_vulkan::_fragment_shader_module{ VK_NULL_HANDLE };
+std::size_t material_vulkan::_material_count{ 0 };
+
 material_vulkan::material_vulkan(VkDevice device,
     VmaAllocator allocator,
     VkRenderPass render_pass,
@@ -16,11 +20,25 @@ material_vulkan::material_vulkan(VkDevice device,
     , _device(device)
     , _allocator(allocator)
     , _render_pass(render_pass) {
+    if (_material_count == 0) {
+        _vertex_shader_module = _create_shader_module(forward_vert);
+        _fragment_shader_module = _create_shader_module(forward_frag);
+    }
+
     _create_uniform_buffer(desc);
     _create_pipeline(desc);
+
+    _material_count++;
 }
 
 material_vulkan::~material_vulkan() {
+    _material_count--;
+
+    if (_material_count == 0) {
+        vkDestroyShaderModule(_device, _vertex_shader_module, nullptr);
+        vkDestroyShaderModule(_device, _fragment_shader_module, nullptr);
+    }
+
     vkDestroyPipeline(_device, _pipeline, nullptr);
     vkDestroyPipelineLayout(_device, _pipeline_layout, nullptr);
     vkDestroyDescriptorSetLayout(_device, _descriptor_set_layout, nullptr);
@@ -218,19 +236,16 @@ void material_vulkan::_create_pipeline(const material_desc& desc) {
     color_blend_state_info.blendConstants[2] = 0.0f;
     color_blend_state_info.blendConstants[3] = 0.0f;
 
-    auto vertex_shader_module = _create_shader_module(forward_vert);
-    auto fragment_shader_module = _create_shader_module(forward_frag);
-
     VkPipelineShaderStageCreateInfo vertex_shader_stage_info{};
     vertex_shader_stage_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     vertex_shader_stage_info.stage = VK_SHADER_STAGE_VERTEX_BIT;
-    vertex_shader_stage_info.module = vertex_shader_module;
+    vertex_shader_stage_info.module = _vertex_shader_module;
     vertex_shader_stage_info.pName = "main";
 
     VkPipelineShaderStageCreateInfo fragment_shader_stage_info{};
     fragment_shader_stage_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     fragment_shader_stage_info.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-    fragment_shader_stage_info.module = fragment_shader_module;
+    fragment_shader_stage_info.module = _fragment_shader_module;
     fragment_shader_stage_info.pName = "main";
 
     VkPipelineShaderStageCreateInfo shader_stages[] = {
@@ -256,9 +271,6 @@ void material_vulkan::_create_pipeline(const material_desc& desc) {
 
     result = vkCreateGraphicsPipelines(_device, VK_NULL_HANDLE, 1, &pipeline_info, nullptr, &_pipeline);
     RB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan graphics pipeline");
-
-    vkDestroyShaderModule(_device, vertex_shader_module, nullptr);
-    vkDestroyShaderModule(_device, fragment_shader_module, nullptr);
 }
 
 VkShaderModule material_vulkan::_create_shader_module(const span<const std::uint32_t>& bytecode) {
