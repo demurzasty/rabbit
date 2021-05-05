@@ -83,7 +83,11 @@ std::shared_ptr<texture> graphics_device_vulkan::create_texture(const texture_de
 }
 
 std::shared_ptr<shader> graphics_device_vulkan::create_shader(const shader_desc& desc) {
-    return std::make_shared<shader_vulkan>(_device, _render_pass, _swapchain_extent, desc);
+    const auto render_pass = desc.render_target ?
+        std::static_pointer_cast<texture_vulkan>(desc.render_target)->render_pass() :
+        _render_pass;
+
+    return std::make_shared<shader_vulkan>(_device, render_pass, _swapchain_extent, desc);
 }
 
 std::shared_ptr<mesh> graphics_device_vulkan::create_mesh(const mesh_desc& desc) {
