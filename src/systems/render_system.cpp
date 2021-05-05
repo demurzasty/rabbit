@@ -6,9 +6,24 @@
 using namespace rb;
 
 render_system::render_system(graphics_device& graphics_device)
-    : _graphics_deivce(graphics_device) {
+    : _graphics_device(graphics_device) {
     _command_buffer = graphics_device.create_command_buffer();
+    _create_forward_shader();
+}
 
+void render_system::draw(registry& registry) {
+    _command_buffer->begin();
+
+    _command_buffer->begin_render_pass(_graphics_device);
+
+    _command_buffer->end_render_pass();
+
+    _command_buffer->end();
+
+    _graphics_device.submit(_command_buffer);
+}
+
+void render_system::_create_forward_shader() {
     shader_desc shader_desc;
     shader_desc.vertex_layout = {
         { vertex_attribute::position, vertex_format::vec3f() },
@@ -23,17 +38,5 @@ render_system::render_system(graphics_device& graphics_device)
         { shader_binding_type::uniform_buffer, shader_stage_flags::fragment, 2, 1 },
         { shader_binding_type::texture, shader_stage_flags::fragment, 3, 1 }
     };
-    _forward_shader = graphics_device.create_shader(shader_desc);
-}
-
-void render_system::draw(registry& registry) {
-    _command_buffer->begin();
-
-    _command_buffer->begin_render_pass(_graphics_deivce);
-
-    _command_buffer->end_render_pass();
-
-    _command_buffer->end();
-
-    _graphics_deivce.submit(_command_buffer);
+    _forward_shader = _graphics_device.create_shader(shader_desc);
 }

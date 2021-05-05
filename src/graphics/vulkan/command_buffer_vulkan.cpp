@@ -2,8 +2,9 @@
 #include "graphics_device_vulkan.hpp"
 #include "utils_vulkan.hpp"
 #include "texture_vulkan.hpp"
-#include "mesh_vulkan.hpp"
-#include "material_vulkan.hpp"
+#include "buffer_vulkan.hpp"
+#include "resource_heap_vulkan.hpp"
+#include "shader_vulkan.hpp"
 
 #include <rabbit/math/vec4.hpp>
 #include <rabbit/core/config.hpp>
@@ -124,33 +125,60 @@ void command_buffer_vulkan::set_viewport(const vec4f& viewport) {
     vkCmdSetViewport(_command_buffer, 0, 1, &native_viewport);
 }
 
-void command_buffer_vulkan::draw(const std::shared_ptr<mesh>& mesh, const std::shared_ptr<material>& material) {
-    // RB_ASSERT(mesh, "Mesh is not provided");
-    // RB_ASSERT(material, "Material is not provided");
+void command_buffer_vulkan::set_shader(const std::shared_ptr<shader>& shader) {
+    const auto native_shader = std::static_pointer_cast<shader_vulkan>(shader);
 
-    // const auto native_mesh = std::static_pointer_cast<mesh_vulkan>(mesh);
-    // const auto native_material = std::static_pointer_cast<material_vulkan>(material);
-
-    // // vkCmdBindPipeline(_command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, native_material->pipeline());
-
-    // // TODO: Bind descriptor set
-
-    // const auto vertex_buffer = native_mesh->vertex_buffer();
-    // const VkDeviceSize vertex_offset{ 0 };
-
-    // vkCmdBindVertexBuffers(_command_buffer, 0, 1, &vertex_buffer, &vertex_offset);
-
-    // const auto index_buffer = native_mesh->index_buffer();
-    // if (index_buffer) {
-    //     vkCmdBindIndexBuffer(_command_buffer, index_buffer, 0, utils_vulkan::index_type(mesh->index_type()));
-    // }
-
-    // if (index_buffer) {
-    //     vkCmdDrawIndexed(_command_buffer, static_cast<std::uint32_t>(mesh->index_count()), 1, 0, 0, 0);
-    // } else {
-    //     vkCmdDraw(_command_buffer, static_cast<std::uint32_t>(mesh->vertex_count()), 1, 0, 0);
-    // }
+    vkCmdBindPipeline(_command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, native_shader->pipeline());
 }
+
+void command_buffer_vulkan::set_resource_heap(const std::shared_ptr<resource_heap>& resource_heap) {
+    const auto native_resource_heap = std::static_pointer_cast<resource_heap_vulkan>(resource_heap);
+    const auto native_shader = std::static_pointer_cast<shader_vulkan>(resource_heap->shader());
+
+    const auto descriptor_set = native_resource_heap->descriptor_set();
+
+    vkCmdBindDescriptorSets(_command_buffer,
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        native_shader->pipeline_layout(),
+        0,
+        1,
+        &descriptor_set,
+        0,
+        nullptr);
+}
+
+void command_buffer_vulkan::set_vertex_buffer(const std::shared_ptr<buffer>& vertex_buffer) {
+    const auto native_buffer = std::static_pointer_cast<buffer_vulkan>(vertex_buffer);
+
+    const auto buffer = native_buffer->buffer();
+    const VkDeviceSize offset{ 0 };
+
+    vkCmdBindVertexBuffers(_command_buffer, 0, 1, &buffer, &offset);
+}
+
+void command_buffer_vulkan::set_index_buffer(const std::shared_ptr<buffer>& index_buffer) {
+    const auto native_buffer = std::static_pointer_cast<buffer_vulkan>(index_buffer);
+
+    vkCmdBindIndexBuffer(_command_buffer, native_buffer->buffer(), 0, VK_INDEX_TYPE_UINT32);
+}
+
+void command_buffer_vulkan::draw(std::size_t vertex_count, std::size_t instance_count, std::size_t first_vertex, std::size_t first_instance) {
+    vkCmdDraw(_command_buffer,
+        static_cast<std::uint32_t>(vertex_count),
+        static_cast<std::uint32_t>(instance_count),
+        static_cast<std::uint32_t>(first_vertex),
+        static_cast<std::uint32_t>(first_instance));
+}
+
+void command_buffer_vulkan::draw_indexed(std::size_t index_count, std::size_t instance_count, std::size_t first_index, std::size_t vertex_offset, std::size_t first_instance) {
+    vkCmdDrawIndexed(_command_buffer,
+        static_cast<std::uint32_t>(index_count),
+        static_cast<std::uint32_t>(instance_count),
+        static_cast<std::uint32_t>(first_index),
+        static_cast<std::int32_t>(vertex_offset),
+        static_cast<std::uint32_t>(first_instance));
+}
+
 
 VkCommandBuffer command_buffer_vulkan::command_buffer() const {
     return _command_buffer;

@@ -24,7 +24,17 @@ namespace rb {
 
         void set_viewport(const vec4f& viewport) override;
 
-        void draw(const std::shared_ptr<mesh>& mesh, const std::shared_ptr<material>& material) override;
+        void set_shader(const std::shared_ptr<shader>& shader) override;
+
+        void set_resource_heap(const std::shared_ptr<resource_heap>& resource_heap) override;
+
+        void set_vertex_buffer(const std::shared_ptr<buffer>& vertex_buffer) override;
+
+        void set_index_buffer(const std::shared_ptr<buffer>& index_buffer) override;
+
+        void draw(std::size_t vertex_count, std::size_t instance_count, std::size_t first_vertex, std::size_t first_instance) override;
+
+        void draw_indexed(std::size_t index_count, std::size_t instance_count, std::size_t first_index, std::size_t vertex_offset, std::size_t first_instance) override;
 
         VkCommandBuffer command_buffer() const;
 

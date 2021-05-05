@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include "material.hpp"
-#include "mesh.hpp"
+#include "shader.hpp"
+#include "resource_heap.hpp"
 #include "../math/vec4.hpp"
 
 #include <memory>
@@ -65,11 +65,52 @@ namespace rb {
         virtual void set_viewport(const vec4f& viewport) = 0;
 
         /**
-         * @brief Draw the specifed mesh using provided material.
+         * @brief Sets the active shader.
          *
-         * @param mesh Mesh to draw.
-         * @param material Material to be used.
+         * @param shader Specifies the shader which is to be bound for subsequent draw or compute commands.
          */
-        virtual void draw(const std::shared_ptr<mesh>& mesh, const std::shared_ptr<material>& material) = 0;
+        virtual void set_shader(const std::shared_ptr<shader>& shader) = 0;
+
+        /**
+         * @brief Binds the specified resource heap to the active shader.
+         *
+         * @param resource_heap Specifies the resource heap that contains all shader resources thath will be bound to the shader pipeline.
+         *
+         * @warning Any previously bound resources are invalid after this call.
+         */
+        virtual void set_resource_heap(const std::shared_ptr<resource_heap>& resource_heap) = 0;
+
+        /**
+         * @brief Sets the specified vertex buffer for subsequent drawing operations.
+         *
+         * @param vertex_buffer Specifies the vertex buffer to set. This buffer must have been created with the vertex type and its content must not be uninitialized.
+         */
+        virtual void set_vertex_buffer(const std::shared_ptr<buffer>& vertex_buffer) = 0;
+
+        /**
+         * @brief Sets the specified index buffer for subsequent drawing operations.
+         *
+         * @param index_buffer Specifies the index buffer to set. This buffer must have been created with the index type and its content must not be uninitialized.
+         */
+        virtual void set_index_buffer(const std::shared_ptr<buffer>& index_buffer) = 0;
+
+        /**
+         * @brief Draws the specified amount of instances of primitives from the currently set vertex buffer.
+         * @param vertex_count Number of vertices to generate.
+         * @param instance_count Number of instances to generate.
+         * @param first_vertex Zero-based offset of the first vertex from the vertex buffer.
+         * @param first_instance Zero-based offset of the first instance.
+         */
+        virtual void draw(std::size_t vertex_count, std::size_t instance_count, std::size_t first_vertex, std::size_t first_instance) = 0;
+
+        /**
+         * @brief Draws the specified amount of instances of primitives from the currently set vertex buffer.
+         * @param index_count Number of vertices to generate.
+         * @param instance_count Number of instances to generate.
+         * @param first_vertex Zero-based offset of the first vertex from the vertex buffer.
+         * @param vertex_offset Zero-based offset of the first vertex from the vertex buffer.
+         * @param first_instance Zero-based offset of the first instance.
+         */
+        virtual void draw_indexed(std::size_t index_count, std::size_t instance_count, std::size_t first_index, std::size_t vertex_offset, std::size_t first_instance) = 0;
     };
 }
