@@ -21,6 +21,8 @@ namespace rb {
 
         std::shared_ptr<texture> create_texture(const texture_desc& desc) override;
 
+        std::shared_ptr<shader> create_shader(const shader_desc& desc) override;
+
         std::shared_ptr<mesh> create_mesh(const mesh_desc& desc) override;
 
         std::shared_ptr<material> create_material(const material_desc& desc) override;

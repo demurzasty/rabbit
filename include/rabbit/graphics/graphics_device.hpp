@@ -4,6 +4,7 @@
 #include "mesh.hpp"
 #include "material.hpp"
 #include "renderer.hpp"
+#include "shader.hpp"
 #include "../core/non_copyable.hpp"
 
 #include <memory>
@@ -22,6 +23,11 @@ namespace rb {
          * @brief Creates graphics texture.
          */
         virtual std::shared_ptr<texture> create_texture(const texture_desc& desc) = 0;
+
+        /**
+         * @brief Creates shader.
+         */
+        virtual std::shared_ptr<shader> create_shader(const shader_desc& desc) = 0;
 
         /**
          * @brief Creates mesh.

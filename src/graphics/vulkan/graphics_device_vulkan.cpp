@@ -3,6 +3,7 @@
 #include "mesh_vulkan.hpp"
 #include "texture_vulkan.hpp"
 #include "renderer_vulkan.hpp"
+#include "shader_vulkan.hpp"
 
 #include <rabbit/core/config.hpp>
 #include <rabbit/core/version.hpp>
@@ -79,6 +80,10 @@ std::shared_ptr<renderer> graphics_device_vulkan::create_renderer() {
 
 std::shared_ptr<texture> graphics_device_vulkan::create_texture(const texture_desc& desc) {
     return std::make_shared<texture_vulkan>(_device, _graphics_queue, _command_pool, _allocator, desc);
+}
+
+std::shared_ptr<shader> graphics_device_vulkan::create_shader(const shader_desc& desc) {
+    return std::make_shared<shader_vulkan>(_device, _render_pass, _swapchain_extent, desc);
 }
 
 std::shared_ptr<mesh> graphics_device_vulkan::create_mesh(const mesh_desc& desc) {

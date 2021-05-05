@@ -3,9 +3,6 @@
 
 #include <rabbit/core/config.hpp>
 
-#include <numeric>
-#include <algorithm>
-
 using namespace rb;
 
 shader_vulkan::shader_vulkan(VkDevice device, VkRenderPass render_pass, VkExtent2D swapchain_extent, const shader_desc& desc)
@@ -101,8 +98,10 @@ void shader_vulkan::_create_pipeline_layout(const shader_desc& desc) {
 }
 
 VkShaderModule shader_vulkan::_create_shader_module(const span<const std::uint32_t>& bytecode) {
-    VkShaderModuleCreateInfo create_info{};
+    VkShaderModuleCreateInfo create_info;
     create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+    create_info.pNext = nullptr;
+    create_info.flags = 0;
     create_info.codeSize = bytecode.size_bytes();
     create_info.pCode = bytecode.data();
 
@@ -113,7 +112,10 @@ VkShaderModule shader_vulkan::_create_shader_module(const span<const std::uint32
     return shader_module;
 }
 
-void shader_vulkan::_create_pipeline(const span<const VkPipelineShaderStageCreateInfo>& shader_stages, VkRenderPass render_pass, VkExtent2D swapchain_extent, const shader_desc& desc) {
+void shader_vulkan::_create_pipeline(const span<const VkPipelineShaderStageCreateInfo>& shader_stages,
+    VkRenderPass render_pass,
+    VkExtent2D swapchain_extent,
+    const shader_desc& desc) {
     std::size_t vertex_stride{ 0 };
     for (auto& vertex_element : desc.vertex_layout) {
         vertex_stride += vertex_element.format.size;
