@@ -106,9 +106,9 @@ void renderer_vulkan::render(registry& registry) {
         const auto vertex_buffer = mesh->vertex_buffer();
         const VkDeviceSize offset{ 0 };
 
-        vkCmdBindVertexBuffers(_command_buffer, 0, 1, &vertex_buffer, &offset);
-        vkCmdBindDescriptorSets(_command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _forward_pipeline_layout, 0, 1, &entity_local_data.descriptor_set, 0, nullptr);
-        vkCmdDraw(_command_buffer, static_cast<std::uint32_t>(mesh->vertex_count()), 1, 0, 0);
+        // vkCmdBindVertexBuffers(_command_buffer, 0, 1, &vertex_buffer, &offset);
+        // vkCmdBindDescriptorSets(_command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _forward_pipeline_layout, 0, 1, &entity_local_data.descriptor_set, 0, nullptr);
+    //    vkCmdDraw(_command_buffer, static_cast<std::uint32_t>(mesh->vertex_count()), 1, 0, 0);
     });
 
     _end_main_render_pass();

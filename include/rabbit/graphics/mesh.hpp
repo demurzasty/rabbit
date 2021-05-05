@@ -1,7 +1,10 @@
 #pragma once
 
+#include "buffer.hpp"
+
 #include <cstddef>
 #include <vector>
+#include <memory>
 
 namespace rb {
     enum class vertex_attribute {
@@ -65,19 +68,10 @@ namespace rb {
 
     using vertex_layout = std::vector<vertex_element>;
 
-    enum class index_type {
-        undefined,
-        uint16,
-        uint32
-    };
-
     struct mesh_desc {
         vertex_layout vertex_layout;
-        const void* vertex_data{ nullptr };
-        std::size_t vertex_count{ 0 };
-        const void* index_data{ nullptr };
-        std::size_t index_count{ 0 };
-        index_type index_type{ index_type::undefined };
+        std::shared_ptr<buffer> vertex_buffer;
+        std::shared_ptr<buffer> index_buffer;
     };
 
     class mesh {
@@ -93,27 +87,21 @@ namespace rb {
         const vertex_layout& vertex_layout() const;
 
         /**
-         * @brief Returns vertex count.
+         * @brief Returns vertex buffer.
          */
-        std::size_t vertex_count() const;
+        const std::shared_ptr<buffer>& vertex_buffer() const;
 
         /**
-         * @brief Returns index count.
+         * @brief Returns index buffer.
          */
-        std::size_t index_count() const;
-
-        /**
-         * @brief Returns index type.
-         */
-        index_type index_type() const;
+        const std::shared_ptr<buffer>& index_buffer() const;
 
     protected:
         mesh(const mesh_desc& desc);
 
     private:
         const rb::vertex_layout _vertex_layout;
-        const std::size_t _vertex_count;
-        const std::size_t _index_count;
-        const rb::index_type _index_type;
+        const std::shared_ptr<buffer> _vertex_buffer;
+        const std::shared_ptr<buffer> _index_buffer;
     };
 }

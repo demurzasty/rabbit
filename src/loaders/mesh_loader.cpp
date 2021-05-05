@@ -79,9 +79,15 @@ std::shared_ptr<void> mesh_loader::load(const std::string& filename, const json&
         { vertex_attribute::normal, vertex_format::vec3f() }
     };
 
+    buffer_desc buffer_desc;
+    buffer_desc.type = buffer_type::vertex;
+    buffer_desc.data = vertices.data();
+    buffer_desc.size = vertices.size() * sizeof(mesh_vertex);
+    buffer_desc.stride = sizeof(mesh_vertex);
+    auto vertex_buffer = _graphics_device.create_buffer(buffer_desc);
+
     mesh_desc desc;
     desc.vertex_layout = vertex_layout;
-    desc.vertex_data = vertices.data();
-    desc.vertex_count = vertices.size();
+    desc.vertex_buffer = vertex_buffer;
     return _graphics_device.create_mesh(desc);
 }

@@ -45,6 +45,7 @@ set (SRC
     "src/core/application.cpp"
     "src/core/builder.cpp"
     "src/core/system.cpp"
+    "src/graphics/buffer.cpp"
     "src/graphics/graphics_device_provider.cpp"
     "src/graphics/material.cpp"
     "src/graphics/mesh.cpp"
@@ -65,6 +66,7 @@ endif ()
 
 if (RB_VULKAN)
 	set (SRC ${SRC}
+		"src/graphics/vulkan/buffer_vulkan.cpp"
 		"src/graphics/vulkan/command_buffer_vulkan.cpp"
         "src/graphics/vulkan/graphics_device_vulkan.cpp"
         "src/graphics/vulkan/material_vulkan.cpp"

@@ -2,6 +2,7 @@
 
 #include "../core/system.hpp"
 #include "../graphics/graphics_device.hpp"
+#include "../graphics/shader.hpp"
 
 namespace rb {
     class render_system : public system {
@@ -11,6 +12,6 @@ namespace rb {
         void draw(registry& registry) override;
 
     private:
-        std::shared_ptr<renderer> _renderer;
+        std::shared_ptr<shader> _forward_shader;
     };
 }

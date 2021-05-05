@@ -41,7 +41,18 @@ void utils_vulkan::end_single_time_commands(VkDevice device, VkQueue graphics_qu
     vkFreeCommandBuffers(device, command_pool, 1, &command_buffer);
 }
 
-VkFormat utils_vulkan::format(const texture_format& format) {
+VkBufferUsageFlags utils_vulkan::buffer_usage_flags(buffer_type type) {
+    switch (type) {
+        case buffer_type::vertex: return VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+        case buffer_type::index: return VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+        case buffer_type::uniform: return VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+    }
+
+    RB_ASSERT(false, "Missing Vulkan buffer usage mapping");
+    return 0;
+}
+
+VkFormat utils_vulkan::format(texture_format format) {
     switch (format) {
         case texture_format::r8: return VK_FORMAT_R8_UNORM;
         case texture_format::rg8: return VK_FORMAT_R8G8_UNORM;
@@ -150,18 +161,6 @@ VkSamplerAddressMode utils_vulkan::sampler_address_mode(texture_wrap texture_wra
 
     RB_ASSERT(false, "Failed to map Vulkan sampler address mode");
     return VK_SAMPLER_ADDRESS_MODE_REPEAT;
-}
-
-VkIndexType utils_vulkan::index_type(rb::index_type index_type) {
-    switch (index_type) {
-        case index_type::uint16:
-            return VK_INDEX_TYPE_UINT16;
-        case index_type::uint32:
-            return VK_INDEX_TYPE_UINT32;
-    }
-
-    RB_ASSERT(false, "Failed to map Vulkan index type");
-    return VK_INDEX_TYPE_UINT32;
 }
 
 VkDescriptorType utils_vulkan::descriptor_type(const shader_binding_type& type) {

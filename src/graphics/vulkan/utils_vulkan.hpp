@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <rabbit/graphics/buffer.hpp>
 #include <rabbit/graphics/texture.hpp>
 #include <rabbit/graphics/mesh.hpp>
 #include <rabbit/graphics/shader.hpp>
@@ -15,7 +16,9 @@ namespace rb {
 
         static void end_single_time_commands(VkDevice device, VkQueue graphics_queue, VkCommandPool command_pool, VkCommandBuffer command_buffer);
 
-        static VkFormat format(const texture_format& format);
+        static VkBufferUsageFlags buffer_usage_flags(buffer_type type);
+
+        static VkFormat format(texture_format format);
 
         static VkFormat format(const vertex_format& format);
 
@@ -30,8 +33,6 @@ namespace rb {
         static VkFilter filter(texture_filter texture_filter);
 
         static VkSamplerAddressMode sampler_address_mode(texture_wrap texture_wrap);
-
-        static VkIndexType index_type(index_type index_type);
 
         static VkDescriptorType descriptor_type(const shader_binding_type& type);
 

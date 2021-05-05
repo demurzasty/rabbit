@@ -125,31 +125,31 @@ void command_buffer_vulkan::set_viewport(const vec4f& viewport) {
 }
 
 void command_buffer_vulkan::draw(const std::shared_ptr<mesh>& mesh, const std::shared_ptr<material>& material) {
-    RB_ASSERT(mesh, "Mesh is not provided");
-    RB_ASSERT(material, "Material is not provided");
+    // RB_ASSERT(mesh, "Mesh is not provided");
+    // RB_ASSERT(material, "Material is not provided");
 
-    const auto native_mesh = std::static_pointer_cast<mesh_vulkan>(mesh);
-    const auto native_material = std::static_pointer_cast<material_vulkan>(material);
+    // const auto native_mesh = std::static_pointer_cast<mesh_vulkan>(mesh);
+    // const auto native_material = std::static_pointer_cast<material_vulkan>(material);
 
-    vkCmdBindPipeline(_command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, native_material->pipeline());
+    // // vkCmdBindPipeline(_command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, native_material->pipeline());
 
-    // TODO: Bind descriptor set
+    // // TODO: Bind descriptor set
 
-    const auto vertex_buffer = native_mesh->vertex_buffer();
-    const VkDeviceSize vertex_offset{ 0 };
+    // const auto vertex_buffer = native_mesh->vertex_buffer();
+    // const VkDeviceSize vertex_offset{ 0 };
 
-    vkCmdBindVertexBuffers(_command_buffer, 0, 1, &vertex_buffer, &vertex_offset);
+    // vkCmdBindVertexBuffers(_command_buffer, 0, 1, &vertex_buffer, &vertex_offset);
 
-    const auto index_buffer = native_mesh->index_buffer();
-    if (index_buffer) {
-        vkCmdBindIndexBuffer(_command_buffer, index_buffer, 0, utils_vulkan::index_type(mesh->index_type()));
-    }
+    // const auto index_buffer = native_mesh->index_buffer();
+    // if (index_buffer) {
+    //     vkCmdBindIndexBuffer(_command_buffer, index_buffer, 0, utils_vulkan::index_type(mesh->index_type()));
+    // }
 
-    if (index_buffer) {
-        vkCmdDrawIndexed(_command_buffer, static_cast<std::uint32_t>(mesh->index_count()), 1, 0, 0, 0);
-    } else {
-        vkCmdDraw(_command_buffer, static_cast<std::uint32_t>(mesh->vertex_count()), 1, 0, 0);
-    }
+    // if (index_buffer) {
+    //     vkCmdDrawIndexed(_command_buffer, static_cast<std::uint32_t>(mesh->index_count()), 1, 0, 0, 0);
+    // } else {
+    //     vkCmdDraw(_command_buffer, static_cast<std::uint32_t>(mesh->vertex_count()), 1, 0, 0);
+    // }
 }
 
 VkCommandBuffer command_buffer_vulkan::command_buffer() const {

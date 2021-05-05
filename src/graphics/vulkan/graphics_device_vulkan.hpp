@@ -19,6 +19,10 @@ namespace rb {
 
         std::shared_ptr<renderer> create_renderer() override;
 
+        std::shared_ptr<command_buffer> create_command_buffer() override;
+
+        std::shared_ptr<buffer> create_buffer(const buffer_desc& desc) override;
+
         std::shared_ptr<texture> create_texture(const texture_desc& desc) override;
 
         std::shared_ptr<shader> create_shader(const shader_desc& desc) override;

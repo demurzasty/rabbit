@@ -1,5 +1,7 @@
 #pragma once
 
+#include "buffer.hpp"
+#include "command_buffer.hpp"
 #include "texture.hpp"
 #include "mesh.hpp"
 #include "material.hpp"
@@ -18,6 +20,16 @@ namespace rb {
          * @brief Creates renderer.
          */
         virtual std::shared_ptr<renderer> create_renderer() = 0;
+
+        /**
+         * @brief Creates command buffer.
+         */
+        virtual std::shared_ptr<command_buffer> create_command_buffer() = 0;
+
+        /**
+         * @brief Creates buffer.
+         */
+        virtual std::shared_ptr<buffer> create_buffer(const buffer_desc& desc) = 0;
 
         /**
          * @brief Creates graphics texture.

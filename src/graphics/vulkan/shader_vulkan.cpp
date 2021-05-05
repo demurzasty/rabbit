@@ -129,7 +129,7 @@ void shader_vulkan::_create_pipeline(const span<const VkPipelineShaderStageCreat
     auto attributes = std::make_unique<VkVertexInputAttributeDescription[]>(desc.vertex_layout.size());
     for (std::size_t index{ 0 }, offset{ 0 };
         index < desc.vertex_layout.size();
-        ++index, offset += desc.vertex_layout[index].format.size) {
+        offset += desc.vertex_layout[index].format.size, ++index) {
         attributes[index].binding = 0;
         attributes[index].location = static_cast<std::uint32_t>(index);
         attributes[index].format = utils_vulkan::format(desc.vertex_layout[index].format);

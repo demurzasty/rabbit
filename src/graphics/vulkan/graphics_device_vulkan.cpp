@@ -1,4 +1,6 @@
 #include "graphics_device_vulkan.hpp"
+#include "buffer_vulkan.hpp"
+#include "command_buffer_vulkan.hpp"
 #include "material_vulkan.hpp"
 #include "mesh_vulkan.hpp"
 #include "texture_vulkan.hpp"
@@ -78,6 +80,14 @@ std::shared_ptr<renderer> graphics_device_vulkan::create_renderer() {
     return std::make_shared<renderer_vulkan>(*this);
 }
 
+std::shared_ptr<command_buffer> graphics_device_vulkan::create_command_buffer() {
+    return std::make_shared<command_buffer_vulkan>(_device, _command_pool);
+}
+
+std::shared_ptr<buffer> graphics_device_vulkan::create_buffer(const buffer_desc& desc) {
+    return std::make_shared<buffer_vulkan>(_device, _allocator, desc);
+}
+
 std::shared_ptr<texture> graphics_device_vulkan::create_texture(const texture_desc& desc) {
     return std::make_shared<texture_vulkan>(_device, _graphics_queue, _command_pool, _allocator, desc);
 }
@@ -91,11 +101,11 @@ std::shared_ptr<shader> graphics_device_vulkan::create_shader(const shader_desc&
 }
 
 std::shared_ptr<mesh> graphics_device_vulkan::create_mesh(const mesh_desc& desc) {
-    return std::make_shared<mesh_vulkan>(_device, _allocator, desc);
+    return std::make_shared<mesh_vulkan>(desc);
 }
 
 std::shared_ptr<material> graphics_device_vulkan::create_material(const material_desc& desc) {
-    return std::make_shared<material_vulkan>(_device, _allocator, _render_pass, desc);
+    return std::make_shared<material_vulkan>(_device, _allocator, desc);
 }
 
 void graphics_device_vulkan::present() {
