@@ -1,6 +1,5 @@
 #pragma once
 
-#include <rabbit/asset/handle.hpp>
 #include <rabbit/graphics/renderer.hpp>
 #include <rabbit/core/span.hpp>
 #include <rabbit/math/mat4.hpp>

@@ -24,7 +24,7 @@ namespace rb {
 
         void set_viewport(const vec4f& viewport) override;
 
-        void draw(const handle<mesh>& mesh, const handle<material>& material) override;
+        void draw(const std::shared_ptr<mesh>& mesh, const std::shared_ptr<material>& material) override;
 
         VkCommandBuffer command_buffer() const;
 

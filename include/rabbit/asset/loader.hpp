@@ -5,7 +5,6 @@
 
 #include <string>
 #include <memory>
-#include <functional>
 
 namespace rb {
     class loader {
@@ -23,6 +22,6 @@ namespace rb {
          *
          * @returns Loaded resource.
          */
-        virtual std::function<std::shared_ptr<void>()> load(const std::string& filename, const json& metadata) = 0;
+        virtual std::shared_ptr<void> load(const std::string& filename, const json& metadata) = 0;
     };
 }

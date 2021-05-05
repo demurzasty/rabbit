@@ -10,7 +10,7 @@ namespace rb {
     public:
         material_loader(asset_manager& asset_manager, graphics_device& graphics_device);
 
-        std::function<std::shared_ptr<void>()> load(const std::string& filename, const json& metadata) override;
+        std::shared_ptr<void> load(const std::string& filename, const json& metadata) override;
 
     private:
         asset_manager& _asset_manager;

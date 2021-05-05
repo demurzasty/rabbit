@@ -124,12 +124,12 @@ void command_buffer_vulkan::set_viewport(const vec4f& viewport) {
     vkCmdSetViewport(_command_buffer, 0, 1, &native_viewport);
 }
 
-void command_buffer_vulkan::draw(const handle<mesh>& mesh, const handle<material>& material) {
+void command_buffer_vulkan::draw(const std::shared_ptr<mesh>& mesh, const std::shared_ptr<material>& material) {
     RB_ASSERT(mesh, "Mesh is not provided");
     RB_ASSERT(material, "Material is not provided");
 
-    const auto native_mesh = std::static_pointer_cast<mesh_vulkan>(mesh.get());
-    const auto native_material = std::static_pointer_cast<material_vulkan>(material.get());
+    const auto native_mesh = std::static_pointer_cast<mesh_vulkan>(mesh);
+    const auto native_material = std::static_pointer_cast<material_vulkan>(material);
 
     vkCmdBindPipeline(_command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, native_material->pipeline());
 

@@ -1,12 +1,13 @@
 #pragma once
 
-#include "../asset/handle.hpp"
 #include "../graphics/mesh.hpp"
 #include "../graphics/material.hpp"
 
+#include <memory>
+
 namespace rb {
     struct geometry {
-        handle<mesh> mesh;
-        handle<material> material;
+        std::shared_ptr<mesh> mesh;
+        std::shared_ptr<material> material;
     };
 }

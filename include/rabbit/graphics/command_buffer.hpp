@@ -3,7 +3,6 @@
 
 #include "material.hpp"
 #include "mesh.hpp"
-#include "../asset/handle.hpp"
 #include "../math/vec4.hpp"
 
 #include <memory>
@@ -71,6 +70,6 @@ namespace rb {
          * @param mesh Mesh to draw.
          * @param material Material to be used.
          */
-        virtual void draw(const handle<mesh>& mesh, const handle<material>& material) = 0;
+        virtual void draw(const std::shared_ptr<mesh>& mesh, const std::shared_ptr<material>& material) = 0;
     };
 }

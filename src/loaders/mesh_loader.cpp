@@ -20,7 +20,7 @@ mesh_loader::mesh_loader(graphics_device& graphics_device)
     : _graphics_device(graphics_device) {
 }
 
-std::function<std::shared_ptr<void>()> mesh_loader::load(const std::string& filename, const json& metadata) {
+std::shared_ptr<void> mesh_loader::load(const std::string& filename, const json& metadata) {
     std::ifstream istream{ filename, std::ios::in };
     RB_ASSERT(istream.is_open(), "Cannot open file");
 
@@ -73,17 +73,15 @@ std::function<std::shared_ptr<void>()> mesh_loader::load(const std::string& file
         }
     }
 
-    return [this, filename, metadata, vertices = std::move(vertices)] {
-        vertex_layout vertex_layout{
-            { vertex_attribute::position, vertex_format::vec3f() },
-            { vertex_attribute::texcoord, vertex_format::vec2f() },
-            { vertex_attribute::normal, vertex_format::vec3f() }
-        };
-
-        mesh_desc desc;
-        desc.vertex_layout = vertex_layout;
-        desc.vertex_data = vertices.data();
-        desc.vertex_count = vertices.size();
-        return _graphics_device.create_mesh(desc);
+    vertex_layout vertex_layout{
+        { vertex_attribute::position, vertex_format::vec3f() },
+        { vertex_attribute::texcoord, vertex_format::vec2f() },
+        { vertex_attribute::normal, vertex_format::vec3f() }
     };
+
+    mesh_desc desc;
+    desc.vertex_layout = vertex_layout;
+    desc.vertex_data = vertices.data();
+    desc.vertex_count = vertices.size();
+    return _graphics_device.create_mesh(desc);
 }

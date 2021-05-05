@@ -2,7 +2,6 @@
 #pragma once
 
 #include "loader.hpp"
-#include "handle.hpp"
 #include "../core/non_copyable.hpp"
 #include "../core/injector.hpp"
 #include "../core/type_info.hpp"
@@ -24,23 +23,18 @@ namespace rb {
         }
 
         template<typename Asset>
-        handle<Asset> load(std::launch launch, const std::string& filename) {
-            return { _load(launch, type_id<Asset>().hash(), filename) };
-        }
-
-        template<typename Asset>
-        handle<Asset> load(const std::string& filename) {
-            return load<Asset>(std::launch::async, filename);
+        std::shared_ptr<Asset> load(const std::string& filename) {
+            return std::static_pointer_cast<Asset>(_load(type_id<Asset>().hash(), filename));
         }
 
     private:
-        std::shared_ptr<proxy> _load(std::launch launch, id_type asset_id, const std::string& filename);
+        std::shared_ptr<void> _load(id_type asset_id, const std::string& filename);
 
         json _load_metadata(const std::string& filename) const;
 
     private:
         injector& _injector;
         std::unordered_map<id_type, std::shared_ptr<loader>> _loaders;
-        std::unordered_map<std::string, std::weak_ptr<proxy>> _assets;
+        std::unordered_map<std::string, std::weak_ptr<void>> _assets;
     };
 }

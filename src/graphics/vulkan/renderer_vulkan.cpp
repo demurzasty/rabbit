@@ -71,11 +71,7 @@ void renderer_vulkan::render(registry& registry) {
             return;
         }
 
-        if (!geometry.mesh.ready() || !geometry.material.ready()) {
-            return;
-        }
-
-        if (!geometry.material->albedo_map().ready()) {
+        if (!geometry.material->albedo_map()) {
             return;
         }
 
@@ -87,7 +83,7 @@ void renderer_vulkan::render(registry& registry) {
 
         if (!entity_local_data.descriptor_set) {
             _create_descriptor_set(entity_local_data);
-            _update_descriptor_set(entity_local_data, geometry.material.get());
+            _update_descriptor_set(entity_local_data, geometry.material);
         }
 
         local_data local_data;
@@ -105,7 +101,7 @@ void renderer_vulkan::render(registry& registry) {
             return;
         }
 
-        const auto mesh = std::static_pointer_cast<mesh_vulkan>(geometry.mesh.get());
+        const auto mesh = std::static_pointer_cast<mesh_vulkan>(geometry.mesh);
 
         const auto vertex_buffer = mesh->vertex_buffer();
         const VkDeviceSize offset{ 0 };
@@ -331,7 +327,7 @@ void renderer_vulkan::_update_descriptor_set(renderer_vulkan::entity_local_data&
     write_infos[2].dstSet = entity_local_data.descriptor_set;
 
     auto texture = material->albedo_map() ?
-        std::static_pointer_cast<texture_vulkan>(material->albedo_map().get()) :
+        std::static_pointer_cast<texture_vulkan>(material->albedo_map()) :
         std::static_pointer_cast<texture_vulkan>(_white_texture);
 
     image_infos[0].sampler = texture->sampler();
