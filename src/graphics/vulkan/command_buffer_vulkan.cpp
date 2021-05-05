@@ -114,6 +114,11 @@ void command_buffer_vulkan::end_render_pass() {
     vkCmdEndRenderPass(_command_buffer);
 }
 
+void command_buffer_vulkan::update_buffer(const std::shared_ptr<buffer>& buffer, const void* data, std::size_t offset, std::size_t size) {
+    auto native_buffer = std::static_pointer_cast<buffer_vulkan>(buffer)->buffer();
+    vkCmdUpdateBuffer(_command_buffer, native_buffer, offset, size, data);
+}
+
 void command_buffer_vulkan::set_viewport(const vec4f& viewport) {
     VkViewport native_viewport;
     native_viewport.x = viewport.x;

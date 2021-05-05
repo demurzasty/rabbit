@@ -58,6 +58,18 @@ namespace rb {
         virtual void end_render_pass() = 0;
 
         /**
+         * @brief Updates the data of the specifed buffer during recording the command buffer.
+         *
+         * @param buffer Specifes the destination buffer whose data is to be updated.
+         * @param data Raw pointer to the data which the buffer is to be updated. This must not be null!
+         * @param offset Specifies the destination offset (in bytes) at which the buffer is to be updated.
+         * @param size Specifies the sizes (in bytes) of the data block which is to be updated.
+         *
+         * @warning Record this command outside of a render pass.
+         */
+        virtual void update_buffer(const std::shared_ptr<buffer>& buffer, const void* data, std::size_t offset, std::size_t size) = 0;
+
+        /**
          * @brief Sets the active viewport.
          *
          * @param viewport Viewport to set.
