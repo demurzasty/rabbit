@@ -19,13 +19,6 @@ namespace rb {
         void _create_uniform_buffer(const material_desc& desc);
 
     private:
-        struct material_data {
-            vec3f base_color;
-            float roughness;
-            float metallic;
-        };
-
-    private:
         VkDevice _device;
         VmaAllocator _allocator;
         VkRenderPass _render_pass;

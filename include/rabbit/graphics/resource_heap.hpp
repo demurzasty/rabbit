@@ -4,13 +4,14 @@
 #include "shader.hpp"
 #include "buffer.hpp"
 #include "texture.hpp"
+#include "material.hpp"
 
 #include <map>
 #include <memory>
 #include <variant>
 
 namespace rb {
-    using resource_view = std::variant<std::shared_ptr<buffer>, std::shared_ptr<texture>>;
+    using resource_view = std::variant<std::shared_ptr<material>, std::shared_ptr<buffer>, std::shared_ptr<texture>>;
 
     struct resource_heap_desc {
         std::shared_ptr<shader> shader;

@@ -49,6 +49,13 @@ namespace rb {
 
     class material {
     public:
+        struct material_data {
+            vec3f base_color;
+            float roughness;
+            float metallic;
+        };
+
+    public:
         const vec3f& base_color() const;
 
         float roughness() const;

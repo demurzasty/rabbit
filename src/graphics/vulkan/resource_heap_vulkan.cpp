@@ -3,6 +3,7 @@
 #include "buffer_vulkan.hpp"
 #include "shader_vulkan.hpp"
 #include "texture_vulkan.hpp"
+#include "material_vulkan.hpp"
 #include "utils_vulkan.hpp"
 
 #include <map>
@@ -96,13 +97,23 @@ void resource_heap_vulkan::_update_descriptor_sets(const resource_heap_desc& des
 
         switch (binding.type) {
             case shader_binding_type::uniform_buffer: {
-                auto buffer = std::get<std::shared_ptr<rb::buffer>>(parameter);
+                if (parameter.index() == 0) {
+                    const auto material = std::get<std::shared_ptr<rb::material>>(parameter);
 
-                buffer_info.buffer = std::static_pointer_cast<buffer_vulkan>(buffer)->buffer();
-                buffer_info.offset = 0;
-                buffer_info.range = buffer->size();
+                    buffer_info.buffer = std::static_pointer_cast<material_vulkan>(material)->buffer();
+                    buffer_info.offset = 0;
+                    buffer_info.range = sizeof(material::material_data);
 
-                write_info.pBufferInfo = &buffer_info;
+                    write_info.pBufferInfo = &buffer_info;
+                } else {
+                    auto buffer = std::get<std::shared_ptr<rb::buffer>>(parameter);
+
+                    buffer_info.buffer = std::static_pointer_cast<buffer_vulkan>(buffer)->buffer();
+                    buffer_info.offset = 0;
+                    buffer_info.range = buffer->size();
+
+                    write_info.pBufferInfo = &buffer_info;
+                }
                 break;
             }
             case shader_binding_type::texture: {
