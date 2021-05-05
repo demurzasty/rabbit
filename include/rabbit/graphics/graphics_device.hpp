@@ -6,6 +6,7 @@
 #include "mesh.hpp"
 #include "material.hpp"
 #include "renderer.hpp"
+#include "resource_heap.hpp"
 #include "shader.hpp"
 #include "../core/non_copyable.hpp"
 
@@ -40,6 +41,11 @@ namespace rb {
          * @brief Creates shader.
          */
         virtual std::shared_ptr<shader> create_shader(const shader_desc& desc) = 0;
+
+        /**
+         * @brief Creates resource_heap.
+         */
+        virtual std::shared_ptr<resource_heap> create_resource_heap(const resource_heap_desc& desc) = 0;
 
         /**
          * @brief Creates mesh.
