@@ -74,7 +74,6 @@ if (RB_VULKAN)
         "src/graphics/vulkan/mesh_vulkan.cpp"
         "src/graphics/vulkan/resource_heap_vulkan.cpp"
         "src/graphics/vulkan/shader_vulkan.cpp"
-        "src/graphics/vulkan/renderer_vulkan.cpp"
         "src/graphics/vulkan/texture_vulkan.cpp"
         "src/graphics/vulkan/utils_vulkan.cpp"
 	)

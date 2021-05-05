@@ -4,7 +4,6 @@
 #include "material_vulkan.hpp"
 #include "mesh_vulkan.hpp"
 #include "texture_vulkan.hpp"
-#include "renderer_vulkan.hpp"
 #include "shader_vulkan.hpp"
 #include "resource_heap_vulkan.hpp"
 
@@ -75,10 +74,6 @@ graphics_device_vulkan::~graphics_device_vulkan() {
     vkDestroyDevice(_device, nullptr);
     vkDestroySurfaceKHR(_instance, _surface, nullptr);
     vkDestroyInstance(_instance, nullptr);
-}
-
-std::shared_ptr<renderer> graphics_device_vulkan::create_renderer() {
-    return std::make_shared<renderer_vulkan>(*this);
 }
 
 std::shared_ptr<command_buffer> graphics_device_vulkan::create_command_buffer() {

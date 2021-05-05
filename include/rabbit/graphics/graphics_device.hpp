@@ -5,7 +5,6 @@
 #include "texture.hpp"
 #include "mesh.hpp"
 #include "material.hpp"
-#include "renderer.hpp"
 #include "resource_heap.hpp"
 #include "shader.hpp"
 #include "../core/non_copyable.hpp"
@@ -16,11 +15,6 @@ namespace rb {
     class graphics_device : public non_copyable {
     public:
         virtual ~graphics_device() = default;
-
-        /**
-         * @brief Creates renderer.
-         */
-        virtual std::shared_ptr<renderer> create_renderer() = 0;
 
         /**
          * @brief Creates command buffer.
