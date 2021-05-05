@@ -5,7 +5,10 @@
 
 using namespace rb;
 
-render_system::render_system(graphics_device& graphics_device) {
+render_system::render_system(graphics_device& graphics_device)
+    : _graphics_deivce(graphics_device) {
+    _command_buffer = graphics_device.create_command_buffer();
+
     shader_desc shader_desc;
     shader_desc.vertex_layout = {
         { vertex_attribute::position, vertex_format::vec3f() },
@@ -24,5 +27,13 @@ render_system::render_system(graphics_device& graphics_device) {
 }
 
 void render_system::draw(registry& registry) {
+    _command_buffer->begin();
 
+    _command_buffer->begin_render_pass(_graphics_deivce);
+
+    _command_buffer->end_render_pass();
+
+    _command_buffer->end();
+
+    _graphics_deivce.submit(_command_buffer);
 }

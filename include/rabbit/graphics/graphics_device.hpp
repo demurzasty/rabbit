@@ -52,6 +52,11 @@ namespace rb {
         virtual std::shared_ptr<material> create_material(const material_desc& desc) = 0;
 
         /**
+         * @brief Submits command buffer.
+         */
+        virtual void submit(const std::shared_ptr<command_buffer>& command_buffer) = 0;
+
+        /**
          * @brief Swap buffers.
          */
         virtual void present() = 0;

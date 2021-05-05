@@ -31,9 +31,11 @@ namespace rb {
 
         std::shared_ptr<material> create_material(const material_desc& desc) override;
 
-        void submit(VkCommandBuffer command_buffer, VkFence fence);
+        void submit(const std::shared_ptr<command_buffer>& command_buffer) override;
 
         void present() override;
+
+        void submit(VkCommandBuffer command_buffer, VkFence fence);
 
         VkDevice device() const;
 

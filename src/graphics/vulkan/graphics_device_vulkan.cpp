@@ -108,6 +108,29 @@ std::shared_ptr<material> graphics_device_vulkan::create_material(const material
     return std::make_shared<material_vulkan>(_device, _allocator, desc);
 }
 
+void graphics_device_vulkan::submit(const std::shared_ptr<command_buffer>& command_buffer) {
+    auto native_command_buffer = std::static_pointer_cast<command_buffer_vulkan>(command_buffer);
+
+    auto vulkan_command_buffer = native_command_buffer->command_buffer();
+    auto vulkan_fence = native_command_buffer->fence();
+
+    VkPipelineStageFlags wait_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+
+	VkSubmitInfo submit_info;
+	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submit_info.pNext = nullptr;
+	submit_info.waitSemaphoreCount = 0;
+	submit_info.pWaitSemaphores = nullptr;
+	submit_info.pWaitDstStageMask = nullptr;
+	submit_info.commandBufferCount = 1;
+	submit_info.pCommandBuffers = &vulkan_command_buffer;
+	submit_info.signalSemaphoreCount = 0;
+	submit_info.pSignalSemaphores = nullptr;
+
+    RB_MAYBE_UNUSED const auto result = vkQueueSubmit(_graphics_queue, 1, &submit_info, vulkan_fence);
+    RB_ASSERT(result == VK_SUCCESS, "Failed to queue submit");
+}
+
 void graphics_device_vulkan::present() {
     RB_MAYBE_UNUSED VkResult result;
 
