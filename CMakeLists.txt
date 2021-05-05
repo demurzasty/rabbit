@@ -48,6 +48,7 @@ set (SRC
     "src/graphics/graphics_device_provider.cpp"
     "src/graphics/material.cpp"
     "src/graphics/mesh.cpp"
+    "src/graphics/shader.cpp"
     "src/graphics/texture.cpp"
     "src/loaders/material_loader.cpp"
     "src/loaders/mesh_loader.cpp"
@@ -68,6 +69,7 @@ if (RB_VULKAN)
         "src/graphics/vulkan/graphics_device_vulkan.cpp"
         "src/graphics/vulkan/material_vulkan.cpp"
         "src/graphics/vulkan/mesh_vulkan.cpp"
+        "src/graphics/vulkan/shader_vulkan.cpp"
         "src/graphics/vulkan/renderer_vulkan.cpp"
         "src/graphics/vulkan/texture_vulkan.cpp"
         "src/graphics/vulkan/utils_vulkan.cpp"
@@ -77,7 +79,7 @@ endif ()
 add_library (rabbit STATIC ${SRC})
 target_include_directories (rabbit PUBLIC "include" PRIVATE "generated/include")
 target_compile_features (rabbit PUBLIC cxx_std_17)
-target_link_libraries (rabbit PUBLIC stb gsl json entt)
+target_link_libraries (rabbit PUBLIC stb fmt gsl json entt)
 add_dependencies (rabbit shaders)
 
 if (MSVC)

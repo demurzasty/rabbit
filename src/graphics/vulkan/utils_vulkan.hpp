@@ -3,6 +3,7 @@
 
 #include <rabbit/graphics/texture.hpp>
 #include <rabbit/graphics/mesh.hpp>
+#include <rabbit/graphics/shader.hpp>
 
 #include <volk.h>
 
@@ -31,5 +32,17 @@ namespace rb {
         static VkSamplerAddressMode sampler_address_mode(texture_wrap texture_wrap);
 
         static VkIndexType index_type(index_type index_type);
+
+        static VkDescriptorType descriptor_type(const shader_binding_type& type);
+
+        static VkShaderStageFlags stage_flags(const std::uint32_t flags);
+
+        static VkPolygonMode polygon_mode(polygon_mode polygon_mode);
+
+        static VkCullModeFlags cull_mode(cull_mode cull_mode);
+
+        static VkFrontFace front_face(front_face front_face);
+
+        static VkCompareOp compare_operator(compare_operator compare_operator);
     };
 }

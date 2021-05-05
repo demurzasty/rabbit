@@ -9,9 +9,16 @@ layout (binding = 0) uniform CameraData {
     mat4 view;
 };
 
+#if VULKAN && 0
+layout (push_constant) uniform LocalData {
+    mat4 world;
+};
+#else
 layout (binding = 1) uniform LocalData {
     mat4 world;
 };
+#endif
+
 
 layout (location = 0) out vec2 v_texcoord;
 

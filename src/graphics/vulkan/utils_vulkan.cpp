@@ -163,3 +163,92 @@ VkIndexType utils_vulkan::index_type(rb::index_type index_type) {
     RB_ASSERT(false, "Failed to map Vulkan index type");
     return VK_INDEX_TYPE_UINT32;
 }
+
+VkDescriptorType utils_vulkan::descriptor_type(const shader_binding_type& type) {
+    switch (type) {
+        case shader_binding_type::texture:
+            return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        case shader_binding_type::uniform_buffer:
+            return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    }
+
+    RB_ASSERT(false, "Failed to map Vulkan descriptor type");
+    return VK_DESCRIPTOR_TYPE_MAX_ENUM;
+}
+
+VkShaderStageFlags utils_vulkan::stage_flags(const std::uint32_t flags) {
+    VkShaderStageFlags bitfield = 0;
+
+    if (flags & shader_stage_flags::vertex) {
+        bitfield |= VK_SHADER_STAGE_VERTEX_BIT;
+    }
+    if (flags & shader_stage_flags::fragment) {
+        bitfield |= VK_SHADER_STAGE_FRAGMENT_BIT;
+    }
+
+    return bitfield;
+}
+
+VkPolygonMode utils_vulkan::polygon_mode(rb::polygon_mode polygon_mode) {
+    switch (polygon_mode) {
+        case polygon_mode::fill:
+            return VK_POLYGON_MODE_FILL;
+        case polygon_mode::line:
+            return VK_POLYGON_MODE_LINE;
+        case polygon_mode::point:
+            return VK_POLYGON_MODE_POINT;
+    }
+
+    RB_ASSERT(false, "Failed to map Vulkan polygon mode");
+    return VK_POLYGON_MODE_FILL;
+}
+
+VkCullModeFlags utils_vulkan::cull_mode(rb::cull_mode cull_mode) {
+    switch (cull_mode) {
+        case cull_mode::none:
+            return VK_CULL_MODE_NONE;
+        case cull_mode::front:
+            return VK_CULL_MODE_FRONT_BIT;
+        case cull_mode::back:
+            return VK_CULL_MODE_BACK_BIT;
+    }
+
+    RB_ASSERT(false, "Failed to map Vulkan cull mode");
+    return VK_CULL_MODE_NONE;
+}
+
+VkFrontFace utils_vulkan::front_face(rb::front_face front_face) {
+    switch (front_face) {
+        case front_face::clockwise:
+            return VK_FRONT_FACE_CLOCKWISE;
+        case front_face::counter_clockwise:
+            return VK_FRONT_FACE_COUNTER_CLOCKWISE;
+    }
+
+    RB_ASSERT(false, "Failed to map Vulkan front face");
+    return VK_FRONT_FACE_COUNTER_CLOCKWISE;
+}
+
+VkCompareOp utils_vulkan::compare_operator(rb::compare_operator compare_operator) {
+    switch (compare_operator) {
+        case compare_operator::always:
+            return VK_COMPARE_OP_ALWAYS;
+        case compare_operator::never:
+            return VK_COMPARE_OP_NEVER;
+        case compare_operator::less:
+            return VK_COMPARE_OP_LESS;
+        case compare_operator::less_equal:
+            return VK_COMPARE_OP_LESS_OR_EQUAL;
+        case compare_operator::equal:
+            return VK_COMPARE_OP_EQUAL;
+        case compare_operator::greater_equal:
+            return VK_COMPARE_OP_GREATER_OR_EQUAL;
+        case compare_operator::greater:
+            return VK_COMPARE_OP_GREATER;
+        case compare_operator::not_equal:
+            return VK_COMPARE_OP_NOT_EQUAL;
+    }
+
+    RB_ASSERT(false, "Failed to map Vulkan compare operator");
+    return VK_COMPARE_OP_LESS;
+}

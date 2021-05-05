@@ -4,38 +4,6 @@
 #include <vector>
 
 namespace rb {
-    enum class topology {
-        undefined,
-
-        /**
-         * @brief The data is ordered as a sequence of line segments.
-         *        Each line segment is described by two new vertices.
-         *        The count may be any positive integer.
-         */
-        lines,
-
-        /**
-         * @brief The data is ordered as a sequence of line segments.
-         *        Each line segment is described by one new vertex and the last vertex from the previous line segment.
-         *        The count may be any positive integer.
-         */
-        line_strip,
-
-        /**
-         * @brief The data is ordered as a sequence of triangles.
-         *        Each triangle is described by three new vertices.
-         *        Back-face culling is affected by the current winding-order render state.
-         */
-        triangles,
-
-        /**
-         * @brief The data is ordered as a sequence of triangles.
-         *        Each triangle is described by two new vertices and one vertex from the previous triangle.
-         *        The back-face culling flag is flipped automatically on even-numbered triangles.
-         */
-        triangle_strip
-    };
-
     enum class vertex_attribute {
         undefined,
         position,
@@ -104,7 +72,6 @@ namespace rb {
     };
 
     struct mesh_desc {
-        topology topology{ topology::undefined };
         vertex_layout vertex_layout;
         const void* vertex_data{ nullptr };
         std::size_t vertex_count{ 0 };
@@ -119,11 +86,6 @@ namespace rb {
          * @brief Default virtual destructor.
          */
         virtual ~mesh() = default;
-
-        /**
-         * @brief Returns topology.
-         */
-        topology topology() const;
 
         /**
          * @brief Returns vertex layout.
@@ -149,7 +111,6 @@ namespace rb {
         mesh(const mesh_desc& desc);
 
     private:
-        const rb::topology _topology;
         const rb::vertex_layout _vertex_layout;
         const std::size_t _vertex_count;
         const std::size_t _index_count;

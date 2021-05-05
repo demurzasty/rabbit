@@ -81,7 +81,6 @@ std::function<std::shared_ptr<void>()> mesh_loader::load(const std::string& file
         };
 
         mesh_desc desc;
-        desc.topology = topology::triangles;
         desc.vertex_layout = vertex_layout;
         desc.vertex_data = vertices.data();
         desc.vertex_count = vertices.size();

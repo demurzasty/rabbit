@@ -4,12 +4,10 @@
 using namespace rb;
 
 mesh::mesh(const mesh_desc& desc)
-    : _topology(desc.topology)
-    , _vertex_layout(desc.vertex_layout)
+    : _vertex_layout(desc.vertex_layout)
     , _vertex_count(desc.vertex_count)
     , _index_count(desc.index_count)
     , _index_type(desc.index_type) {
-    RB_ASSERT(_topology != topology::undefined, "Topology is undefined");
     RB_ASSERT(!_vertex_layout.empty(), "Vertex layout is empty");
 
     for (RB_MAYBE_UNUSED const auto& vertex_element : _vertex_layout) {
@@ -23,10 +21,6 @@ mesh::mesh(const mesh_desc& desc)
     RB_ASSERT(desc.vertex_data, "Vertex data is not provided");
     RB_ASSERT(!desc.index_data || desc.index_count > 0, "Index count is zero");
     RB_ASSERT(!desc.index_data || desc.index_type != index_type::undefined, "Index type is not provided");
-}
-
-topology mesh::topology() const {
-    return _topology;
 }
 
 const vertex_layout& mesh::vertex_layout() const {
