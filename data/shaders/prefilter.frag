@@ -4,7 +4,7 @@
 
 layout (location = 0) in vec2 var_position;
 
-layout (std140, binding = 2) uniform PrefilterData {
+layout (std140, binding = 0) uniform PrefilterData {
     int cube_face;
     float roughness;
 };

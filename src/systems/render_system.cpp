@@ -15,6 +15,9 @@
 #include <rabbit/generated/shaders/irradiance.vert.spv.h>
 #include <rabbit/generated/shaders/irradiance.frag.spv.h>
 
+#include <rabbit/generated/shaders/prefilter.vert.spv.h>
+#include <rabbit/generated/shaders/prefilter.frag.spv.h>
+
 using namespace rb;
 
 render_system::render_system(graphics_device& graphics_device)
@@ -28,6 +31,7 @@ render_system::render_system(graphics_device& graphics_device)
     _create_brdf_shader();
     _bake_brdf_texture();
     _create_irradiance();
+    _create_prefiltered();
 }
 
 void render_system::draw(registry& registry) {
@@ -44,6 +48,7 @@ void render_system::draw(registry& registry) {
             _skybox_texture = camera.skybox;
 
             _bake_irradiance_texture(camera.skybox);
+            _bake_prefilter_texture(camera.skybox);
         }
     });
 
@@ -102,7 +107,8 @@ void render_system::_create_forward_shader() {
         { shader_binding_type::uniform_buffer, shader_stage_flags::fragment, 2, 1 },
         { shader_binding_type::texture, shader_stage_flags::fragment, 3, 1 },
         { shader_binding_type::texture, shader_stage_flags::fragment, 4, 1 },
-        { shader_binding_type::texture, shader_stage_flags::fragment, 5, 1 }
+        { shader_binding_type::texture, shader_stage_flags::fragment, 5, 1 },
+        { shader_binding_type::texture, shader_stage_flags::fragment, 6, 1 }
     };
     _forward_shader = _graphics_device.create_shader(shader_desc);
 }
@@ -182,7 +188,7 @@ void render_system::_bake_brdf_texture() {
 
     command_buffer->set_shader(_brdf_shader);
 
-    command_buffer->begin_render_pass(_brdf_texture, 0);
+    command_buffer->begin_render_pass(_brdf_texture, 0, 0);
 
     command_buffer->set_vertex_buffer(_quad->vertex_buffer());
     command_buffer->set_index_buffer(_quad->index_buffer());
@@ -297,7 +303,8 @@ void render_system::_create_geometry_data(transform& transform, geometry& geomet
         { 2, geometry.material },
         { 3, geometry.material->albedo_map() },
         { 4, _skybox_texture },
-        { 5, _irradiance_texture }
+        { 5, _irradiance_texture },
+        { 6, _prefiltered_texture }
     };
     geometry_data.resource_heap = _graphics_device.create_resource_heap(resource_heap_desc);
 }
@@ -354,13 +361,84 @@ void render_system::_bake_irradiance_texture(std::shared_ptr<texture> skybox) {
         data.cube_face = static_cast<std::uint32_t>(layer);
         command_buffer->update_buffer(_irradiance_buffer, &data, 0, sizeof(data));
 
-        command_buffer->begin_render_pass(_irradiance_texture, layer);
+        command_buffer->begin_render_pass(_irradiance_texture, layer, 0);
 
         command_buffer->set_vertex_buffer(_quad->vertex_buffer());
         command_buffer->set_index_buffer(_quad->index_buffer());
         command_buffer->draw_indexed(6, 1, 0, 0, 0);
 
         command_buffer->end_render_pass();
+    }
+
+    command_buffer->end();
+
+    _graphics_device.submit(command_buffer);
+}
+
+void render_system::_create_prefiltered() {
+    texture_desc texture_desc;
+    texture_desc.type = texture_type::texture_cube;
+    texture_desc.size = { 128, 128, 0 };
+    texture_desc.format = texture_format::rgba8;
+    texture_desc.filter = texture_filter::linear;
+    texture_desc.wrap = texture_wrap::clamp;
+    texture_desc.mipmaps = 4;
+    texture_desc.layers = 6;
+    texture_desc.is_render_target = true;
+    _prefiltered_texture = _graphics_device.create_texture(texture_desc);
+
+    shader_desc shader_desc;
+    shader_desc.vertex_layout = { { vertex_attribute::position, vertex_format::vec2f() } };
+    shader_desc.vertex_bytecode = prefilter_vert;
+    shader_desc.fragment_bytecode = prefilter_frag;
+    shader_desc.bindings = {
+        { shader_binding_type::uniform_buffer, shader_stage_flags::fragment, 0, 1 },
+        { shader_binding_type::texture, shader_stage_flags::fragment, 1, 1 }
+    };
+    shader_desc.depth_test_enable = false;
+    shader_desc.depth_write_enable = false;
+    shader_desc.render_target = _prefiltered_texture;
+    _prefiltered_shader = _graphics_device.create_shader(shader_desc);
+
+    buffer_desc buffer_desc;
+    buffer_desc.type = buffer_type::uniform;
+    buffer_desc.size = buffer_desc.stride = sizeof(prefiltered_data);
+    _prefiltered_buffer = _graphics_device.create_buffer(buffer_desc);
+}
+
+void render_system::_bake_prefilter_texture(std::shared_ptr<texture> skybox) {
+    resource_heap_desc resource_heap_desc;
+    resource_heap_desc.shader = _prefiltered_shader;
+    resource_heap_desc.resources = {
+        { 0, _prefiltered_buffer },
+        { 1, skybox }
+    };
+    _prefiltered_resource_heap = _graphics_device.create_resource_heap(resource_heap_desc);
+
+    auto command_buffer = _graphics_device.create_command_buffer();
+
+    command_buffer->begin();
+
+    command_buffer->set_shader(_prefiltered_shader);
+    command_buffer->set_resource_heap(_prefiltered_resource_heap);
+
+    prefiltered_data data;
+    for (std::size_t layer{ 0 }; layer < 6; ++layer) {
+        data.cube_face = static_cast<int>(layer);
+        command_buffer->update_buffer(_prefiltered_buffer, &data.cube_face, offsetof(prefiltered_data, cube_face), sizeof(int));
+
+        for (std::size_t mipmap{ 0 }; mipmap < 4; ++mipmap) {
+            data.roughness = mipmap / 4.0f;
+            command_buffer->update_buffer(_prefiltered_buffer, &data.roughness, offsetof(prefiltered_data, roughness), sizeof(float));
+
+            command_buffer->begin_render_pass(_prefiltered_texture, layer, mipmap);
+
+            command_buffer->set_vertex_buffer(_quad->vertex_buffer());
+            command_buffer->set_index_buffer(_quad->index_buffer());
+            command_buffer->draw_indexed(6, 1, 0, 0, 0);
+
+            command_buffer->end_render_pass();
+        }
     }
 
     command_buffer->end();

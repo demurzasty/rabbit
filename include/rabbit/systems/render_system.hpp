@@ -25,7 +25,12 @@ namespace rb {
         };
 
         struct alignas(16) irradiance_data {
-            int cube_face{ 0 };
+            int cube_face;
+        };
+
+        struct alignas(16) prefiltered_data {
+            int cube_face;
+            float roughness;
         };
 
         struct geometry_data {
@@ -62,6 +67,10 @@ namespace rb {
 
         void _bake_irradiance_texture(std::shared_ptr<texture> skybox);
 
+        void _create_prefiltered();
+
+        void _bake_prefilter_texture(std::shared_ptr<texture> skybox);
+
     private:
         graphics_device& _graphics_device;
         std::shared_ptr<shader> _forward_shader;
@@ -80,6 +89,11 @@ namespace rb {
         std::shared_ptr<texture> _irradiance_texture;
         std::shared_ptr<buffer> _irradiance_buffer;
         std::shared_ptr<resource_heap> _irradiance_resource_heap;
+
+        std::shared_ptr<texture> _prefiltered_texture;
+        std::shared_ptr<shader> _prefiltered_shader;
+        std::shared_ptr<buffer> _prefiltered_buffer;
+        std::shared_ptr<resource_heap> _prefiltered_resource_heap;
 
         std::unordered_map<entity, geometry_data> _geometry_data;
         std::shared_ptr<command_buffer> _command_buffer;

@@ -3,6 +3,8 @@
 
 #include <rabbit/core/config.hpp>
 
+#include <algorithm>
+
 using namespace rb;
 
 texture_vulkan::texture_vulkan(VkDevice device,
@@ -34,9 +36,9 @@ texture_vulkan::texture_vulkan(VkDevice device,
 
 texture_vulkan::~texture_vulkan() {
     if (is_render_target()) {
-        for (std::size_t layer{ 0 }; layer < layers(); ++layer) {
-            vkDestroyFramebuffer(_device, _framebuffers[layer], nullptr);
-            vkDestroyImageView(_device, _target_image_views[layer], nullptr);
+        for (std::size_t index{ 0 }; index < layers() * mipmaps(); ++index) {
+            vkDestroyFramebuffer(_device, _framebuffers[index], nullptr);
+            vkDestroyImageView(_device, _target_image_views[index], nullptr);
         }
 
         vkDestroyRenderPass(_device, _render_pass, nullptr);
@@ -55,18 +57,22 @@ VkImageView texture_vulkan::image_view() const {
     return _image_view;
 }
 
-VkImageView texture_vulkan::target_image_view(std::size_t layer) const {
+VkImageView texture_vulkan::target_image_view(std::size_t layer, std::size_t mipmap) const {
     RB_ASSERT(layer < layers(), "Out of bound");
-    return _target_image_views[layer];
+    RB_ASSERT(mipmap < mipmaps(), "Out of bound");
+
+    return _target_image_views[layer * mipmaps() + mipmap];
 }
 
 VkSampler texture_vulkan::sampler() const {
     return _sampler;
 }
 
-VkFramebuffer texture_vulkan::framebuffer(std::size_t layer) const {
+VkFramebuffer texture_vulkan::framebuffer(std::size_t layer, std::size_t mipmap) const {
     RB_ASSERT(layer < layers(), "Out of bound");
-    return _framebuffers[layer];
+    RB_ASSERT(mipmap < mipmaps(), "Out of bound");
+
+    return _framebuffers[layer * mipmaps() + mipmap];
 }
 
 VkRenderPass texture_vulkan::render_pass() const {
@@ -345,46 +351,49 @@ void texture_vulkan::_create_sampler(const texture_desc& desc) {
 }
 
 void texture_vulkan::_create_framebuffer(const texture_desc& desc) {
-    _target_image_views = std::make_unique<VkImageView[]>(desc.layers);
-
-    for (std::size_t layer{ 0 }; layer < desc.layers; ++layer) {
-        VkImageViewCreateInfo image_view_info;
-        image_view_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        image_view_info.pNext = nullptr;
-        image_view_info.flags = 0;
-        image_view_info.image = _image;
-        image_view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        image_view_info.format = utils_vulkan::format(format());
-        image_view_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-        image_view_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-        image_view_info.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-        image_view_info.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-        image_view_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        image_view_info.subresourceRange.baseMipLevel = 0;
-        image_view_info.subresourceRange.levelCount = static_cast<std::uint32_t>(mipmaps());
-        image_view_info.subresourceRange.baseArrayLayer = static_cast<std::uint32_t>(layer);
-        image_view_info.subresourceRange.layerCount = 1;
-
-        RB_MAYBE_UNUSED auto result = vkCreateImageView(_device, &image_view_info, nullptr, &_target_image_views[layer]);
-        RB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan image view");
-    }
-
-    _framebuffers = std::make_unique<VkFramebuffer[]>(desc.layers);
+    _target_image_views = std::make_unique<VkImageView[]>(layers() * mipmaps());
+    _framebuffers = std::make_unique<VkFramebuffer[]>(layers() * mipmaps());
 
     for (std::size_t layer{ 0 }; layer < layers(); ++layer) {
-        VkFramebufferCreateInfo framebuffer_info;
-        framebuffer_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebuffer_info.pNext = nullptr;
-        framebuffer_info.flags = 0;
-        framebuffer_info.renderPass = _render_pass;
-        framebuffer_info.attachmentCount = 1;
-        framebuffer_info.pAttachments = &_target_image_views[layer];
-        framebuffer_info.width = desc.size.x;
-        framebuffer_info.height = desc.size.y;
-        framebuffer_info.layers = 1;
+        auto size = desc.size;
+        for (std::size_t mipmap{ 0 }; mipmap < mipmaps(); ++mipmap) {
+            VkImageViewCreateInfo image_view_info;
+            image_view_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+            image_view_info.pNext = nullptr;
+            image_view_info.flags = 0;
+            image_view_info.image = _image;
+            image_view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+            image_view_info.format = utils_vulkan::format(format());
+            image_view_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+            image_view_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+            image_view_info.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+            image_view_info.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+            image_view_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            image_view_info.subresourceRange.baseMipLevel = static_cast<std::uint32_t>(mipmap);
+            image_view_info.subresourceRange.levelCount = 1;
+            image_view_info.subresourceRange.baseArrayLayer = static_cast<std::uint32_t>(layer);
+            image_view_info.subresourceRange.layerCount = 1;
 
-        RB_MAYBE_UNUSED const auto result = vkCreateFramebuffer(_device, &framebuffer_info, nullptr, &_framebuffers[layer]);
-        RB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan framebuffer");
+            RB_MAYBE_UNUSED auto result = vkCreateImageView(_device, &image_view_info, nullptr, &_target_image_views[layer * mipmaps() + mipmap]);
+            RB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan image view");
+
+            VkFramebufferCreateInfo framebuffer_info;
+            framebuffer_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+            framebuffer_info.pNext = nullptr;
+            framebuffer_info.flags = 0;
+            framebuffer_info.renderPass = _render_pass;
+            framebuffer_info.attachmentCount = 1;
+            framebuffer_info.pAttachments = &_target_image_views[layer * mipmaps() + mipmap];
+            framebuffer_info.width = size.x;
+            framebuffer_info.height = size.y;
+            framebuffer_info.layers = 1;
+
+            result = vkCreateFramebuffer(_device, &framebuffer_info, nullptr, &_framebuffers[layer * mipmaps() + mipmap]);
+            RB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan framebuffer");
+
+            size.x = std::max(size.x / 2, 1u);
+            size.y = std::max(size.y / 2, 1u);
+        }
     }
 }
 

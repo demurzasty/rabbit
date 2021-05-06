@@ -22,11 +22,11 @@ namespace rb {
 
         VkImageView image_view() const;
 
-        VkImageView target_image_view(std::size_t layer) const;
+        VkImageView target_image_view(std::size_t layer, std::size_t mipmap) const;
 
         VkSampler sampler() const;
 
-        VkFramebuffer framebuffer(std::size_t layer) const;
+        VkFramebuffer framebuffer(std::size_t layer, std::size_t mipmap) const;
 
         VkRenderPass render_pass() const;
 

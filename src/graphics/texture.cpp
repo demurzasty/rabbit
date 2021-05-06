@@ -3,7 +3,7 @@
 #include <rabbit/core/config.hpp>
 #include <rabbit/math/vec2.hpp>
 #include <rabbit/math/math.hpp>
-#include <cmath>
+
 #include <algorithm>
 
 using namespace rb;
@@ -29,6 +29,7 @@ texture::texture(const texture_desc& desc)
     RB_ASSERT(_type != texture_type::undefined, "Undefined texture type");
     RB_ASSERT(_layers > 0, "Layer count must be greater than 0");
     RB_ASSERT(_mipmaps > 0, "Mipmaps count must be greater than 0");
+    RB_ASSERT(!_is_render_target || desc.mipmaps > 0, "Cannot generate mipmaps on render target");
 }
 
 const vec3u& texture::size() const {
