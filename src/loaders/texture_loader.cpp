@@ -52,7 +52,7 @@ std::shared_ptr<void> texture_loader::load(const std::string& filename, const js
         for (std::size_t index{ 0 }; index < 6; ++index) {
             int width, height, components;
             data[index] = stbi_load(filenames[index].c_str(), &width, &height, &components, STBI_rgb_alpha);
-            desc.size = { static_cast<unsigned int>(width), static_cast<unsigned int>(height), 0 };
+            desc.size = { static_cast<unsigned int>(width), static_cast<unsigned int>(height) };
         }
 
         auto buffer = std::make_unique<stbi_uc[]>(desc.size.x * desc.size.y * 4 * 6);
@@ -78,15 +78,14 @@ std::shared_ptr<void> texture_loader::load(const std::string& filename, const js
 
         RB_ASSERT(pixels, "Cannot load image");
 
-        texture_desc desc;
         desc.pixels = pixels.get();
-        desc.size = { static_cast<unsigned int>(width), static_cast<unsigned int>(height), 1 };
+        desc.size = { static_cast<unsigned int>(width), static_cast<unsigned int>(height) };
         desc.format = texture_format::rgba8;
         desc.filter = texture_filter::linear;
         desc.wrap = texture_wrap::repeat;
         desc.mipmaps = 0;
         desc.type = texture_type::texture_2d;
-        desc.anisotropy = 16;
+        desc.anisotropy = 8;
         auto texture = _graphics_device.create_texture(desc);
         return texture;
     }

@@ -399,7 +399,7 @@ void render_system::_create_prefilter() {
     texture_desc.format = texture_format::rgba8;
     texture_desc.filter = texture_filter::linear;
     texture_desc.wrap = texture_wrap::clamp;
-    texture_desc.mipmaps = 4;
+    texture_desc.mipmaps = 6;
     texture_desc.layers = 6;
     texture_desc.is_render_target = true;
     _prefilter_texture = _graphics_device.create_texture(texture_desc);
@@ -444,8 +444,8 @@ void render_system::_bake_prefilter_texture(std::shared_ptr<texture> skybox) {
         data.cube_face = static_cast<int>(layer);
         command_buffer->update_buffer(_prefilter_buffer, &data.cube_face, offsetof(prefilter_data, cube_face), sizeof(int));
 
-        for (std::size_t mipmap{ 0 }; mipmap < 4; ++mipmap) {
-            data.roughness = mipmap / 4.0f;
+        for (std::size_t mipmap{ 0 }; mipmap < 6; ++mipmap) {
+            data.roughness = mipmap / 6.0f;
             command_buffer->update_buffer(_prefilter_buffer, &data.roughness, offsetof(prefilter_data, roughness), sizeof(float));
 
             command_buffer->begin_render_pass(_prefilter_texture, layer, mipmap);

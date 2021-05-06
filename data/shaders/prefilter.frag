@@ -121,7 +121,7 @@ void main() {
     vec3 prefilteredColor = vec3(0.0);
     float totalWeight = 0.0;
 
-    float resolution = 512.0; // resolution of source cubemap (per face)
+    float resolution = 128.0; // resolution of source cubemap (per face)
     float saTexel  = 4.0 * PI / (6.0 * resolution * resolution);
 
     for (uint i = 0u; i < SAMPLE_COUNT; ++i)
@@ -138,12 +138,12 @@ void main() {
             float D   = distributionGGX(N, H, roughness);
             float NdotH = max(dot(N, H), 0.0);
             float HdotV = max(dot(H, V), 0.0);
-            float pdf = D * NdotH / (4.0 * HdotV) + 0.0001;
+            float pdf = D * NdotH / ((4.0 * HdotV) + 0.0001);
 
             float saSample = 1.0 / (float(SAMPLE_COUNT) * pdf + 0.0001);
             float mipLevel = (roughness == 0.0) ? 0.0 : 0.5 * log2(saSample / saTexel);
 
-            prefilteredColor += textureLod(radianceMap, L, mipLevel).rgb * NdotL;
+            prefilteredColor += textureLod(radianceMap, L, 0.0).rgb * NdotL;
             totalWeight      += NdotL;
         }
     }

@@ -331,7 +331,7 @@ void texture_vulkan::_create_sampler(const VkPhysicalDeviceProperties& physical_
     sampler_info.flags = 0;
     sampler_info.magFilter = utils_vulkan::filter(filter());
     sampler_info.minFilter = utils_vulkan::filter(filter());
-    sampler_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST; // TODO: Do mapping.
+    sampler_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR; // TODO: Do mapping.
     sampler_info.addressModeU = utils_vulkan::sampler_address_mode(wrap());
     sampler_info.addressModeV = utils_vulkan::sampler_address_mode(wrap());
     sampler_info.addressModeW = utils_vulkan::sampler_address_mode(wrap());

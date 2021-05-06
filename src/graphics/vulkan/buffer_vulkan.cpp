@@ -1,4 +1,3 @@
-
 #include "buffer_vulkan.hpp"
 #include "utils_vulkan.hpp"
 

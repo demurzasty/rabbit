@@ -147,7 +147,7 @@ void main() {
 
     vec3 reflected = reflect(-v, n);
 
-    vec3 prefilter_color = textureLod(u_prefilter_map, reflected, roughness * 4.0).rgb;
+    vec3 prefilter_color = textureLod(u_prefilter_map, reflected, roughness * 6.0).rgb;
     vec2 brdf = texture(u_brdf_map, vec2(n_dot_v, roughness)).rg;
     vec3 spec = prefilter_color * (ks * brdf.x + brdf.y);
 

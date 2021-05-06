@@ -18,19 +18,15 @@ public:
     }
 
     void initialize(registry& registry) override {
-        for (int x = -4; x < 5; ++x) {
-            for (int z = 0; z < 9; ++z) {
-                auto helmet = registry.create();
-                auto& helmet_transform = registry.emplace<transform>(helmet).position = { x * 2.0f, 0.0f, -z * 2.0f };
-                auto& helmet_geometry = registry.emplace<geometry>(helmet);
+        auto helmet = registry.create();
+        auto& helmet_transform = registry.emplace<transform>(helmet);
+        auto& helmet_geometry = registry.emplace<geometry>(helmet);
 
-                helmet_geometry.mesh = _asset_manager.load<mesh>("meshes/helmet.obj");
-                helmet_geometry.material = _asset_manager.load<material>("materials/helmet.json");
-            }
-        }
+        helmet_geometry.mesh = _asset_manager.load<mesh>("meshes/helmet.obj");
+        helmet_geometry.material = _asset_manager.load<material>("materials/helmet.json");
 
         auto camera = registry.create();
-        registry.emplace<rb::camera>(camera).skybox = _asset_manager.load<texture>("cubemaps/daylight.json");
+        registry.emplace<rb::camera>(camera).skybox = _asset_manager.load<texture>("cubemaps/magic_hour.json");
         registry.emplace<transform>(camera).position = { 0.0f, 0.0f, 5.0f };
     }
 
