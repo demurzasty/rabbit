@@ -60,6 +60,7 @@ namespace rb {
 
         std::shared_ptr<shader> _skybox_shader;
         std::shared_ptr<mesh> _skybox_mesh;
+        std::shared_ptr<texture> _skybox_texture;
         std::shared_ptr<resource_heap> _skybox_resource_heap;
 
         std::shared_ptr<shader> _brdf_shader;

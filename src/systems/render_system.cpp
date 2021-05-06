@@ -37,6 +37,7 @@ void render_system::draw(registry& registry) {
 
         if (!_skybox_mesh && camera.skybox) {
             _create_skybox(camera.skybox);
+            _skybox_texture = camera.skybox;
         }
     });
 
@@ -93,7 +94,8 @@ void render_system::_create_forward_shader() {
         { shader_binding_type::uniform_buffer, shader_stage_flags::vertex, 0, 1 },
         { shader_binding_type::uniform_buffer, shader_stage_flags::vertex, 1, 1 },
         { shader_binding_type::uniform_buffer, shader_stage_flags::fragment, 2, 1 },
-        { shader_binding_type::texture, shader_stage_flags::fragment, 3, 1 }
+        { shader_binding_type::texture, shader_stage_flags::fragment, 3, 1 },
+        { shader_binding_type::texture, shader_stage_flags::fragment, 4, 1 }
     };
     _forward_shader = _graphics_device.create_shader(shader_desc);
 }
@@ -286,7 +288,8 @@ void render_system::_create_geometry_data(transform& transform, geometry& geomet
         { 0, _camera_buffer },
         { 1, geometry_data.local_buffer },
         { 2, geometry.material },
-        { 3, geometry.material->albedo_map() }
+        { 3, geometry.material->albedo_map() },
+        { 4, _skybox_texture }
     };
     geometry_data.resource_heap = _graphics_device.create_resource_heap(resource_heap_desc);
 }
