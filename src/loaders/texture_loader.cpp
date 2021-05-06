@@ -86,6 +86,7 @@ std::shared_ptr<void> texture_loader::load(const std::string& filename, const js
         desc.wrap = texture_wrap::repeat;
         desc.mipmaps = 0;
         desc.type = texture_type::texture_2d;
+        desc.anisotropy = 16;
         auto texture = _graphics_device.create_texture(desc);
         return texture;
     }

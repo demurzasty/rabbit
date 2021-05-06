@@ -11,6 +11,7 @@ namespace rb {
     class texture_vulkan : public texture {
     public:
         texture_vulkan(VkDevice device,
+            const VkPhysicalDeviceProperties& physical_device_properties,
             VkQueue graphics_queue,
             VkCommandPool command_pool,
             VmaAllocator allocator,
@@ -41,7 +42,7 @@ namespace rb {
 
         void _create_framebuffer(const texture_desc& desc);
 
-        void _create_sampler(const texture_desc& desc);
+        void _create_sampler(const VkPhysicalDeviceProperties& physical_device_properties, const texture_desc& desc);
 
         void _create_render_pass(const texture_desc& desc);
 

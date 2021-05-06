@@ -18,6 +18,7 @@ namespace rb {
         struct alignas(16) camera_data {
             mat4f projection;
             mat4f view;
+            vec3f camera_position;
         };
 
         struct alignas(16) local_data {
@@ -28,7 +29,7 @@ namespace rb {
             int cube_face;
         };
 
-        struct alignas(16) prefiltered_data {
+        struct alignas(16) prefilter_data {
             int cube_face;
             float roughness;
         };
@@ -67,7 +68,7 @@ namespace rb {
 
         void _bake_irradiance_texture(std::shared_ptr<texture> skybox);
 
-        void _create_prefiltered();
+        void _create_prefilter();
 
         void _bake_prefilter_texture(std::shared_ptr<texture> skybox);
 
@@ -90,10 +91,10 @@ namespace rb {
         std::shared_ptr<buffer> _irradiance_buffer;
         std::shared_ptr<resource_heap> _irradiance_resource_heap;
 
-        std::shared_ptr<texture> _prefiltered_texture;
-        std::shared_ptr<shader> _prefiltered_shader;
-        std::shared_ptr<buffer> _prefiltered_buffer;
-        std::shared_ptr<resource_heap> _prefiltered_resource_heap;
+        std::shared_ptr<texture> _prefilter_texture;
+        std::shared_ptr<shader> _prefilter_shader;
+        std::shared_ptr<buffer> _prefilter_buffer;
+        std::shared_ptr<resource_heap> _prefilter_resource_heap;
 
         std::unordered_map<entity, geometry_data> _geometry_data;
         std::shared_ptr<command_buffer> _command_buffer;

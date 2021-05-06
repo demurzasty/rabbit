@@ -85,7 +85,7 @@ std::shared_ptr<buffer> graphics_device_vulkan::create_buffer(const buffer_desc&
 }
 
 std::shared_ptr<texture> graphics_device_vulkan::create_texture(const texture_desc& desc) {
-    return std::make_shared<texture_vulkan>(_device, _graphics_queue, _command_pool, _allocator, desc);
+    return std::make_shared<texture_vulkan>(_device, _physical_device_properties, _graphics_queue, _command_pool, _allocator, desc);
 }
 
 std::shared_ptr<shader> graphics_device_vulkan::create_shader(const shader_desc& desc) {
@@ -296,6 +296,8 @@ void graphics_device_vulkan::_choose_physical_device(const settings& desc) {
 
     // TODO: We should find best device.
     _physical_device = physical_devices[0];
+
+    vkGetPhysicalDeviceProperties(_physical_device, &_physical_device_properties);
 }
 
 void graphics_device_vulkan::_create_surface(const settings& desc, window& window) {
@@ -372,6 +374,9 @@ void graphics_device_vulkan::_create_device(const settings& desc) {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME // Need swapchain to present render result onto a screen.
     };
 
+    VkPhysicalDeviceFeatures supported_features;
+    vkGetPhysicalDeviceFeatures(_physical_device, &supported_features);
+
     // Fill device create informations.
     VkDeviceCreateInfo device_info;
     device_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -386,7 +391,7 @@ void graphics_device_vulkan::_create_device(const settings& desc) {
 #endif
     device_info.enabledExtensionCount = sizeof(device_extensions) / sizeof(*device_extensions);
     device_info.ppEnabledExtensionNames = device_extensions;
-    device_info.pEnabledFeatures = nullptr;
+    device_info.pEnabledFeatures = &supported_features;
     device_info.queueCreateInfoCount = sizeof(device_queue_infos) / sizeof(*device_queue_infos);
     device_info.pQueueCreateInfos = device_queue_infos;
 

@@ -8,6 +8,7 @@
 using namespace rb;
 
 texture_vulkan::texture_vulkan(VkDevice device,
+    const VkPhysicalDeviceProperties& physical_device_properties,
     VkQueue graphics_queue,
     VkCommandPool command_pool,
     VmaAllocator allocator,
@@ -26,7 +27,7 @@ texture_vulkan::texture_vulkan(VkDevice device,
     }
 
     _create_image_view(desc);
-    _create_sampler(desc);
+    _create_sampler(physical_device_properties, desc);
 
     if (desc.is_render_target) {
         _create_render_pass(desc);
@@ -323,22 +324,20 @@ void texture_vulkan::_create_image_view(const texture_desc& desc) {
     RB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan image view");
 }
 
-void texture_vulkan::_create_sampler(const texture_desc& desc) {
-    // todo: vkGetPhysicalDeviceProperties for max anisotropy
-
+void texture_vulkan::_create_sampler(const VkPhysicalDeviceProperties& physical_device_properties,const texture_desc& desc) {
     VkSamplerCreateInfo sampler_info;
     sampler_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
     sampler_info.pNext = nullptr;
     sampler_info.flags = 0;
     sampler_info.magFilter = utils_vulkan::filter(filter());
     sampler_info.minFilter = utils_vulkan::filter(filter());
-    sampler_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR; // TODO: Do mapping.
+    sampler_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST; // TODO: Do mapping.
     sampler_info.addressModeU = utils_vulkan::sampler_address_mode(wrap());
     sampler_info.addressModeV = utils_vulkan::sampler_address_mode(wrap());
     sampler_info.addressModeW = utils_vulkan::sampler_address_mode(wrap());
     sampler_info.mipLodBias = 0.0f;
     sampler_info.anisotropyEnable = desc.anisotropy > 1 ? VK_TRUE : VK_FALSE;
-    sampler_info.maxAnisotropy = static_cast<float>(desc.anisotropy);
+    sampler_info.maxAnisotropy = std::min(static_cast<float>(desc.anisotropy), physical_device_properties.limits.maxSamplerAnisotropy);
     sampler_info.compareEnable = VK_FALSE;
     sampler_info.compareOp = VK_COMPARE_OP_ALWAYS;
     sampler_info.minLod = 0.0f;

@@ -31,7 +31,7 @@ render_system::render_system(graphics_device& graphics_device)
     _create_brdf_shader();
     _bake_brdf_texture();
     _create_irradiance();
-    _create_prefiltered();
+    _create_prefilter();
 }
 
 void render_system::draw(registry& registry) {
@@ -41,6 +41,7 @@ void render_system::draw(registry& registry) {
         camera_data data;
         data.projection = mat4f::perspective(deg2rad(45.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
         data.view = invert(mat4f::translation(transform.position));
+        data.camera_position = transform.position;
         _command_buffer->update_buffer(_camera_buffer, &data, 0, sizeof(data));
 
         if (!_skybox_mesh && camera.skybox) {
@@ -102,13 +103,18 @@ void render_system::_create_forward_shader() {
     shader_desc.vertex_bytecode = forward_vert;
     shader_desc.fragment_bytecode = forward_frag;
     shader_desc.bindings = {
-        { shader_binding_type::uniform_buffer, shader_stage_flags::vertex, 0, 1 },
+        { shader_binding_type::uniform_buffer, shader_stage_flags::vertex | shader_stage_flags::fragment, 0, 1 },
         { shader_binding_type::uniform_buffer, shader_stage_flags::vertex, 1, 1 },
         { shader_binding_type::uniform_buffer, shader_stage_flags::fragment, 2, 1 },
         { shader_binding_type::texture, shader_stage_flags::fragment, 3, 1 },
         { shader_binding_type::texture, shader_stage_flags::fragment, 4, 1 },
         { shader_binding_type::texture, shader_stage_flags::fragment, 5, 1 },
-        { shader_binding_type::texture, shader_stage_flags::fragment, 6, 1 }
+        { shader_binding_type::texture, shader_stage_flags::fragment, 6, 1 },
+        { shader_binding_type::texture, shader_stage_flags::fragment, 7, 1 },
+        { shader_binding_type::texture, shader_stage_flags::fragment, 8, 1 },
+        { shader_binding_type::texture, shader_stage_flags::fragment, 9, 1 },
+        { shader_binding_type::texture, shader_stage_flags::fragment, 10, 1 },
+        { shader_binding_type::texture, shader_stage_flags::fragment, 11, 1 }
     };
     _forward_shader = _graphics_device.create_shader(shader_desc);
 }
@@ -304,7 +310,12 @@ void render_system::_create_geometry_data(transform& transform, geometry& geomet
         { 3, geometry.material->albedo_map() },
         { 4, _skybox_texture },
         { 5, _irradiance_texture },
-        { 6, _prefiltered_texture }
+        { 6, _prefilter_texture },
+        { 7, _brdf_texture },
+        { 8, geometry.material->normal_map() },
+        { 9, geometry.material->roughness_map() },
+        { 10, geometry.material->metallic_map() },
+        { 11, geometry.material->emissive_map() }
     };
     geometry_data.resource_heap = _graphics_device.create_resource_heap(resource_heap_desc);
 }
@@ -375,7 +386,7 @@ void render_system::_bake_irradiance_texture(std::shared_ptr<texture> skybox) {
     _graphics_device.submit(command_buffer);
 }
 
-void render_system::_create_prefiltered() {
+void render_system::_create_prefilter() {
     texture_desc texture_desc;
     texture_desc.type = texture_type::texture_cube;
     texture_desc.size = { 128, 128, 0 };
@@ -385,7 +396,7 @@ void render_system::_create_prefiltered() {
     texture_desc.mipmaps = 4;
     texture_desc.layers = 6;
     texture_desc.is_render_target = true;
-    _prefiltered_texture = _graphics_device.create_texture(texture_desc);
+    _prefilter_texture = _graphics_device.create_texture(texture_desc);
 
     shader_desc shader_desc;
     shader_desc.vertex_layout = { { vertex_attribute::position, vertex_format::vec2f() } };
@@ -397,41 +408,41 @@ void render_system::_create_prefiltered() {
     };
     shader_desc.depth_test_enable = false;
     shader_desc.depth_write_enable = false;
-    shader_desc.render_target = _prefiltered_texture;
-    _prefiltered_shader = _graphics_device.create_shader(shader_desc);
+    shader_desc.render_target = _prefilter_texture;
+    _prefilter_shader = _graphics_device.create_shader(shader_desc);
 
     buffer_desc buffer_desc;
     buffer_desc.type = buffer_type::uniform;
-    buffer_desc.size = buffer_desc.stride = sizeof(prefiltered_data);
-    _prefiltered_buffer = _graphics_device.create_buffer(buffer_desc);
+    buffer_desc.size = buffer_desc.stride = sizeof(prefilter_data);
+    _prefilter_buffer = _graphics_device.create_buffer(buffer_desc);
 }
 
 void render_system::_bake_prefilter_texture(std::shared_ptr<texture> skybox) {
     resource_heap_desc resource_heap_desc;
-    resource_heap_desc.shader = _prefiltered_shader;
+    resource_heap_desc.shader = _prefilter_shader;
     resource_heap_desc.resources = {
-        { 0, _prefiltered_buffer },
+        { 0, _prefilter_buffer },
         { 1, skybox }
     };
-    _prefiltered_resource_heap = _graphics_device.create_resource_heap(resource_heap_desc);
+    _prefilter_resource_heap = _graphics_device.create_resource_heap(resource_heap_desc);
 
     auto command_buffer = _graphics_device.create_command_buffer();
 
     command_buffer->begin();
 
-    command_buffer->set_shader(_prefiltered_shader);
-    command_buffer->set_resource_heap(_prefiltered_resource_heap);
+    command_buffer->set_shader(_prefilter_shader);
+    command_buffer->set_resource_heap(_prefilter_resource_heap);
 
-    prefiltered_data data;
+    prefilter_data data;
     for (std::size_t layer{ 0 }; layer < 6; ++layer) {
         data.cube_face = static_cast<int>(layer);
-        command_buffer->update_buffer(_prefiltered_buffer, &data.cube_face, offsetof(prefiltered_data, cube_face), sizeof(int));
+        command_buffer->update_buffer(_prefilter_buffer, &data.cube_face, offsetof(prefilter_data, cube_face), sizeof(int));
 
         for (std::size_t mipmap{ 0 }; mipmap < 4; ++mipmap) {
             data.roughness = mipmap / 4.0f;
-            command_buffer->update_buffer(_prefiltered_buffer, &data.roughness, offsetof(prefiltered_data, roughness), sizeof(float));
+            command_buffer->update_buffer(_prefilter_buffer, &data.roughness, offsetof(prefilter_data, roughness), sizeof(float));
 
-            command_buffer->begin_render_pass(_prefiltered_texture, layer, mipmap);
+            command_buffer->begin_render_pass(_prefilter_texture, layer, mipmap);
 
             command_buffer->set_vertex_buffer(_quad->vertex_buffer());
             command_buffer->set_index_buffer(_quad->index_buffer());

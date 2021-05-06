@@ -73,6 +73,7 @@ namespace rb {
     private:
         VkInstance _instance;
         VkPhysicalDevice _physical_device;
+        VkPhysicalDeviceProperties _physical_device_properties;
         VkSurfaceKHR _surface;
         VkDevice _device;
 

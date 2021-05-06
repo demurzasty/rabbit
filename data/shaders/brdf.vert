@@ -7,7 +7,7 @@ layout (location = 0) out vec2 var_texcoord;
 void main() {
 	var_texcoord = in_position * 0.5 + 0.5;
 
-#ifdef HLSL
+#if defined HLSL || defined VULKAN
 	var_texcoord.y = 1.0 - var_texcoord.y;
 #endif
 
