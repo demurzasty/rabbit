@@ -62,7 +62,7 @@ void render_system::draw(registry& registry) {
         // TODO: Update on transform change
 
         local_data data;
-        data.world = mat4f::rotation(transform.rotation) * mat4f::translation(transform.position);
+        data.world = mat4f::translation(transform.position) * mat4f::rotation(transform.rotation);
         _command_buffer->update_buffer(geometry_data.local_buffer, &data, 0, sizeof(data));
     });
 
@@ -72,8 +72,8 @@ void render_system::draw(registry& registry) {
     registry.view<transform, geometry>().each([this](const entity entity, transform& transform, geometry& geometry) {
         auto& geometry_data = _geometry_data[entity];
 
-        _command_buffer->set_resource_heap(geometry_data.resource_heap);
         _command_buffer->set_vertex_buffer(geometry.mesh->vertex_buffer());
+        _command_buffer->set_resource_heap(geometry_data.resource_heap);
         _command_buffer->draw(geometry.mesh->vertex_buffer()->count(), 1, 0, 0);
     });
 

@@ -97,7 +97,6 @@ vec3 perturb(vec3 map, vec3 n, vec3 v, vec2 texcoord) {
   return normalize(tbn * map);
 }
 
-
 void main() {
     vec3 albedo = u_base_color * texture(u_albedo_map, v_texcoord).rgb;
     float roughness = u_roughness * texture(u_roughness_map, v_texcoord).r;
