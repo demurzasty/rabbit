@@ -52,7 +52,7 @@ std::shared_ptr<void> texture_loader::load(const std::string& filename, const js
         for (std::size_t index{ 0 }; index < 6; ++index) {
             int width, height, components;
             data[index] = stbi_load(filenames[index].c_str(), &width, &height, &components, STBI_rgb_alpha);
-            desc.size = { static_cast<unsigned int>(width), static_cast<unsigned int>(height), 6 };
+            desc.size = { static_cast<unsigned int>(width), static_cast<unsigned int>(height), 0 };
         }
 
         auto buffer = std::make_unique<stbi_uc[]>(desc.size.x * desc.size.y * 4 * 6);

@@ -18,7 +18,7 @@ namespace rb {
 
         void begin_render_pass(graphics_device& graphics_device) override;
 
-        void begin_render_pass(const std::shared_ptr<texture>& render_target) override;
+        void begin_render_pass(const std::shared_ptr<texture>& render_target, std::size_t layer) override;
 
         void end_render_pass() override;
 

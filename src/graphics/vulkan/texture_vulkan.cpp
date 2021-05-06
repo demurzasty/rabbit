@@ -363,7 +363,7 @@ void texture_vulkan::_create_framebuffer(const texture_desc& desc) {
         image_view_info.subresourceRange.baseMipLevel = 0;
         image_view_info.subresourceRange.levelCount = static_cast<std::uint32_t>(mipmaps());
         image_view_info.subresourceRange.baseArrayLayer = static_cast<std::uint32_t>(layer);
-        image_view_info.subresourceRange.layerCount = static_cast<std::uint32_t>(layers());
+        image_view_info.subresourceRange.layerCount = 1;
 
         RB_MAYBE_UNUSED auto result = vkCreateImageView(_device, &image_view_info, nullptr, &_target_image_views[layer]);
         RB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan image view");

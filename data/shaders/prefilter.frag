@@ -85,7 +85,7 @@ vec3 importanceSampleGGX(vec2 xi, vec3 n, float roughness) {
 }
 
 void main() {
-#ifdef HLSL
+#if defined VULKAN || defined HLSL
     vec3 N = normalize(vec3(var_position.x, var_position.y, 1));
 
     if (cube_face == 2) {

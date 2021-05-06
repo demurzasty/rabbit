@@ -24,6 +24,10 @@ namespace rb {
             mat4f world;
         };
 
+        struct alignas(16) irradiance_data {
+            int cube_face{ 0 };
+        };
+
         struct geometry_data {
             std::shared_ptr<buffer> local_buffer;
             std::shared_ptr<resource_heap> resource_heap;
@@ -54,6 +58,11 @@ namespace rb {
         void _create_geometry_data(transform& transform, geometry& geometry, geometry_data& geometry_data);
 
     private:
+        void _create_irradiance();
+
+        void _bake_irradiance_texture(std::shared_ptr<texture> skybox);
+
+    private:
         graphics_device& _graphics_device;
         std::shared_ptr<shader> _forward_shader;
         std::shared_ptr<buffer> _camera_buffer;
@@ -66,6 +75,11 @@ namespace rb {
         std::shared_ptr<shader> _brdf_shader;
         std::shared_ptr<mesh> _quad;
         std::shared_ptr<texture> _brdf_texture;
+
+        std::shared_ptr<shader> _irradiance_shader;
+        std::shared_ptr<texture> _irradiance_texture;
+        std::shared_ptr<buffer> _irradiance_buffer;
+        std::shared_ptr<resource_heap> _irradiance_resource_heap;
 
         std::unordered_map<entity, geometry_data> _geometry_data;
         std::shared_ptr<command_buffer> _command_buffer;

@@ -5,9 +5,8 @@
 #define PI 3.14159265359
 
 layout (location = 0) in vec2 var_position;
-layout (location = 1) in vec2 var_texcoord;
 
-layout (std140, binding = 1) uniform IrradianceData {
+layout (std140, binding = 0) uniform IrradianceData {
     int cube_face;
 };
 
@@ -17,7 +16,7 @@ layout (location = 0) out vec4 out_color;
 
 void main() {
 
-#ifdef HLSL
+#if defined VULKAN || defined HLSL
     vec3 N = normalize(vec3(var_position.x, var_position.y, 1));
 
     if (cube_face == 2) {

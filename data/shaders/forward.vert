@@ -4,20 +4,14 @@ layout (location = 0) in vec3 in_position;
 layout (location = 1) in vec2 in_texcoord;
 layout (location = 2) in vec3 in_normal;
 
-layout (binding = 0) uniform CameraData {
+layout (std140, binding = 0) uniform CameraData {
     mat4 proj;
     mat4 view;
 };
 
-#if VULKAN && 0
-layout (push_constant) uniform LocalData {
+layout (std140, binding = 1) uniform LocalData {
     mat4 world;
 };
-#else
-layout (binding = 1) uniform LocalData {
-    mat4 world;
-};
-#endif
 
 layout (location = 0) out vec2 v_texcoord;
 layout (location = 1) out vec3 v_normal;
