@@ -163,8 +163,8 @@ void command_buffer_vulkan::set_vertex_buffer(const std::shared_ptr<buffer>& ver
 
 void command_buffer_vulkan::set_index_buffer(const std::shared_ptr<buffer>& index_buffer) {
     const auto native_buffer = std::static_pointer_cast<buffer_vulkan>(index_buffer);
-
-    vkCmdBindIndexBuffer(_command_buffer, native_buffer->buffer(), 0, VK_INDEX_TYPE_UINT32);
+    const auto index_type = native_buffer->stride() == 4 ? VK_INDEX_TYPE_UINT32 : VK_INDEX_TYPE_UINT16;
+    vkCmdBindIndexBuffer(_command_buffer, native_buffer->buffer(), 0, index_type);
 }
 
 void command_buffer_vulkan::draw(std::size_t vertex_count, std::size_t instance_count, std::size_t first_vertex, std::size_t first_instance) {

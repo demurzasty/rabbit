@@ -12,7 +12,7 @@ layout (location = 0) out vec3 var_texcoord;
 
 void main() {
     var_texcoord = normalize(in_position);
-    vec4 pos = proj * view * vec4(in_position, 1.0);
+    vec4 pos = proj * mat4(mat3(view)) * vec4(in_position, 1.0);
     gl_Position = pos.xyww;
 
 #ifdef VULKAN

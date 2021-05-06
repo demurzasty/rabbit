@@ -1,4 +1,5 @@
 #include <rabbit/graphics/shader.hpp>
+#include <rabbit/core/config.hpp>
 
 using namespace rb;
 
@@ -14,6 +15,7 @@ shader::shader(const shader_desc& desc)
     , _depth_write_enable(desc.depth_write_enable)
     , _stencil_test_enable(desc.stencil_test_enable)
     , _depth_compare_operator(desc.depth_compare_operator) {
+    RB_ASSERT(!desc.render_target || desc.render_target->is_render_target(), "Provided texture is not render target");
 }
 
 const vertex_layout& shader::vertex_layout() const {

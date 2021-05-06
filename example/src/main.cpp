@@ -26,7 +26,7 @@ public:
         helmet_geometry.material = _asset_manager.load<material>("materials/helmet.json");
 
         auto camera = registry.create();
-        registry.emplace<rb::camera>(camera);
+        registry.emplace<rb::camera>(camera).skybox = _asset_manager.load<texture>("cubemaps/daylight.json");
         registry.emplace<transform>(camera).position = { 0.0f, 0.0f, 5.0f };
     }
 

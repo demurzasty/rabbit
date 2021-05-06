@@ -152,17 +152,21 @@ void shader_vulkan::_create_pipeline(const span<const VkPipelineShaderStageCreat
     input_assembly_info.topology = utils_vulkan::topology(desc.topology);
     input_assembly_info.primitiveRestartEnable = VK_FALSE;
 
+    VkExtent2D extent = desc.render_target ?
+        VkExtent2D{ desc.render_target->size().x, desc.render_target->size().y } :
+        swapchain_extent;
+
     VkViewport viewport;
     viewport.x = 0.0f;
     viewport.y = 0.0f;
-    viewport.width = static_cast<float>(swapchain_extent.width);
-    viewport.height = static_cast<float>(swapchain_extent.height);
+    viewport.width = static_cast<float>(extent.width);
+    viewport.height = static_cast<float>(extent.height);
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
 
     VkRect2D scissor;
     scissor.offset = { 0, 0 };
-    scissor.extent = swapchain_extent;
+    scissor.extent = extent;
 
     VkPipelineViewportStateCreateInfo viewport_state_info;
     viewport_state_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
