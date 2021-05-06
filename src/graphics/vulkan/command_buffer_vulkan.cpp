@@ -13,44 +13,56 @@
 
 using namespace rb;
 
+constexpr std::size_t native_buffer_count{ 3 };
+
 command_buffer_vulkan::command_buffer_vulkan(VkDevice device, VkCommandPool command_pool)
     : _device(device)
     , _command_pool(command_pool) {
+    _command_buffers = std::make_unique<VkCommandBuffer[]>(native_buffer_count);
+
     VkCommandBufferAllocateInfo command_buffer_alloc_info;
     command_buffer_alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     command_buffer_alloc_info.pNext = nullptr;
     command_buffer_alloc_info.commandPool = _command_pool;
     command_buffer_alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    command_buffer_alloc_info.commandBufferCount = 1;
+    command_buffer_alloc_info.commandBufferCount = static_cast<std::uint32_t>(native_buffer_count);
 
-    RB_MAYBE_UNUSED auto result = vkAllocateCommandBuffers(_device, &command_buffer_alloc_info, &_command_buffer);
+    RB_MAYBE_UNUSED auto result = vkAllocateCommandBuffers(_device, &command_buffer_alloc_info, _command_buffers.get());
     RB_ASSERT(result == VK_SUCCESS, "Failed to allocate command buffer");
+
+    _fences = std::make_unique<VkFence[]>(native_buffer_count);
 
     VkFenceCreateInfo fence_info;
 	fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 	fence_info.pNext = nullptr;
     fence_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-    result = vkCreateFence(_device, &fence_info, nullptr, &_fence);
-    RB_ASSERT(result == VK_SUCCESS, "Failed to create fence");
+    for (std::size_t index{ 0 }; index < native_buffer_count; ++index) {
+        result = vkCreateFence(_device, &fence_info, nullptr, &_fences[index]);
+        RB_ASSERT(result == VK_SUCCESS, "Failed to create fence");
+    }
 }
 
 command_buffer_vulkan::~command_buffer_vulkan() {
-    vkWaitForFences(_device, 1, &_fence, VK_TRUE, 1000000000);
-    vkDestroyFence(_device, _fence, nullptr);
-    vkFreeCommandBuffers(_device, _command_pool, 1, &_command_buffer);
+    for (std::size_t index{ 0 }; index < native_buffer_count; ++index) {
+        vkWaitForFences(_device, 1, &_fences[index], VK_TRUE, 1000000000);
+        vkDestroyFence(_device, _fences[index], nullptr);
+    }
+    vkFreeCommandBuffers(_device, _command_pool, static_cast<std::uint32_t>(native_buffer_count), _command_buffers.get());
 }
 
 void command_buffer_vulkan::begin() {
-    RB_MAYBE_UNUSED auto result = vkWaitForFences(_device, 1, &_fence, VK_TRUE, 1000000000);
+    _index = (_index + 1) % native_buffer_count;
+
+    RB_MAYBE_UNUSED auto result = vkWaitForFences(_device, 1, &_fences[_index], VK_TRUE, 1000000000);
     RB_ASSERT(result == VK_SUCCESS, "Failed to wait for render fence");
 
-    result = vkResetFences(_device, 1, &_fence);
+    result = vkResetFences(_device, 1, &_fences[_index]);
     RB_ASSERT(result == VK_SUCCESS, "Failed to reset render fence");
 
     // Now that we are sure that the commands finished executing,
     // we can safely reset the command buffer to begin recording again.
-    result = vkResetCommandBuffer(_command_buffer, 0);
+    result = vkResetCommandBuffer(_command_buffers[_index], 0);
     RB_ASSERT(result == VK_SUCCESS, "Failed to reset command buffer");
 
     // Begin the command buffer recording.
@@ -61,13 +73,13 @@ void command_buffer_vulkan::begin() {
     begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
     begin_info.pInheritanceInfo = nullptr;
 
-    result = vkBeginCommandBuffer(_command_buffer, &begin_info);
+    result = vkBeginCommandBuffer(_command_buffers[_index], &begin_info);
     RB_ASSERT(result == VK_SUCCESS, "Failed to begin command buffer");
 }
 
 void command_buffer_vulkan::end() {
     // Finalize the command buffer (we can no longer add commands, but it can now be executed)
-    RB_MAYBE_UNUSED auto result = vkEndCommandBuffer(_command_buffer);
+    RB_MAYBE_UNUSED auto result = vkEndCommandBuffer(_command_buffers[_index]);
     RB_ASSERT(result == VK_SUCCESS, "Failed to end command buffer");
 }
 
@@ -88,7 +100,7 @@ void command_buffer_vulkan::begin_render_pass(graphics_device& graphics_device) 
 	render_pass_begin_info.clearValueCount = sizeof(clear_values) / sizeof(*clear_values);
 	render_pass_begin_info.pClearValues = clear_values;
 
-    vkCmdBeginRenderPass(_command_buffer, &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdBeginRenderPass(_command_buffers[_index], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 }
 
 void command_buffer_vulkan::begin_render_pass(const std::shared_ptr<texture>& render_target, std::size_t layer, std::size_t mipmap) {
@@ -114,16 +126,16 @@ void command_buffer_vulkan::begin_render_pass(const std::shared_ptr<texture>& re
 	render_pass_begin_info.clearValueCount = sizeof(clear_values) / sizeof(*clear_values);
 	render_pass_begin_info.pClearValues = clear_values;
 
-    vkCmdBeginRenderPass(_command_buffer, &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdBeginRenderPass(_command_buffers[_index], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 }
 
 void command_buffer_vulkan::end_render_pass() {
-    vkCmdEndRenderPass(_command_buffer);
+    vkCmdEndRenderPass(_command_buffers[_index]);
 }
 
 void command_buffer_vulkan::update_buffer(const std::shared_ptr<buffer>& buffer, const void* data, std::size_t offset, std::size_t size) {
     auto native_buffer = std::static_pointer_cast<buffer_vulkan>(buffer)->buffer();
-    vkCmdUpdateBuffer(_command_buffer, native_buffer, offset, size, data);
+    vkCmdUpdateBuffer(_command_buffers[_index], native_buffer, offset, size, data);
 }
 
 void command_buffer_vulkan::set_viewport(const vec4f& viewport) {
@@ -134,13 +146,13 @@ void command_buffer_vulkan::set_viewport(const vec4f& viewport) {
     native_viewport.height = viewport.w;
     native_viewport.minDepth = 0.0f;
     native_viewport.maxDepth = 1.0f;
-    vkCmdSetViewport(_command_buffer, 0, 1, &native_viewport);
+    vkCmdSetViewport(_command_buffers[_index], 0, 1, &native_viewport);
 }
 
 void command_buffer_vulkan::set_shader(const std::shared_ptr<shader>& shader) {
     const auto native_shader = std::static_pointer_cast<shader_vulkan>(shader);
 
-    vkCmdBindPipeline(_command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, native_shader->pipeline());
+    vkCmdBindPipeline(_command_buffers[_index], VK_PIPELINE_BIND_POINT_GRAPHICS, native_shader->pipeline());
 }
 
 void command_buffer_vulkan::set_resource_heap(const std::shared_ptr<resource_heap>& resource_heap) {
@@ -149,7 +161,7 @@ void command_buffer_vulkan::set_resource_heap(const std::shared_ptr<resource_hea
 
     const auto descriptor_set = native_resource_heap->descriptor_set();
 
-    vkCmdBindDescriptorSets(_command_buffer,
+    vkCmdBindDescriptorSets(_command_buffers[_index],
         VK_PIPELINE_BIND_POINT_GRAPHICS,
         native_shader->pipeline_layout(),
         0,
@@ -165,17 +177,17 @@ void command_buffer_vulkan::set_vertex_buffer(const std::shared_ptr<buffer>& ver
     const auto buffer = native_buffer->buffer();
     const VkDeviceSize offset{ 0 };
 
-    vkCmdBindVertexBuffers(_command_buffer, 0, 1, &buffer, &offset);
+    vkCmdBindVertexBuffers(_command_buffers[_index], 0, 1, &buffer, &offset);
 }
 
 void command_buffer_vulkan::set_index_buffer(const std::shared_ptr<buffer>& index_buffer) {
     const auto native_buffer = std::static_pointer_cast<buffer_vulkan>(index_buffer);
     const auto index_type = native_buffer->stride() == 4 ? VK_INDEX_TYPE_UINT32 : VK_INDEX_TYPE_UINT16;
-    vkCmdBindIndexBuffer(_command_buffer, native_buffer->buffer(), 0, index_type);
+    vkCmdBindIndexBuffer(_command_buffers[_index], native_buffer->buffer(), 0, index_type);
 }
 
 void command_buffer_vulkan::draw(std::size_t vertex_count, std::size_t instance_count, std::size_t first_vertex, std::size_t first_instance) {
-    vkCmdDraw(_command_buffer,
+    vkCmdDraw(_command_buffers[_index],
         static_cast<std::uint32_t>(vertex_count),
         static_cast<std::uint32_t>(instance_count),
         static_cast<std::uint32_t>(first_vertex),
@@ -183,7 +195,7 @@ void command_buffer_vulkan::draw(std::size_t vertex_count, std::size_t instance_
 }
 
 void command_buffer_vulkan::draw_indexed(std::size_t index_count, std::size_t instance_count, std::size_t first_index, std::size_t vertex_offset, std::size_t first_instance) {
-    vkCmdDrawIndexed(_command_buffer,
+    vkCmdDrawIndexed(_command_buffers[_index],
         static_cast<std::uint32_t>(index_count),
         static_cast<std::uint32_t>(instance_count),
         static_cast<std::uint32_t>(first_index),
@@ -193,9 +205,9 @@ void command_buffer_vulkan::draw_indexed(std::size_t index_count, std::size_t in
 
 
 VkCommandBuffer command_buffer_vulkan::command_buffer() const {
-    return _command_buffer;
+    return _command_buffers[_index];
 }
 
 VkFence command_buffer_vulkan::fence() const {
-    return _fence;
+    return _fences[_index];
 }

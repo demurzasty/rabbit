@@ -5,6 +5,8 @@
 
 #include <volk.h>
 
+#include <memory>
+
 namespace rb {
     class command_buffer_vulkan : public command_buffer {
     public:
@@ -45,7 +47,8 @@ namespace rb {
     private:
         VkDevice _device;
         VkCommandPool _command_pool;
-        VkCommandBuffer _command_buffer;
-        VkFence _fence;
+        std::unique_ptr<VkCommandBuffer[]> _command_buffers;
+        std::unique_ptr<VkFence[]> _fences;
+        std::size_t _index{ 0 };
     };
 }
