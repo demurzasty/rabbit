@@ -69,12 +69,18 @@ void render_system::draw(registry& registry) {
     _command_buffer->begin_render_pass(_graphics_device);
 
     _command_buffer->set_shader(_forward_shader);
+
     registry.view<transform, geometry>().each([this](const entity entity, transform& transform, geometry& geometry) {
         auto& geometry_data = _geometry_data[entity];
-
         _command_buffer->set_vertex_buffer(geometry.mesh->vertex_buffer());
         _command_buffer->set_resource_heap(geometry_data.resource_heap);
-        _command_buffer->draw(geometry.mesh->vertex_buffer()->count(), 1, 0, 0);
+
+        if (geometry.mesh->index_buffer()) {
+            _command_buffer->set_index_buffer(geometry.mesh->index_buffer());
+            _command_buffer->draw_indexed(geometry.mesh->index_buffer()->count(), 1, 0, 0, 0);
+        } else {
+            _command_buffer->draw(geometry.mesh->vertex_buffer()->count(), 1, 0, 0);
+        }
     });
 
     if (_skybox_mesh) {

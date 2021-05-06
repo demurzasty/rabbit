@@ -10,6 +10,8 @@ add_subdirectory ("gsl-3.1.0")
 
 add_subdirectory ("json-3.9.1")
 
+add_subdirectory ("meshoptimizer-0.16")
+
 add_subdirectory ("stb")
 
 if (WIN32)

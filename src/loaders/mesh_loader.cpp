@@ -6,12 +6,13 @@
 #include <rabbit/math/vec3.hpp>
 #include <rabbit/core/json.hpp>
 
+#include <meshoptimizer.h>
+
 #include <fstream>
 #include <sstream>
 #include <vector>
 
-// TODO: Add indices writing (generate if necessary)
-// TODO: Generate indices and optimize mesh.
+// TODO: Vertex quantization
 // TODO: Add more formats (.dae, .gltf)
 
 using namespace rb;
@@ -79,15 +80,36 @@ std::shared_ptr<void> mesh_loader::load(const std::string& filename, const json&
         { vertex_attribute::normal, vertex_format::vec3f() }
     };
 
+    auto remap = std::make_unique<std::uint32_t[]>(vertices.size());
+    const auto vertex_size = meshopt_generateVertexRemap(remap.get(), nullptr, vertices.size(), vertices.data(), vertices.size(), sizeof(mesh_vertex));
+
+    auto indices = std::make_unique<std::uint32_t[]>(vertices.size());
+    meshopt_remapIndexBuffer(indices.get(), nullptr, vertices.size(), remap.get());
+
+    auto indexed_vertices = std::make_unique<mesh_vertex[]>(vertex_size);
+    meshopt_remapVertexBuffer(indexed_vertices.get(), vertices.data(), vertices.size(), sizeof(mesh_vertex), remap.get());
+
+    meshopt_optimizeVertexCache(indices.get(), indices.get(), vertices.size(), vertex_size);
+
+    meshopt_optimizeOverdraw(indices.get(), indices.get(), vertices.size(), &indexed_vertices.get()->position.x, vertex_size, sizeof(mesh_vertex), 1.05f);
+    meshopt_optimizeVertexFetch(indexed_vertices.get(), indices.get(), vertices.size(), indexed_vertices.get(), vertex_size, sizeof(mesh_vertex));
+
     buffer_desc buffer_desc;
     buffer_desc.type = buffer_type::vertex;
-    buffer_desc.data = vertices.data();
-    buffer_desc.size = vertices.size() * sizeof(mesh_vertex);
+    buffer_desc.data = indexed_vertices.get();
+    buffer_desc.size = vertex_size * sizeof(mesh_vertex);
     buffer_desc.stride = sizeof(mesh_vertex);
     auto vertex_buffer = _graphics_device.create_buffer(buffer_desc);
+
+    buffer_desc.type = buffer_type::index;
+    buffer_desc.data = indices.get();
+    buffer_desc.size = vertices.size() * sizeof(std::uint32_t);
+    buffer_desc.stride = sizeof(std::uint32_t);
+    auto index_buffer = _graphics_device.create_buffer(buffer_desc);
 
     mesh_desc desc;
     desc.vertex_layout = vertex_layout;
     desc.vertex_buffer = vertex_buffer;
+    desc.index_buffer = index_buffer;
     return _graphics_device.create_mesh(desc);
 }

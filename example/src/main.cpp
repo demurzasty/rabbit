@@ -19,7 +19,7 @@ public:
 
     void initialize(registry& registry) override {
         for (int x = -4; x < 5; ++x) {
-            for (int z = 9; z >= 0; --z) {
+            for (int z = 0; z < 9; ++z) {
                 auto helmet = registry.create();
                 auto& helmet_transform = registry.emplace<transform>(helmet).position = { x * 2.0f, 0.0f, -z * 2.0f };
                 auto& helmet_geometry = registry.emplace<geometry>(helmet);
