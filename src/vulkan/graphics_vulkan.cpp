@@ -134,6 +134,17 @@ graphics::graphics(const window& p_window)
 #else
     assert(0);
 #endif
+
+    std::uint32_t physical_device_count = 0;
+    vkEnumeratePhysicalDevices(m_impl->instance, &physical_device_count, nullptr);
+
+    std::vector<VkPhysicalDevice> physical_devices(physical_device_count);
+    vkEnumeratePhysicalDevices(m_impl->instance, &physical_device_count, physical_devices.data());
+
+    m_impl->physical_device = physical_devices[0];
+
+    vkGetPhysicalDeviceProperties(m_impl->physical_device, &m_impl->physical_device_properties);
+
 }
 
 graphics::~graphics() {
