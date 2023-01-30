@@ -524,6 +524,8 @@ graphics::~graphics() {
 
 
 void graphics::push_canvas_primitives(const span<const vertex2d>& p_vertices, const span<const std::uint32_t>& p_indices) {
+    std::unique_lock lock{ m_impl->mutex };
+
     void* ptr;
 
     vk(vmaMapMemory(m_impl->allocator, m_impl->canvas_vertex_buffer_allocation, &ptr));
