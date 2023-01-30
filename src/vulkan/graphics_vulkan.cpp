@@ -266,16 +266,16 @@ graphics::graphics(const window& p_window)
 
     // TODO: Select present mode if vertical synchronization is enabled.
 
-    std::uint32_t image_count = surfaceCapabilities.minImageCount + 1;
-    if (surfaceCapabilities.maxImageCount > 0 && image_count > surfaceCapabilities.maxImageCount) {
-        image_count = surfaceCapabilities.maxImageCount;
+    std::uint32_t min_image_count = surfaceCapabilities.minImageCount + 1;
+    if (surfaceCapabilities.maxImageCount > 0 && min_image_count > surfaceCapabilities.maxImageCount) {
+        min_image_count = surfaceCapabilities.maxImageCount;
     }
 
     std::uint32_t queue_indices[] = { m_impl->graphics_family, m_impl->present_family };
 
     VkSwapchainCreateInfoKHR swapchain_info{ VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR };
     swapchain_info.surface = m_impl->surface;
-    swapchain_info.minImageCount = image_count;
+    swapchain_info.minImageCount = min_image_count;
     swapchain_info.imageFormat = m_impl->surface_format.format;
     swapchain_info.imageColorSpace = m_impl->surface_format.colorSpace;
     swapchain_info.imageExtent = { windowWidth, windowHeight };
@@ -298,9 +298,38 @@ graphics::graphics(const window& p_window)
 
     // Create Vulkan swapchain.
     vk(vkCreateSwapchainKHR(m_impl->device, &swapchain_info, nullptr, &m_impl->swapchain));
+
+    std::uint32_t image_count;
+    vk(vkGetSwapchainImagesKHR(m_impl->device, m_impl->swapchain, &image_count, nullptr));
+
+    // Get swapchain images list.
+    m_impl->screen_images.resize(image_count);
+    vk(vkGetSwapchainImagesKHR(m_impl->device, m_impl->swapchain, &image_count, m_impl->screen_images.data()));
+
+    m_impl->screen_image_views.resize(m_impl->screen_images.size());
+    for (std::size_t i = 0; i < m_impl->screen_images.size(); ++i) {
+        VkImageViewCreateInfo image_view_info{ VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
+        image_view_info.image = m_impl->screen_images[i];
+        image_view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        image_view_info.format = m_impl->surface_format.format;
+        image_view_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+        image_view_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+        image_view_info.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+        image_view_info.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+        image_view_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        image_view_info.subresourceRange.baseMipLevel = 0;
+        image_view_info.subresourceRange.levelCount = 1;
+        image_view_info.subresourceRange.baseArrayLayer = 0;
+        image_view_info.subresourceRange.layerCount = 1;
+        vk(vkCreateImageView(m_impl->device, &image_view_info, nullptr, &m_impl->screen_image_views[i]));
+    }
 }
 
 graphics::~graphics() {
+    for (VkImageView image_view : m_impl->screen_image_views) {
+        vkDestroyImageView(m_impl->device, image_view, nullptr);
+    }
+
     vkDestroySwapchainKHR(m_impl->device, m_impl->swapchain, nullptr);
 
     vmaDestroyAllocator(m_impl->allocator);
