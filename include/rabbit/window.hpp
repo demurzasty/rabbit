@@ -6,8 +6,6 @@
 
 namespace rb {
     class window {
-        struct impl;
-
     public:
         struct close_event {};
 
@@ -31,6 +29,9 @@ namespace rb {
         auto on_close() {
             return m_dispatcher.sink<close_event>();
         }
+
+    private:
+        struct impl;
 
     private:
         std::shared_ptr<impl> m_impl;

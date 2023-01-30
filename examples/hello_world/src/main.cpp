@@ -8,12 +8,15 @@ void on_close(bool& p_open) {
 
 int main(int argc, char* argv[]) {
     window window;
+    graphics graphics{ window };
     
     bool open = true;
     window.on_close().connect<&on_close>(open);
 
     while (open) {
         window.dispatch_events();
+
+        graphics.present();
     }
 
     return 0;

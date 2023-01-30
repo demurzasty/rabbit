@@ -4,6 +4,7 @@
 #include "config.hpp"
 #include "entity.hpp"
 #include "format.hpp"
+#include "graphics.hpp"
 #include "json.hpp"
 #include "memory.hpp"
 #include "reactive.hpp"
