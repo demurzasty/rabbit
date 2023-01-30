@@ -2,6 +2,7 @@
 
 #include "reactive.hpp"
 
+#include <string>
 #include <memory>
 
 namespace rb {
@@ -10,7 +11,7 @@ namespace rb {
         struct close_event {};
 
     public:
-        window();
+        window(const std::string& p_title = "RabBit", int p_width = 1280, int p_height = 720, bool p_fullscreen = false);
 
         window(const window&) = delete;
 

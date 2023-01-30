@@ -9,12 +9,14 @@ static LRESULT CALLBACK window_proc(HWND p_hwnd, UINT p_msg, WPARAM p_wparam, LP
 struct window::impl {
     HWND hwnd = nullptr;
     bool open = true;
+    bool fullscreen = false;
 };
 
 static int s_window_count = 0;
 
-window::window()
+window::window(const std::string& p_title, int p_width, int p_height, bool p_fullscreen)
     : m_impl(std::make_shared<impl>()) {
+    m_impl->fullscreen = p_fullscreen;
 
     if (s_window_count++ == 0) {
         WNDCLASS wc{};
@@ -27,8 +29,8 @@ window::window()
     }
 
     HDC screen_dc = GetDC(NULL);
-    int window_width = 1280;
-    int window_height = 720;
+    int window_width = p_width;
+    int window_height = p_height;
 
     int screen_width = GetDeviceCaps(screen_dc, HORZRES);
     int screen_height = GetDeviceCaps(screen_dc, VERTRES);
@@ -39,20 +41,33 @@ window::window()
 
     RECT rect{ 0, 0, window_width, window_height };
 
-    const DWORD style = WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_VISIBLE;
+    const DWORD style = p_fullscreen ?
+        WS_VISIBLE | WS_POPUP : 
+        WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_VISIBLE;
 
     int width = window_width;
     int height = window_height;
 
-    if (AdjustWindowRect(&rect, style, FALSE)) {
-        width = rect.right - rect.left;
-        height = rect.bottom - rect.top;
+    if (p_fullscreen) {
+        left = 0;
+        top = 0;
+        width = screen_width;
+        height = screen_height;
+    } else {
+        if (AdjustWindowRect(&rect, style, FALSE)) {
+            width = rect.right - rect.left;
+            height = rect.bottom - rect.top;
+        }
     }
 
     m_impl->hwnd = CreateWindow("RabBit", "RabBit", style, left, top, width, height, NULL, NULL, GetModuleHandle(NULL), &m_dispatcher);
 }
 
 window::~window() {
+    if (m_impl->fullscreen) {
+        ChangeDisplaySettings(nullptr, 0);
+    }
+
     DestroyWindow(m_impl->hwnd);
 
     if (--s_window_count == 0) {
