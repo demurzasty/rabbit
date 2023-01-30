@@ -6,6 +6,7 @@
 #define VMA_IMPLEMENTATION
 #include <vma/vk_mem_alloc.h>
 
+#include <shared_mutex>
 #include <vector>
 
 using namespace rb;
@@ -71,6 +72,8 @@ struct graphics::impl {
     VkSemaphore present_semaphore;
 
     std::uint32_t image_index = 0;
+
+    std::shared_mutex mutex;
 };
 
 graphics::graphics(const window& p_window)
@@ -471,6 +474,8 @@ graphics::~graphics() {
 }
 
 void graphics::present() {
+    std::unique_lock lock{ m_impl->mutex };
+
     vk(vkAcquireNextImageKHR(m_impl->device, m_impl->swapchain, UINT64_MAX, m_impl->present_semaphore, VK_NULL_HANDLE, &m_impl->image_index));
 
     vkWaitForFences(m_impl->device, 1, &m_impl->fences[m_impl->image_index], VK_FALSE, UINT64_MAX);

@@ -21,6 +21,6 @@ namespace rb {
         }
 
     private:
-        typename Clock::time_point m_time = Clock::now();
+        std::chrono::time_point<clock_type, duration_type> m_time = Clock::now();
     };
 }
