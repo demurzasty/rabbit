@@ -328,7 +328,7 @@ graphics::graphics(const window& p_window)
     color_attachments.flags = 0;
     color_attachments.format = m_impl->surface_format.format;
     color_attachments.samples = VK_SAMPLE_COUNT_1_BIT;
-    color_attachments.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    color_attachments.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     color_attachments.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     color_attachments.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     color_attachments.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -483,7 +483,7 @@ void graphics::present() {
     vkBeginCommandBuffer(m_impl->command_buffers[m_impl->image_index], &begin_info);
 
     VkClearValue clear_values[1];
-    clear_values[0].color = { 0.0f, 0.0f, 0.0f, 1.0f };
+    clear_values[0].color = { 100.0f / 255.0f, 149.0f / 255.0f, 237.0f / 255.0f, 1.0f };
 
     VkRenderPassBeginInfo render_pass_begin_info{ VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
     render_pass_begin_info.renderPass = m_impl->screen_render_pass;
