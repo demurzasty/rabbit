@@ -1,12 +1,13 @@
 #include <rabbit/graphics.hpp>
 #include <rabbit/format.hpp>
+#include <rabbit/arena.hpp>
 
 #include <volk.h>
 
 #define VMA_IMPLEMENTATION
 #include <vma/vk_mem_alloc.h>
 
-#include <shared_mutex>
+#include <mutex>
 #include <vector>
 
 using namespace rb;
@@ -34,6 +35,15 @@ static VkBool32 VKAPI_CALL debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT
     println(pCallbackData->pMessage);
     return VK_FALSE;
 }
+
+struct canvas_buffer_data {
+    std::uint32_t vertex_offset = 0;
+    std::uint32_t vertex_count = 0;
+    std::uint32_t vertex_capacity = 0;
+    std::uint32_t index_offset = 0;
+    std::uint32_t index_count = 0;
+    std::uint32_t index_capacity = 0;
+};
 
 struct graphics::impl {
     // Core
@@ -73,7 +83,11 @@ struct graphics::impl {
 
     std::uint32_t image_index = 0;
 
-    std::shared_mutex mutex;
+    std::mutex mutex;
+
+    // Objects
+
+    arena<canvas_buffer_data> canvas_buffers;
 };
 
 graphics::graphics(const window& p_window)
@@ -471,6 +485,29 @@ graphics::~graphics() {
     vkDestroyDevice(m_impl->device, nullptr);
     vkDestroySurfaceKHR(m_impl->instance, m_impl->surface, nullptr);
     vkDestroyInstance(m_impl->instance, nullptr);
+}
+
+
+id_type graphics::create_canvas_buffer() {
+    std::unique_lock lock{ m_impl->mutex };
+
+    return m_impl->canvas_buffers.create();
+}
+
+void graphics::destroy_canvas_buffer(id_type p_id) {
+    std::unique_lock lock{ m_impl->mutex };
+
+    assert(m_impl->canvas_buffers.valid(p_id));
+
+    m_impl->canvas_buffers.destroy(p_id);
+}
+
+void graphics::set_canvas_buffer_primitives(id_type p_id, const span<const vertex2d>& p_vertices, const span<const std::uint32_t>& p_indices) {
+    std::unique_lock lock{ m_impl->mutex };
+
+    assert(m_impl->canvas_buffers.valid(p_id));
+
+    auto& data = m_impl->canvas_buffers[p_id];
 }
 
 void graphics::present() {

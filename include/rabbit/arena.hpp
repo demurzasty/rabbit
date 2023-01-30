@@ -121,7 +121,7 @@ namespace rb {
         void dispose(id_type p_id) {
             assert(valid(p_id));
 
-            m_pool[std::size_t(id)] = m_disposed;
+            m_pool[std::size_t(p_id)] = m_disposed;
             m_disposed = p_id;
         }
 

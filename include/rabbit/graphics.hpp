@@ -3,6 +3,7 @@
 #include "math.hpp"
 #include "config.hpp"
 #include "window.hpp"
+#include "span.hpp"
 
 #include <memory>
 
@@ -28,6 +29,12 @@ namespace rb {
         graphics& operator=(const graphics&) = delete;
 
         graphics& operator=(graphics&&) noexcept = default;
+
+        id_type create_canvas_buffer();
+
+        void destroy_canvas_buffer(id_type p_id);
+
+        void set_canvas_buffer_primitives(id_type p_id, const span<const vertex2d>& p_vertices, const span<const std::uint32_t>& p_indices);
 
         void present();
 

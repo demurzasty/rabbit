@@ -256,6 +256,22 @@ namespace rb {
         };
     }
 
+    template<typename T>
+    static constexpr bool is_power_of_to(const T& x) {
+        return !(x == 0) && !(x & (x - 1));
+    }
+
+    template<typename T>
+    static constexpr T next_power_of_two(T v) {
+        v--;
+        v |= v >> 1;
+        v |= v >> 2;
+        v |= v >> 4;
+        v |= v >> 8;
+        v |= v >> 16;
+        return ++v;
+    }
+
     template<class T>
     constexpr T min(const T& p_left, const T& p_right) {
         return (p_left < p_right) ? p_left : p_right;
