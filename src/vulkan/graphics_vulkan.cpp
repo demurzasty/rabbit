@@ -50,27 +50,27 @@ struct graphics::impl {
     
     // Screen
 
-    VkSurfaceFormatKHR _surface_format;
-    VkExtent2D _swapchain_extent;
-    VkSwapchainKHR _swapchain;
-    VkPresentModeKHR _present_mode;
+    VkSurfaceFormatKHR surface_format;
+    VkExtent2D swapchain_extent;
+    VkSwapchainKHR swapchain;
+    VkPresentModeKHR present_mode;
 
-    std::vector<VkImage> _screen_images;
-    std::vector<VkImageView> _screen_image_views;
+    std::vector<VkImage> screen_images;
+    std::vector<VkImageView> screen_image_views;
 
-    VkRenderPass _screen_render_pass;
-    std::vector<VkFramebuffer> _screen_framebuffers;
+    VkRenderPass screen_render_pass;
+    std::vector<VkFramebuffer> screen_framebuffers;
 
     // Render Loop
 
-    VkCommandPool _command_pool;
-    std::vector<VkCommandBuffer> _command_buffers;
-    std::vector<VkFence> _fences;
+    VkCommandPool command_pool;
+    std::vector<VkCommandBuffer> command_buffers;
+    std::vector<VkFence> fences;
 
-    VkSemaphore _render_semaphore;
-    VkSemaphore _present_semaphore;
+    VkSemaphore render_semaphore;
+    VkSemaphore present_semaphore;
 
-    std::uint32_t _image_index = 0;
+    std::uint32_t image_index = 0;
 };
 
 graphics::graphics(const window& p_window)
@@ -227,6 +227,30 @@ graphics::graphics(const window& p_window)
     allocator_info.physicalDevice = m_impl->physical_device;
     allocator_info.device = m_impl->device;
     vk(vmaCreateAllocator(&allocator_info, &m_impl->allocator));
+
+    // Query surface format count of picked physical device.
+    std::uint32_t surface_format_count = 0;
+    vk(vkGetPhysicalDeviceSurfaceFormatsKHR(m_impl->physical_device, m_impl->surface, &surface_format_count, nullptr));
+
+    // Enumarate all surface formats.
+    std::vector<VkSurfaceFormatKHR> surface_formats(surface_format_count);
+    vk(vkGetPhysicalDeviceSurfaceFormatsKHR(m_impl->physical_device, m_impl->surface, &surface_format_count, surface_formats.data()));
+
+    // Choose surface color format.
+    if (surface_format_count == 1 && surface_formats[0].format == VK_FORMAT_UNDEFINED) {
+        m_impl->surface_format.format = VK_FORMAT_B8G8R8A8_UNORM;
+    } else {
+        m_impl->surface_format.format = surface_formats[0].format;
+    }
+
+    m_impl->surface_format.colorSpace = surface_formats[0].colorSpace;
+
+    // Query surface capabilities.
+    VkSurfaceCapabilitiesKHR surfaceCapabilities;
+    vk(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_impl->physical_device, m_impl->surface, &surfaceCapabilities));
+
+    // Store swapchain extent
+    m_impl->swapchain_extent = surfaceCapabilities.currentExtent;
 }
 
 graphics::~graphics() {
