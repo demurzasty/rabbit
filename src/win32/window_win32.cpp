@@ -11,16 +11,20 @@ struct window::impl {
     bool open = true;
 };
 
+static int s_window_count = 0;
+
 window::window()
     : m_impl(std::make_shared<impl>()) {
 
-    WNDCLASS wc{};
-    wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-    wc.lpfnWndProc = &window_proc;
-    wc.hInstance = GetModuleHandle(nullptr);
-    wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    wc.lpszClassName = "RabBit";
-    RegisterClass(&wc);
+    if (s_window_count++ == 0) {
+        WNDCLASS wc{};
+        wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+        wc.lpfnWndProc = &window_proc;
+        wc.hInstance = GetModuleHandle(nullptr);
+        wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+        wc.lpszClassName = "RabBit";
+        RegisterClass(&wc);
+    }
 
     HDC screen_dc = GetDC(NULL);
     int window_width = 1280;
@@ -50,7 +54,10 @@ window::window()
 
 window::~window() {
     DestroyWindow(m_impl->hwnd);
-    UnregisterClass("RabBit", GetModuleHandle(NULL));
+
+    if (--s_window_count == 0) {
+        UnregisterClass("RabBit", GetModuleHandle(NULL));
+    }
 }
 
 bool window::dispatch_events() {
