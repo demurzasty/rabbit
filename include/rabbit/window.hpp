@@ -25,11 +25,15 @@ namespace rb {
 
         bool dispatch_events();
 
-        void* handle() const;
-
         auto on_close() {
             return m_dispatcher.sink<close_event>();
         }
+
+        void* handle() const;
+
+        int width() const;
+
+        int height() const;
 
     private:
         struct impl;

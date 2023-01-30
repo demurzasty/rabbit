@@ -90,6 +90,18 @@ void* window::handle() const {
     return m_impl->hwnd;
 }
 
+int window::width() const {
+    RECT rect;
+    GetClientRect(m_impl->hwnd, &rect);
+    return rect.right - rect.left;
+}
+
+int window::height() const {
+    RECT rect;
+    GetClientRect(m_impl->hwnd, &rect);
+    return rect.bottom - rect.top;
+}
+
 LRESULT CALLBACK window_proc(HWND p_hwnd, UINT p_msg, WPARAM p_wparam, LPARAM p_lparam) {
     if (p_msg == WM_CREATE) {
         SetWindowLongPtr(p_hwnd, GWLP_USERDATA, (LONG_PTR)((CREATESTRUCT*)(p_lparam))->lpCreateParams);
