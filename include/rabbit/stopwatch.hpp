@@ -12,7 +12,7 @@ namespace rb {
         using clock_type = Clock;
 
     public:
-        T elapsed() {
+        T reset() {
             const auto current = Clock::now();
             const auto duration = std::chrono::duration_cast<duration_type>(current - m_time);
             m_time = current;
