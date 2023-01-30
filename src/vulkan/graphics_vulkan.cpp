@@ -323,9 +323,85 @@ graphics::graphics(const window& p_window)
         image_view_info.subresourceRange.layerCount = 1;
         vk(vkCreateImageView(m_impl->device, &image_view_info, nullptr, &m_impl->screen_image_views[i]));
     }
+
+    VkAttachmentDescription color_attachments;
+    color_attachments.flags = 0;
+    color_attachments.format = m_impl->surface_format.format;
+    color_attachments.samples = VK_SAMPLE_COUNT_1_BIT;
+    color_attachments.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    color_attachments.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    color_attachments.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    color_attachments.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    color_attachments.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    color_attachments.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+    VkAttachmentDescription attachments[] = {
+        color_attachments,
+    };
+
+    VkAttachmentReference color_attachment_reference;
+    color_attachment_reference.attachment = 0;
+    color_attachment_reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+    VkAttachmentReference color_attachment_references[] = {
+        color_attachment_reference
+    };
+
+    VkSubpassDescription subpass{};
+    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    subpass.colorAttachmentCount = 1;
+    subpass.pColorAttachments = color_attachment_references;
+    subpass.pDepthStencilAttachment = nullptr;
+    subpass.pResolveAttachments = nullptr;
+
+    VkSubpassDependency subpass_deps[2]{};
+    subpass_deps[0].srcSubpass = VK_SUBPASS_EXTERNAL;
+    subpass_deps[0].dstSubpass = 0;
+    subpass_deps[0].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+    subpass_deps[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    subpass_deps[0].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+    subpass_deps[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    subpass_deps[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+    subpass_deps[1].srcSubpass = 0;
+    subpass_deps[1].dstSubpass = VK_SUBPASS_EXTERNAL;
+    subpass_deps[1].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    subpass_deps[1].dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+    subpass_deps[1].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    subpass_deps[1].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+    subpass_deps[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+    subpass_deps[0].srcSubpass = VK_SUBPASS_EXTERNAL;
+    subpass_deps[0].dstSubpass = 0;
+    subpass_deps[0].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
+        VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT; // Both stages might have access the depth-buffer, so need both in src/dstStageMask;;
+    subpass_deps[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    subpass_deps[0].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+    subpass_deps[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
+        VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+    subpass_deps[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+    subpass_deps[1].srcSubpass = 0;
+    subpass_deps[1].dstSubpass = VK_SUBPASS_EXTERNAL;
+    subpass_deps[1].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    subpass_deps[1].dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+    subpass_deps[1].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    subpass_deps[1].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+    subpass_deps[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+    VkRenderPassCreateInfo render_pass_info{ VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO };
+    render_pass_info.attachmentCount = sizeof(attachments) / sizeof(*attachments);
+    render_pass_info.pAttachments = attachments;
+    render_pass_info.subpassCount = 1;
+    render_pass_info.pSubpasses = &subpass;
+    render_pass_info.dependencyCount = 2;
+    render_pass_info.pDependencies = subpass_deps;
+    vk(vkCreateRenderPass(m_impl->device, &render_pass_info, nullptr, &m_impl->screen_render_pass));
 }
 
 graphics::~graphics() {
+    vkDestroyRenderPass(m_impl->device, m_impl->screen_render_pass, nullptr);
+
     for (VkImageView image_view : m_impl->screen_image_views) {
         vkDestroyImageView(m_impl->device, image_view, nullptr);
     }
