@@ -520,8 +520,8 @@ void graphics::set_canvas_buffer_primitives(id_type p_id, const span<const verte
 
     auto& data = m_impl->canvas_buffers[p_id];
 
-    auto& vertex_region = m_impl->canvas_vertex_zone[data.vertex_region_id];
-    auto& index_region = m_impl->canvas_vertex_zone[data.index_region_id];
+    auto& vertex_region = m_impl->canvas_vertex_zone.assign(data.vertex_region_id, p_vertices.size());
+    auto& index_region = m_impl->canvas_index_zone.assign(data.index_region_id, p_indices.size());
 }
 
 void graphics::present() {
