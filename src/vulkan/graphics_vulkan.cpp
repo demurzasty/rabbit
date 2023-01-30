@@ -145,9 +145,85 @@ graphics::graphics(const window& p_window)
 
     vkGetPhysicalDeviceProperties(m_impl->physical_device, &m_impl->physical_device_properties);
 
+
+    std::uint32_t queue_family_count;
+    vkGetPhysicalDeviceQueueFamilyProperties(m_impl->physical_device, &queue_family_count, nullptr);
+
+    std::vector<VkQueueFamilyProperties> queue_family_properties(queue_family_count);
+    vkGetPhysicalDeviceQueueFamilyProperties(m_impl->physical_device, &queue_family_count, queue_family_properties.data());
+
+    for (std::uint32_t i = 0; i < queue_family_count; ++i) {
+        if (queue_family_properties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+            m_impl->graphics_family = i;
+        }
+
+        VkBool32 present_support = VK_FALSE;
+        vkGetPhysicalDeviceSurfaceSupportKHR(m_impl->physical_device, i, m_impl->surface, &present_support);
+
+        if (present_support == VK_TRUE) {
+            m_impl->present_family = i;
+        }
+    }
+
+
+    // Fill queue priorities array.
+    float queuePriorities[] = { 1.0f };
+
+    // Fill graphics device queue create informations.
+    VkDeviceQueueCreateInfo device_graphics_queue_info{ VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO };
+    device_graphics_queue_info.queueFamilyIndex = m_impl->graphics_family;
+    device_graphics_queue_info.queueCount = 1;
+    device_graphics_queue_info.pQueuePriorities = queuePriorities;
+
+    // Fill present queue create informations.
+    VkDeviceQueueCreateInfo device_present_queue_info{ VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO };
+    device_present_queue_info.queueFamilyIndex = m_impl->present_family;
+    device_present_queue_info.queueCount = 1;
+    device_present_queue_info.pQueuePriorities = queuePriorities;
+
+    VkDeviceQueueCreateInfo device_queue_infos[] = {
+        device_graphics_queue_info,
+        device_present_queue_info
+    };
+
+    // Fill logical device extensions array.
+    const char* device_extensions[] = {
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME, // Need swapchain to present render result onto a screen.
+        VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
+        VK_KHR_DEPTH_STENCIL_RESOLVE_EXTENSION_NAME, // For resolve multisampled depth
+    };
+
+    VkPhysicalDeviceDescriptorIndexingFeatures indexing_features{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT };
+    VkPhysicalDeviceFeatures2 advance_features{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2, &indexing_features };
+    vkGetPhysicalDeviceFeatures2(m_impl->physical_device, &advance_features);
+
+    // Fill device create informations.
+    VkDeviceCreateInfo device_info{ VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO };
+    device_info.pNext = &advance_features;
+#ifdef _DEBUG
+    device_info.enabledLayerCount = sizeof(validation_layers) / sizeof(*validation_layers);
+    device_info.ppEnabledLayerNames = validation_layers;
+#else
+    device_info.enabledLayerCount = 0;
+    device_info.ppEnabledLayerNames = nullptr;
+#endif
+    device_info.enabledExtensionCount = sizeof(device_extensions) / sizeof(*device_extensions);
+    device_info.ppEnabledExtensionNames = device_extensions;
+    // device_info.pEnabledFeatures = &supported_features;
+    device_info.pEnabledFeatures = nullptr;
+    device_info.queueCreateInfoCount = sizeof(device_queue_infos) / sizeof(*device_queue_infos);
+    device_info.pQueueCreateInfos = device_queue_infos;
+
+    // Create new Vulkan logical device using physical one.
+    vk(vkCreateDevice(m_impl->physical_device, &device_info, nullptr, &m_impl->device));
+
+    // Gets logical device queues.
+    vkGetDeviceQueue(m_impl->device, m_impl->graphics_family, 0, &m_impl->graphics_queue);
+    vkGetDeviceQueue(m_impl->device, m_impl->present_family, 0, &m_impl->present_queue);
 }
 
 graphics::~graphics() {
+    vkDestroyDevice(m_impl->device, nullptr);
     vkDestroySurfaceKHR(m_impl->instance, m_impl->surface, nullptr);
     vkDestroyInstance(m_impl->instance, nullptr);
 }
