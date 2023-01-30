@@ -8,7 +8,6 @@ void on_close(bool& p_open) {
 
 int main(int argc, char* argv[]) {
     window window;
-
     graphics graphics{ window };
     
     bool open = true;
