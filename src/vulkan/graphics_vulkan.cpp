@@ -504,24 +504,24 @@ void graphics::present() {
 
     vkEndCommandBuffer(m_impl->command_buffers[m_impl->image_index]);
 
-    VkPipelineStageFlags waitDstStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
+    VkPipelineStageFlags wait_dst_stage_mask = VK_PIPELINE_STAGE_TRANSFER_BIT;
 
-    VkSubmitInfo submitInfo{ VK_STRUCTURE_TYPE_SUBMIT_INFO };
-    submitInfo.waitSemaphoreCount = 1;
-    submitInfo.pWaitSemaphores = &m_impl->present_semaphore;
-    submitInfo.pWaitDstStageMask = &waitDstStageMask;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &m_impl->command_buffers[m_impl->image_index];
-    submitInfo.signalSemaphoreCount = 1;
-    submitInfo.pSignalSemaphores = &m_impl->render_semaphore;
-    vkQueueSubmit(m_impl->graphics_queue, 1, &submitInfo, m_impl->fences[m_impl->image_index]);
+    VkSubmitInfo submit_info{ VK_STRUCTURE_TYPE_SUBMIT_INFO };
+    submit_info.waitSemaphoreCount = 1;
+    submit_info.pWaitSemaphores = &m_impl->present_semaphore;
+    submit_info.pWaitDstStageMask = &wait_dst_stage_mask;
+    submit_info.commandBufferCount = 1;
+    submit_info.pCommandBuffers = &m_impl->command_buffers[m_impl->image_index];
+    submit_info.signalSemaphoreCount = 1;
+    submit_info.pSignalSemaphores = &m_impl->render_semaphore;
+    vkQueueSubmit(m_impl->graphics_queue, 1, &submit_info, m_impl->fences[m_impl->image_index]);
 
-    VkPresentInfoKHR presentInfo{ VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
-    presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores = &m_impl->render_semaphore;
-    presentInfo.swapchainCount = 1;
-    presentInfo.pSwapchains = &m_impl->swapchain;
-    presentInfo.pImageIndices = &m_impl->image_index;
-    vkQueuePresentKHR(m_impl->present_queue, &presentInfo);
+    VkPresentInfoKHR present_info{ VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
+    present_info.waitSemaphoreCount = 1;
+    present_info.pWaitSemaphores = &m_impl->render_semaphore;
+    present_info.swapchainCount = 1;
+    present_info.pSwapchains = &m_impl->swapchain;
+    present_info.pImageIndices = &m_impl->image_index;
+    vkQueuePresentKHR(m_impl->present_queue, &present_info);
     vkQueueWaitIdle(m_impl->present_queue);
 }
