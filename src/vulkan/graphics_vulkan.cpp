@@ -397,9 +397,25 @@ graphics::graphics(const window& p_window)
     render_pass_info.dependencyCount = 2;
     render_pass_info.pDependencies = subpass_deps;
     vk(vkCreateRenderPass(m_impl->device, &render_pass_info, nullptr, &m_impl->screen_render_pass));
+
+    m_impl->screen_framebuffers.resize(m_impl->screen_image_views.size());
+    for (std::size_t i = 0; i < m_impl->screen_framebuffers.size(); ++i) {
+        VkFramebufferCreateInfo framebufferInfo{ VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
+        framebufferInfo.renderPass = m_impl->screen_render_pass;
+        framebufferInfo.attachmentCount = 1;
+        framebufferInfo.pAttachments = &m_impl->screen_image_views[i];
+        framebufferInfo.width = m_impl->swapchain_extent.width;
+        framebufferInfo.height = m_impl->swapchain_extent.height;
+        framebufferInfo.layers = 1;
+        vk(vkCreateFramebuffer(m_impl->device, &framebufferInfo, nullptr, &m_impl->screen_framebuffers[i]));
+    }
 }
 
 graphics::~graphics() {
+    for (VkFramebuffer framebuffer : m_impl->screen_framebuffers) {
+        vkDestroyFramebuffer(m_impl->device, framebuffer, nullptr);
+    }
+
     vkDestroyRenderPass(m_impl->device, m_impl->screen_render_pass, nullptr);
 
     for (VkImageView image_view : m_impl->screen_image_views) {
