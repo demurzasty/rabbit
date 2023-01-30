@@ -50,6 +50,7 @@ struct canvas_draw_command_clip {
 };
 
 struct canvas_draw_command_primitives {
+    std::int32_t texture_index;
     std::uint32_t index_offset;
     std::uint32_t index_count;
     std::uint32_t vertex_offset;
@@ -569,6 +570,7 @@ void graphics::push_canvas_primitives(const span<const vertex2d>& p_vertices, co
 
     canvas_draw_command command;
     command.type = canvas_draw_command_type::primitives;
+    command.primitives.texture_index = -1;
     command.primitives.index_offset = std::uint32_t(m_impl->canvas_index_buffer_offset);
     command.primitives.index_count = std::uint32_t(p_indices.size());
     command.primitives.vertex_offset = std::uint32_t(m_impl->canvas_vertex_buffer_offset);
