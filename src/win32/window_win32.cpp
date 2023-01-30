@@ -60,7 +60,7 @@ window::window(const std::string& p_title, int p_width, int p_height, bool p_ful
         }
     }
 
-    m_impl->hwnd = CreateWindow("RabBit", "RabBit", style, left, top, width, height, NULL, NULL, GetModuleHandle(NULL), &m_dispatcher);
+    m_impl->hwnd = CreateWindow("RabBit", p_title.c_str(), style, left, top, width, height, NULL, NULL, GetModuleHandle(NULL), &m_dispatcher);
 }
 
 window::~window() {
