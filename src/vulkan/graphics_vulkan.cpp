@@ -409,9 +409,49 @@ graphics::graphics(const window& p_window)
         framebufferInfo.layers = 1;
         vk(vkCreateFramebuffer(m_impl->device, &framebufferInfo, nullptr, &m_impl->screen_framebuffers[i]));
     }
+
+    VkCommandPoolCreateInfo command_pool_info{ VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO };
+    command_pool_info.queueFamilyIndex = m_impl->graphics_family;
+    command_pool_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT; // | VK_COMMAND_POOL_CREATE_TRANSIENT_BIT ?
+    vk(vkCreateCommandPool(m_impl->device, &command_pool_info, nullptr, &m_impl->command_pool));
+
+    m_impl->command_buffers.resize(m_impl->screen_image_views.size());
+
+    VkCommandBufferAllocateInfo command_buffer_alloc_info{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
+    command_buffer_alloc_info.commandPool = m_impl->command_pool;
+    command_buffer_alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    command_buffer_alloc_info.commandBufferCount = std::uint32_t(m_impl->command_buffers.size());
+    vk(vkAllocateCommandBuffers(m_impl->device, &command_buffer_alloc_info, m_impl->command_buffers.data()));
+
+    VkSemaphoreCreateInfo semaphore_info{ VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
+    vk(vkCreateSemaphore(m_impl->device, &semaphore_info, VK_NULL_HANDLE, &m_impl->render_semaphore));
+    vk(vkCreateSemaphore(m_impl->device, &semaphore_info, VK_NULL_HANDLE, &m_impl->present_semaphore));
+
+    m_impl->fences.resize(m_impl->screen_image_views.size());
+
+    VkFenceCreateInfo fence_info{ VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
+    fence_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+    for (auto& fence : m_impl->fences) {
+        vk(vkCreateFence(m_impl->device, &fence_info, nullptr, &fence));
+    }
 }
 
 graphics::~graphics() {
+    for (auto& fence : m_impl->fences) {
+        vkWaitForFences(m_impl->device, 1, &fence, VK_TRUE, 1000000000);
+        vkDestroyFence(m_impl->device, fence, nullptr);
+    }
+    vkFreeCommandBuffers(m_impl->device, m_impl->command_pool, std::uint32_t(m_impl->command_buffers.size()), m_impl->command_buffers.data());
+
+    vkQueueWaitIdle(m_impl->graphics_queue);
+    vkQueueWaitIdle(m_impl->present_queue);
+    vkDeviceWaitIdle(m_impl->device);
+
+    vkDestroySemaphore(m_impl->device, m_impl->present_semaphore, nullptr);
+    vkDestroySemaphore(m_impl->device, m_impl->render_semaphore, nullptr);
+
+    vkDestroyCommandPool(m_impl->device, m_impl->command_pool, nullptr);
+
     for (VkFramebuffer framebuffer : m_impl->screen_framebuffers) {
         vkDestroyFramebuffer(m_impl->device, framebuffer, nullptr);
     }
