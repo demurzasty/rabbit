@@ -37,9 +37,10 @@ static VkBool32 VKAPI_CALL debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT
     return VK_FALSE;
 }
 
-struct canvas_buffer_data {
-    id_type vertex_region_id = null;
-    id_type index_region_id = null;
+struct canvas_draw_command {
+    std::uint32_t index_offset = 0;
+    std::uint32_t index_count = 0;
+    std::uint32_t vertex_offset = 0;
 };
 
 struct graphics::impl {
@@ -82,11 +83,19 @@ struct graphics::impl {
 
     std::mutex mutex;
 
-    // Objects
+    // GPU buffers
 
-    zone canvas_vertex_zone;
-    zone canvas_index_zone;
-    arena<canvas_buffer_data> canvas_buffers;
+    VkBuffer canvas_vertex_buffer;
+    VmaAllocation canvas_vertex_buffer_allocation;
+    std::uint32_t canvas_vertex_buffer_offset = 0;
+
+    VkBuffer canvas_index_buffer;
+    VmaAllocation canvas_index_buffer_allocation;
+    std::uint32_t canvas_index_buffer_offset = 0;
+
+    // Drawing
+
+    std::vector<canvas_draw_command> canvas_draw_commands;
 };
 
 graphics::graphics(const window& p_window)
@@ -450,6 +459,30 @@ graphics::graphics(const window& p_window)
     for (auto& fence : m_impl->fences) {
         vk(vkCreateFence(m_impl->device, &fence_info, nullptr, &fence));
     }
+
+    VkBufferCreateInfo canvas_vertex_buffer_info{ VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
+    canvas_vertex_buffer_info.size = sizeof(vertex2d) * 0x10000;
+    canvas_vertex_buffer_info.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    canvas_vertex_buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    canvas_vertex_buffer_info.queueFamilyIndexCount = 0;
+    canvas_vertex_buffer_info.pQueueFamilyIndices = nullptr;
+
+    VmaAllocationCreateInfo canvas_vertex_buffer_allocation_info{};
+    canvas_vertex_buffer_allocation_info.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+    canvas_vertex_buffer_allocation_info.preferredFlags = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+    vk(vmaCreateBuffer(m_impl->allocator, &canvas_vertex_buffer_info, &canvas_vertex_buffer_allocation_info, &m_impl->canvas_vertex_buffer, &m_impl->canvas_vertex_buffer_allocation, nullptr));
+
+    VkBufferCreateInfo canvas_index_buffer_info{ VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
+    canvas_index_buffer_info.size = sizeof(std::uint32_t) * 0x10000;
+    canvas_index_buffer_info.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+    canvas_index_buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    canvas_index_buffer_info.queueFamilyIndexCount = 0;
+    canvas_index_buffer_info.pQueueFamilyIndices = nullptr;
+
+    VmaAllocationCreateInfo canvas_index_buffer_allocation_info{};
+    canvas_index_buffer_allocation_info.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+    canvas_index_buffer_allocation_info.preferredFlags = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+    vk(vmaCreateBuffer(m_impl->allocator, &canvas_index_buffer_info, &canvas_index_buffer_allocation_info, &m_impl->canvas_index_buffer, &m_impl->canvas_index_buffer_allocation, nullptr));
 }
 
 graphics::~graphics() {
@@ -462,6 +495,9 @@ graphics::~graphics() {
     vkQueueWaitIdle(m_impl->graphics_queue);
     vkQueueWaitIdle(m_impl->present_queue);
     vkDeviceWaitIdle(m_impl->device);
+
+    vmaDestroyBuffer(m_impl->allocator, m_impl->canvas_index_buffer, m_impl->canvas_index_buffer_allocation);
+    vmaDestroyBuffer(m_impl->allocator, m_impl->canvas_vertex_buffer, m_impl->canvas_vertex_buffer_allocation);
 
     vkDestroySemaphore(m_impl->device, m_impl->present_semaphore, nullptr);
     vkDestroySemaphore(m_impl->device, m_impl->render_semaphore, nullptr);
@@ -487,41 +523,25 @@ graphics::~graphics() {
 }
 
 
-id_type graphics::create_canvas_buffer() {
-    std::unique_lock lock{ m_impl->mutex };
+void graphics::push_canvas_primitives(const span<const vertex2d>& p_vertices, const span<const std::uint32_t>& p_indices) {
+    void* ptr;
 
-    const auto id = m_impl->canvas_buffers.create();
+    vk(vmaMapMemory(m_impl->allocator, m_impl->canvas_vertex_buffer_allocation, &ptr));
+    memcpy(static_cast<vertex2d*>(ptr) + m_impl->canvas_vertex_buffer_offset, p_vertices.data(), p_vertices.size_bytes());
+    vmaUnmapMemory(m_impl->allocator, m_impl->canvas_vertex_buffer_allocation);
 
-    auto& data = m_impl->canvas_buffers[id];
+    vk(vmaMapMemory(m_impl->allocator, m_impl->canvas_index_buffer_allocation, &ptr));
+    memcpy(static_cast<std::uint32_t*>(ptr) + m_impl->canvas_index_buffer_offset, p_indices.data(), p_indices.size_bytes());
+    vmaUnmapMemory(m_impl->allocator, m_impl->canvas_index_buffer_allocation);
 
-    data.vertex_region_id = m_impl->canvas_vertex_zone.create(0);
-    data.index_region_id = m_impl->canvas_index_zone.create(0);
+    canvas_draw_command command;
+    command.index_offset = m_impl->canvas_index_buffer_offset;
+    command.index_count = std::uint32_t(p_indices.size());
+    command.vertex_offset = m_impl->canvas_vertex_buffer_offset;
+    m_impl->canvas_draw_commands.push_back(command);
 
-    return id;
-}
-
-void graphics::destroy_canvas_buffer(id_type p_id) {
-    std::unique_lock lock{ m_impl->mutex };
-
-    assert(m_impl->canvas_buffers.valid(p_id));
-
-    auto& data = m_impl->canvas_buffers[p_id];
-
-    m_impl->canvas_index_zone.destroy(data.index_region_id);
-    m_impl->canvas_vertex_zone.destroy(data.vertex_region_id);
-
-    m_impl->canvas_buffers.destroy(p_id);
-}
-
-void graphics::set_canvas_buffer_primitives(id_type p_id, const span<const vertex2d>& p_vertices, const span<const std::uint32_t>& p_indices) {
-    std::unique_lock lock{ m_impl->mutex };
-
-    assert(m_impl->canvas_buffers.valid(p_id));
-
-    auto& data = m_impl->canvas_buffers[p_id];
-
-    auto& vertex_region = m_impl->canvas_vertex_zone.assign(data.vertex_region_id, p_vertices.size());
-    auto& index_region = m_impl->canvas_index_zone.assign(data.index_region_id, p_indices.size());
+    m_impl->canvas_vertex_buffer_offset += p_vertices.size();
+    m_impl->canvas_index_buffer_offset += p_indices.size();
 }
 
 void graphics::present() {
@@ -580,4 +600,7 @@ void graphics::present() {
     present_info.pImageIndices = &m_impl->image_index;
     vkQueuePresentKHR(m_impl->present_queue, &present_info);
     vkQueueWaitIdle(m_impl->present_queue);
+
+    m_impl->canvas_vertex_buffer_offset = 0;
+    m_impl->canvas_index_buffer_offset = 0;
 }

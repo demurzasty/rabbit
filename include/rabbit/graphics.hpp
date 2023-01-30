@@ -30,11 +30,7 @@ namespace rb {
 
         graphics& operator=(graphics&&) noexcept = default;
 
-        id_type create_canvas_buffer();
-
-        void destroy_canvas_buffer(id_type p_id);
-
-        void set_canvas_buffer_primitives(id_type p_id, const span<const vertex2d>& p_vertices, const span<const std::uint32_t>& p_indices);
+        void push_canvas_primitives(const span<const vertex2d>& p_vertices, const span<const std::uint32_t>& p_indices);
 
         void present();
 
