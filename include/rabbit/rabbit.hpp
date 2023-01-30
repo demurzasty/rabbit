@@ -8,6 +8,7 @@
 #include "json.hpp"
 #include "memory.hpp"
 #include "reactive.hpp"
+#include "stopwatch.hpp"
 #include "type_info.hpp"
 #include "type_traits.hpp"
 #include "window.hpp"
