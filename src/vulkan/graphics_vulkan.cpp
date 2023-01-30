@@ -471,5 +471,57 @@ graphics::~graphics() {
 }
 
 void graphics::present() {
-    std::this_thread::sleep_for(std::chrono::milliseconds(16));
+    vk(vkAcquireNextImageKHR(m_impl->device, m_impl->swapchain, UINT64_MAX, m_impl->present_semaphore, VK_NULL_HANDLE, &m_impl->image_index));
+
+    vkWaitForFences(m_impl->device, 1, &m_impl->fences[m_impl->image_index], VK_FALSE, UINT64_MAX);
+    vkResetFences(m_impl->device, 1, &m_impl->fences[m_impl->image_index]);
+
+    vkResetCommandBuffer(m_impl->command_buffers[m_impl->image_index], 0);
+
+    VkCommandBufferBeginInfo begin_info{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
+    begin_info.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+    vkBeginCommandBuffer(m_impl->command_buffers[m_impl->image_index], &begin_info);
+
+    VkClearValue clear_values[1];
+    clear_values[0].color = { 0.0f, 0.0f, 0.0f, 1.0f };
+
+    VkRenderPassBeginInfo render_pass_begin_info{ VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
+    render_pass_begin_info.renderPass = m_impl->screen_render_pass;
+    render_pass_begin_info.framebuffer = m_impl->screen_framebuffers[m_impl->image_index];
+    render_pass_begin_info.renderArea.offset = { 0, 0 };
+    render_pass_begin_info.renderArea.extent = m_impl->swapchain_extent;
+    render_pass_begin_info.clearValueCount = sizeof(clear_values) / sizeof(*clear_values);
+    render_pass_begin_info.pClearValues = clear_values;
+    vkCmdBeginRenderPass(m_impl->command_buffers[m_impl->image_index], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+
+    VkViewport viewport{ 0.0f, 0.0f, float(m_impl->swapchain_extent.width), float(m_impl->swapchain_extent.height), 0.0f, 1.0f };
+    vkCmdSetViewport(m_impl->command_buffers[m_impl->image_index], 0, 1, &viewport);
+
+    VkRect2D scissor{ { 0, 0 }, { m_impl->swapchain_extent.width, m_impl->swapchain_extent.height } };
+    vkCmdSetScissor(m_impl->command_buffers[m_impl->image_index], 0, 1, &scissor);
+
+    vkCmdEndRenderPass(m_impl->command_buffers[m_impl->image_index]);
+
+    vkEndCommandBuffer(m_impl->command_buffers[m_impl->image_index]);
+
+    VkPipelineStageFlags waitDstStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
+
+    VkSubmitInfo submitInfo{ VK_STRUCTURE_TYPE_SUBMIT_INFO };
+    submitInfo.waitSemaphoreCount = 1;
+    submitInfo.pWaitSemaphores = &m_impl->present_semaphore;
+    submitInfo.pWaitDstStageMask = &waitDstStageMask;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &m_impl->command_buffers[m_impl->image_index];
+    submitInfo.signalSemaphoreCount = 1;
+    submitInfo.pSignalSemaphores = &m_impl->render_semaphore;
+    vkQueueSubmit(m_impl->graphics_queue, 1, &submitInfo, m_impl->fences[m_impl->image_index]);
+
+    VkPresentInfoKHR presentInfo{ VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
+    presentInfo.waitSemaphoreCount = 1;
+    presentInfo.pWaitSemaphores = &m_impl->render_semaphore;
+    presentInfo.swapchainCount = 1;
+    presentInfo.pSwapchains = &m_impl->swapchain;
+    presentInfo.pImageIndices = &m_impl->image_index;
+    vkQueuePresentKHR(m_impl->present_queue, &presentInfo);
+    vkQueueWaitIdle(m_impl->present_queue);
 }
