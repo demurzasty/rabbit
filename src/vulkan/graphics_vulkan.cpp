@@ -220,9 +220,17 @@ graphics::graphics(const window& p_window)
     // Gets logical device queues.
     vkGetDeviceQueue(m_impl->device, m_impl->graphics_family, 0, &m_impl->graphics_queue);
     vkGetDeviceQueue(m_impl->device, m_impl->present_family, 0, &m_impl->present_queue);
+
+    // Create Vulkan memory allocator
+    VmaAllocatorCreateInfo allocator_info{};
+    allocator_info.instance = m_impl->instance;
+    allocator_info.physicalDevice = m_impl->physical_device;
+    allocator_info.device = m_impl->device;
+    vk(vmaCreateAllocator(&allocator_info, &m_impl->allocator));
 }
 
 graphics::~graphics() {
+    vmaDestroyAllocator(m_impl->allocator);
     vkDestroyDevice(m_impl->device, nullptr);
     vkDestroySurfaceKHR(m_impl->instance, m_impl->surface, nullptr);
     vkDestroyInstance(m_impl->instance, nullptr);
