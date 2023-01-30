@@ -4,6 +4,31 @@ project (rabbit)
 
 add_subdirectory ("lib")
 
+set (YAWN_SOURCE ${YAWN_SOURCE}
+	"Source/Physics/PhysX/PhysicsDriverPhysX.cpp"
+)
+
+add_executable (b2h "src/tools/b2h.cpp")
+
+file (GLOB_RECURSE BIN_SOURCE_FILES "src/*.spv")
+foreach (BIN_SRC ${BIN_SOURCE_FILES})
+	get_filename_component (FILE_DIRECTORY ${BIN_SRC} DIRECTORY)
+	get_filename_component (FILE_NAME ${BIN_SRC} NAME)
+	get_filename_component (FILE_EXT ${BIN_SRC} EXT)
+
+	set (BIN_H "${FILE_DIRECTORY}/gen/${FILE_NAME}.h")
+
+	string (REPLACE "." "_" VARIABLE_NAME ${FILE_NAME})
+
+	add_custom_command (
+		OUTPUT ${BIN_H}
+		COMMAND b2h ${BIN_SRC} ${BIN_H} "${VARIABLE_NAME}" 
+		DEPENDS ${BIN_SRC}
+	)
+	list (APPEND BIN_FILES ${BIN_H})
+endforeach (BIN_SRC)
+add_custom_target (binaries DEPENDS ${BIN_FILES})
+
 if (WIN32)
 	set (SRC ${SRC} "src/win32/window_win32.cpp")
 endif ()
@@ -16,6 +41,7 @@ target_compile_features (rabbit PUBLIC cxx_std_17)
 target_link_libraries (rabbit PUBLIC json fmt entt gsl)
 target_link_libraries (rabbit PRIVATE vma volk)
 target_compile_definitions (rabbit PRIVATE VMA_STATIC_VULKAN_FUNCTIONS)
+add_dependencies (rabbit binaries)
 
 if (WIN32)
 	target_compile_definitions (rabbit PRIVATE VK_USE_PLATFORM_WIN32_KHR)
