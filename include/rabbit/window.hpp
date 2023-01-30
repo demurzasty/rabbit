@@ -23,7 +23,7 @@ namespace rb {
 
         window& operator=(window&&) noexcept = default;
 
-        bool dispatch_events();
+        void dispatch_events();
 
         auto on_close() {
             return m_dispatcher.sink<close_event>();

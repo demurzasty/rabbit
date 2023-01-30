@@ -6,6 +6,7 @@
 #include "format.hpp"
 #include "graphics.hpp"
 #include "json.hpp"
+#include "math.hpp"
 #include "memory.hpp"
 #include "reactive.hpp"
 #include "span.hpp"

@@ -75,7 +75,7 @@ window::~window() {
     }
 }
 
-bool window::dispatch_events() {
+void window::dispatch_events() {
     MSG message;
     while (PeekMessage(&message, m_impl->hwnd, 0, 0, PM_REMOVE)) {
         TranslateMessage(&message);
@@ -83,7 +83,6 @@ bool window::dispatch_events() {
     }
 
     m_dispatcher.update();
-    return false;
 }
 
 void* window::handle() const {
