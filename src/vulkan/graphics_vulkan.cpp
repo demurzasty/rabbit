@@ -125,9 +125,19 @@ graphics::graphics(const window& p_window)
     vk(vkCreateInstance(&instance_info, nullptr, &m_impl->instance));
 
     volkLoadInstance(m_impl->instance);
+    
+#if _WIN32
+    VkWin32SurfaceCreateInfoKHR surface_info{ VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR };
+    surface_info.hinstance = GetModuleHandle(NULL);
+    surface_info.hwnd = (HWND)p_window.handle();
+    vk(vkCreateWin32SurfaceKHR(m_impl->instance, &surface_info, nullptr, &m_impl->surface));
+#else
+    assert(0);
+#endif
 }
 
 graphics::~graphics() {
+    vkDestroySurfaceKHR(m_impl->instance, m_impl->surface, nullptr);
     vkDestroyInstance(m_impl->instance, nullptr);
 }
 
