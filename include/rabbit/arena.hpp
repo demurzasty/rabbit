@@ -1,5 +1,6 @@
 #pragma once 
 
+#include "pool.hpp"
 #include "config.hpp"
 #include "memory.hpp"
 #include "type_traits.hpp"
@@ -10,7 +11,7 @@
 
 namespace rb {
     /**
-     * @brief Region-based memory allocator. Mainly used for sharing data between CPU and GPU.
+     * @brief Region-based fixed-size memory allocator. Mainly used for sharing data between CPU and GPU.
      *        Better performance should be achieved with plain-old-data types.
      */
     template<class T>
@@ -24,11 +25,9 @@ namespace rb {
 
         ~arena() {
             if constexpr (!is_pod_v<T>) {
-                for (std::size_t i = 0, size = m_pool.size(); i < size;  ++i) {
-                    if (m_pool[i] == id_type(i)) {
-                        std::destroy_at(std::launder(reinterpret_cast<T*>(&m_data[i])));
-                    }
-                }
+                m_pool.each([this](id_type p_id) {
+                    std::destroy_at(std::launder(reinterpret_cast<T*>(&m_data[std::size_t(p_id)])));
+                });
             }
         }
 
@@ -48,22 +47,18 @@ namespace rb {
 
         template<typename Func>
         void each(Func p_func) {
-            for (std::size_t i = 0, size = m_pool.size(); i < size; ++i) {
-                if (m_pool[i] == id_type(i)) {
-                    auto& data = *std::launder(reinterpret_cast<T*>(&m_data[i]));
-                    std::invoke(p_func, i, data);
-                }
-            }
+            m_pool.each([&p_func](id_type p_id) {
+                auto& data = *std::launder(reinterpret_cast<T*>(&m_data[i]));
+                std::invoke(p_func, p_id, data);
+            });
         }
 
         template<typename Func>
         void each(Func p_func) const {
-            for (std::size_t i = 0, size = m_pool.size(); i < size; ++i) {
-                if (m_pool[i] == id_type(i)) {
-                    const auto& data = *std::launder(reinterpret_cast<const T*>(&m_data[i]));
-                    std::invoke(p_func, i, data);
-                }
-            }
+            m_pool.each([&p_func](id_type p_id) {
+                const auto& data = *std::launder(reinterpret_cast<const T*>(&m_data[i]));
+                std::invoke(p_func, p_id, data);
+            });
         }
 
         /**
@@ -71,7 +66,7 @@ namespace rb {
          */
         template<class... Args>
         id_type create(Args&&... p_args) {
-            const auto id = acquire();
+            const auto id = m_pool.acquire();
             
             if (std::size_t(id) == m_data.size()) {
                 m_data.emplace_back();
@@ -86,7 +81,7 @@ namespace rb {
         }
 
         /**
-         * @brief Create and construct new object.
+         * @brief Destroy an object.
          * 
          * @warning Changing data of identifier being destroyed can result in undefined behavior.
          */
@@ -97,37 +92,18 @@ namespace rb {
                 std::destroy_at(std::launder(reinterpret_cast<T*>(&m_data[std::size_t(p_id)])));
             }
 
-            dispose(p_id);
+            m_pool.dispose(p_id);
         }
 
         /**
          * @brief Checks if an identifier refers to a valid data.
          */
         bool valid(id_type p_id) const {
-            return std::size_t(p_id) < m_pool.size() && m_pool[std::size_t(p_id)] == p_id;
+            return m_pool.valid(p_id);
         }
 
     private:
-        id_type acquire() {
-            if (m_disposed == null) {
-                return m_pool.emplace_back(id_type(m_pool.size()));
-            }
-
-            const auto recycled_id = m_disposed;
-            m_disposed = m_pool[std::size_t(m_disposed)];
-            return m_pool[std::size_t(recycled_id)] = recycled_id;
-        }
-
-        void dispose(id_type p_id) {
-            assert(valid(p_id));
-
-            m_pool[std::size_t(p_id)] = m_disposed;
-            m_disposed = p_id;
-        }
-
-    private:
-        std::vector<id_type> m_pool;
+        pool m_pool;
         std::vector<std::aligned_storage_t<sizeof(T), alignof(T)>> m_data;
-        id_type m_disposed = null;
     };
 }
