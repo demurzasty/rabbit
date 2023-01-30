@@ -37,10 +37,30 @@ static VkBool32 VKAPI_CALL debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT
     return VK_FALSE;
 }
 
+enum class canvas_draw_command_type {
+    clip,
+    primitives
+};
+
+struct canvas_draw_command_clip {
+    float left;
+    float top;
+    float width;
+    float height;
+};
+
+struct canvas_draw_command_primitives {
+    std::uint32_t index_offset;
+    std::uint32_t index_count;
+    std::uint32_t vertex_offset;
+};
+
 struct canvas_draw_command {
-    std::uint32_t index_offset = 0;
-    std::uint32_t index_count = 0;
-    std::uint32_t vertex_offset = 0;
+    canvas_draw_command_type type;
+    union {
+        canvas_draw_command_clip clip;
+        canvas_draw_command_primitives primitives;
+    };
 };
 
 struct graphics::impl {
@@ -87,11 +107,11 @@ struct graphics::impl {
 
     VkBuffer canvas_vertex_buffer;
     VmaAllocation canvas_vertex_buffer_allocation;
-    std::uint32_t canvas_vertex_buffer_offset = 0;
+    std::size_t canvas_vertex_buffer_offset = 0;
 
     VkBuffer canvas_index_buffer;
     VmaAllocation canvas_index_buffer_allocation;
-    std::uint32_t canvas_index_buffer_offset = 0;
+    std::size_t canvas_index_buffer_offset = 0;
 
     // Drawing
 
@@ -522,6 +542,17 @@ graphics::~graphics() {
     vkDestroyInstance(m_impl->instance, nullptr);
 }
 
+void graphics::push_canvas_clip(float p_left, float p_top, float p_width, float p_height) {
+    std::unique_lock lock{ m_impl->mutex };
+
+    canvas_draw_command command;
+    command.type = canvas_draw_command_type::clip;
+    command.clip.left = p_left;
+    command.clip.top = p_top;
+    command.clip.width = p_width;
+    command.clip.height = p_height;
+    m_impl->canvas_draw_commands.push_back(command);
+}
 
 void graphics::push_canvas_primitives(const span<const vertex2d>& p_vertices, const span<const std::uint32_t>& p_indices) {
     std::unique_lock lock{ m_impl->mutex };
@@ -537,9 +568,10 @@ void graphics::push_canvas_primitives(const span<const vertex2d>& p_vertices, co
     vmaUnmapMemory(m_impl->allocator, m_impl->canvas_index_buffer_allocation);
 
     canvas_draw_command command;
-    command.index_offset = m_impl->canvas_index_buffer_offset;
-    command.index_count = std::uint32_t(p_indices.size());
-    command.vertex_offset = m_impl->canvas_vertex_buffer_offset;
+    command.type = canvas_draw_command_type::primitives;
+    command.primitives.index_offset = std::uint32_t(m_impl->canvas_index_buffer_offset);
+    command.primitives.index_count = std::uint32_t(p_indices.size());
+    command.primitives.vertex_offset = std::uint32_t(m_impl->canvas_vertex_buffer_offset);
     m_impl->canvas_draw_commands.push_back(command);
 
     m_impl->canvas_vertex_buffer_offset += p_vertices.size();
