@@ -251,9 +251,58 @@ graphics::graphics(const window& p_window)
 
     // Store swapchain extent
     m_impl->swapchain_extent = surfaceCapabilities.currentExtent;
+
+    // Get window size.
+    const auto windowWidth = std::uint32_t(p_window.width());
+    const auto windowHeight = std::uint32_t(p_window.height());
+
+    std::uint32_t present_mode_count = 0;
+    vk(vkGetPhysicalDeviceSurfacePresentModesKHR(m_impl->physical_device, m_impl->surface, &present_mode_count, nullptr));
+
+    std::vector<VkPresentModeKHR> present_modes(present_mode_count);
+    vk(vkGetPhysicalDeviceSurfacePresentModesKHR(m_impl->physical_device, m_impl->surface, &present_mode_count, present_modes.data()));
+
+    m_impl->present_mode = VK_PRESENT_MODE_FIFO_KHR;
+
+    // TODO: Select present mode if vertical synchronization is enabled.
+
+    std::uint32_t image_count = surfaceCapabilities.minImageCount + 1;
+    if (surfaceCapabilities.maxImageCount > 0 && image_count > surfaceCapabilities.maxImageCount) {
+        image_count = surfaceCapabilities.maxImageCount;
+    }
+
+    std::uint32_t queue_indices[] = { m_impl->graphics_family, m_impl->present_family };
+
+    VkSwapchainCreateInfoKHR swapchain_info{ VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR };
+    swapchain_info.surface = m_impl->surface;
+    swapchain_info.minImageCount = image_count;
+    swapchain_info.imageFormat = m_impl->surface_format.format;
+    swapchain_info.imageColorSpace = m_impl->surface_format.colorSpace;
+    swapchain_info.imageExtent = { windowWidth, windowHeight };
+    swapchain_info.imageArrayLayers = 1;
+    swapchain_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    if (m_impl->graphics_family != m_impl->present_family) {
+        swapchain_info.queueFamilyIndexCount = sizeof(queue_indices) / sizeof(*queue_indices);
+        swapchain_info.pQueueFamilyIndices = queue_indices;
+        swapchain_info.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+    } else {
+        swapchain_info.queueFamilyIndexCount = 0;
+        swapchain_info.pQueueFamilyIndices = nullptr;
+        swapchain_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    }
+    swapchain_info.presentMode = m_impl->present_mode;
+    swapchain_info.clipped = VK_TRUE;
+    swapchain_info.preTransform = surfaceCapabilities.currentTransform;
+    swapchain_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+    swapchain_info.oldSwapchain = VK_NULL_HANDLE;
+
+    // Create Vulkan swapchain.
+    vk(vkCreateSwapchainKHR(m_impl->device, &swapchain_info, nullptr, &m_impl->swapchain));
 }
 
 graphics::~graphics() {
+    vkDestroySwapchainKHR(m_impl->device, m_impl->swapchain, nullptr);
+
     vmaDestroyAllocator(m_impl->allocator);
     vkDestroyDevice(m_impl->device, nullptr);
     vkDestroySurfaceKHR(m_impl->instance, m_impl->surface, nullptr);
