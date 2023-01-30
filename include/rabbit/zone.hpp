@@ -28,7 +28,7 @@ namespace rb {
             return m_regions[p_id];
         }
 
-        region& operator[](id_type p_id) {
+        const region& operator[](id_type p_id) {
             assert(valid(p_id));
             return m_regions[p_id];
         }

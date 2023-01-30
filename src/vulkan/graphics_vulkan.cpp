@@ -1,6 +1,7 @@
 #include <rabbit/graphics.hpp>
 #include <rabbit/format.hpp>
 #include <rabbit/arena.hpp>
+#include <rabbit/zone.hpp>
 
 #include <volk.h>
 
@@ -37,12 +38,8 @@ static VkBool32 VKAPI_CALL debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT
 }
 
 struct canvas_buffer_data {
-    std::uint32_t vertex_offset = 0;
-    std::uint32_t vertex_count = 0;
-    std::uint32_t vertex_capacity = 0;
-    std::uint32_t index_offset = 0;
-    std::uint32_t index_count = 0;
-    std::uint32_t index_capacity = 0;
+    id_type vertex_region_id = null;
+    id_type index_region_id = null;
 };
 
 struct graphics::impl {
@@ -87,6 +84,8 @@ struct graphics::impl {
 
     // Objects
 
+    zone canvas_vertex_zone;
+    zone canvas_index_zone;
     arena<canvas_buffer_data> canvas_buffers;
 };
 
@@ -491,13 +490,25 @@ graphics::~graphics() {
 id_type graphics::create_canvas_buffer() {
     std::unique_lock lock{ m_impl->mutex };
 
-    return m_impl->canvas_buffers.create();
+    const auto id = m_impl->canvas_buffers.create();
+
+    auto& data = m_impl->canvas_buffers[id];
+
+    data.vertex_region_id = m_impl->canvas_vertex_zone.create(0);
+    data.index_region_id = m_impl->canvas_index_zone.create(0);
+
+    return id;
 }
 
 void graphics::destroy_canvas_buffer(id_type p_id) {
     std::unique_lock lock{ m_impl->mutex };
 
     assert(m_impl->canvas_buffers.valid(p_id));
+
+    auto& data = m_impl->canvas_buffers[p_id];
+
+    m_impl->canvas_index_zone.destroy(data.index_region_id);
+    m_impl->canvas_vertex_zone.destroy(data.vertex_region_id);
 
     m_impl->canvas_buffers.destroy(p_id);
 }
@@ -508,6 +519,9 @@ void graphics::set_canvas_buffer_primitives(id_type p_id, const span<const verte
     assert(m_impl->canvas_buffers.valid(p_id));
 
     auto& data = m_impl->canvas_buffers[p_id];
+
+    auto& vertex_region = m_impl->canvas_vertex_zone[data.vertex_region_id];
+    auto& index_region = m_impl->canvas_vertex_zone[data.index_region_id];
 }
 
 void graphics::present() {
