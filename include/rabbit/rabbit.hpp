@@ -1,5 +1,6 @@
 #pragma once 
 
+#include "assets.hpp"
 #include "config.hpp"
 #include "entity.hpp"
 #include "format.hpp"

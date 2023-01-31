@@ -29,7 +29,11 @@ namespace rb {
     public:
         window(const std::string& p_title = "RabBit", int p_width = 1280, int p_height = 720, bool p_fullscreen = false);
 
+        window(window&&) noexcept = default;
+
         ~window();
+
+        window& operator=(window&&) noexcept = default;
 
         void dispatch_events();
 

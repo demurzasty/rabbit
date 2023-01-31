@@ -15,23 +15,27 @@ namespace rb {
      * 
      * @note Waiting for C++20.
      */
-    template<typename T, class... Args>
+    template<class T, class... Args>
     constexpr T* construct_at(T* p_ptr, Args&&... p_args) {
         return ::new (const_cast<void*>(static_cast<const volatile void*>(p_ptr))) 
             T(std::forward<Args>(p_args)...);
     }
 
+    template<class IdType = id_type>
     class pool {
+    public:
+        using id_type = IdType;
+
     public:
         pool() = default;
 
-        pool(const pool&) = delete;
+        pool(const pool<IdType>&) = delete;
 
-        pool(pool&&) noexcept = default;
+        pool(pool<IdType>&&) noexcept = default;
 
-        pool& operator=(const pool&) = delete;
+        pool<IdType>& operator=(const pool<IdType>&) = delete;
 
-        pool& operator=(pool&&) noexcept = default;
+        pool<IdType>& operator=(pool<IdType>&&) noexcept = default;
 
         template<typename Func>
         void each(Func p_func) {
@@ -84,14 +88,17 @@ namespace rb {
      * @brief Region-based fixed-size memory allocator. Mainly used for sharing data between CPU and GPU.
      *        Better performance should be achieved with plain-old-data types.
      */
-    template<class T>
+    template<class T, class IdType = id_type>
     class arena {
+    public:
+        using id_type = IdType;
+
     public:
         arena() = default;
 
-        arena(const arena<T>&) = delete;
+        arena(const arena<T, IdType>&) = delete;
 
-        arena(arena<T>&&) noexcept = default;
+        arena(arena<T, IdType>&&) noexcept = default;
 
         ~arena() {
             if constexpr (!is_pod_v<T>) {
@@ -101,9 +108,9 @@ namespace rb {
             }
         }
 
-        arena<T>& operator=(const arena<T>&) = delete;
+        arena<T, IdType>& operator=(const arena<T, IdType>&) = delete;
 
-        arena<T>& operator=(arena<T>&&) noexcept = default;
+        arena<T, IdType>& operator=(arena<T, IdType>&&) noexcept = default;
 
         const T& operator[](id_type p_id) const {
             assert(valid(p_id));
@@ -118,7 +125,7 @@ namespace rb {
         template<typename Func>
         void each(Func p_func) {
             m_pool.each([this, &p_func](id_type p_id) {
-                auto& data = *std::launder(reinterpret_cast<T*>(&m_data[p_id]));
+                auto& data = *std::launder(reinterpret_cast<T*>(&m_data[std::size_t(p_id)]));
                 std::invoke(p_func, p_id, data);
             });
         }
@@ -126,7 +133,7 @@ namespace rb {
         template<typename Func>
         void each(Func p_func) const {
             m_pool.each([&p_func](id_type p_id) {
-                const auto& data = *std::launder(reinterpret_cast<const T*>(&m_data[p_id]));
+                const auto& data = *std::launder(reinterpret_cast<const T*>(&m_data[std::size_t(p_id)]));
                 std::invoke(p_func, p_id, data);
             });
         }
@@ -173,7 +180,7 @@ namespace rb {
         }
 
     private:
-        pool m_pool;
+        pool<id_type> m_pool;
         std::vector<std::aligned_storage_t<sizeof(T), alignof(T)>> m_data;
     };
     

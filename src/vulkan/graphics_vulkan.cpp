@@ -38,7 +38,7 @@ static VkBool32 VKAPI_CALL debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT
     return VK_FALSE;
 }
 
-struct texture {
+struct texture_data {
     VkImage image{ VK_NULL_HANDLE };
     VmaAllocation allocation{ VK_NULL_HANDLE };
     VkImageView image_view{ VK_NULL_HANDLE };
@@ -131,7 +131,7 @@ struct graphics::impl {
     VkPipelineLayout pipeline_layout;
     VkPipeline pipeline;
 
-    arena<texture> textures;
+    arena<texture_data, texture> textures;
 
     std::vector<canvas_draw_command> canvas_draw_commands;
 };
@@ -740,7 +740,7 @@ graphics::~graphics() {
     vkQueueWaitIdle(m_impl->present_queue);
     vkDeviceWaitIdle(m_impl->device);
 
-    m_impl->textures.each([this](id_type id, texture& p_texture) {
+    m_impl->textures.each([this](texture id, texture_data& p_texture) {
         if (p_texture.image) {
             vkDestroySampler(m_impl->device, p_texture.sampler, nullptr);
             vkDestroyImageView(m_impl->device, p_texture.image_view, nullptr);
@@ -780,7 +780,7 @@ graphics::~graphics() {
     vkDestroyInstance(m_impl->instance, nullptr);
 }
 
-id_type graphics::create_texture() {
+texture graphics::create_texture() {
     std::unique_lock lock{ m_impl->mutex };
 
     const auto id = m_impl->textures.create();
@@ -788,7 +788,7 @@ id_type graphics::create_texture() {
     return id;
 }
 
-void graphics::destroy_texture(id_type p_id) {
+void graphics::destroy_texture(texture p_id) {
     std::unique_lock lock{ m_impl->mutex };
 
     assert(m_impl->textures.valid(p_id));
@@ -804,7 +804,7 @@ void graphics::destroy_texture(id_type p_id) {
     data = {};
 }
 
-void graphics::set_texture_data(id_type p_id, int p_width, int p_height, const void* p_pixels) {
+void graphics::set_texture_data(texture p_id, int p_width, int p_height, const void* p_pixels) {
     std::unique_lock lock{ m_impl->mutex };
 
     assert(m_impl->textures.valid(p_id));
@@ -968,7 +968,7 @@ void graphics::set_texture_data(id_type p_id, int p_width, int p_height, const v
     VkWriteDescriptorSet write_info{ VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
     write_info.dstSet = m_impl->main_descriptor_set;
     write_info.dstBinding = 0;
-    write_info.dstArrayElement = p_id;
+    write_info.dstArrayElement = std::uint32_t(p_id);
     write_info.descriptorCount = 1;
     write_info.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     write_info.pImageInfo = &descriptor_image_info;
@@ -987,7 +987,7 @@ void graphics::push_canvas_clip(float p_left, float p_top, float p_width, float 
     m_impl->canvas_draw_commands.push_back(command);
 }
 
-void graphics::push_canvas_primitives(id_type p_texture_id, const span<const vertex2d>& p_vertices, const span<const std::uint32_t>& p_indices) {
+void graphics::push_canvas_primitives(texture p_texture_id, const span<const vertex2d>& p_vertices, const span<const std::uint32_t>& p_indices) {
     std::unique_lock lock{ m_impl->mutex };
 
     void* ptr;

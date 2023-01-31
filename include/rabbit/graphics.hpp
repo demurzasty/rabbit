@@ -24,21 +24,27 @@ namespace rb {
         color color;
     };
 
+    enum class texture : id_type {};
+
     class graphics : public non_copyable {
     public:
         graphics(const window& p_window);
 
+        graphics(graphics&&) noexcept = default;
+
         ~graphics();
 
-        id_type create_texture();
+        graphics& operator=(graphics&&) noexcept = default;
 
-        void destroy_texture(id_type p_id);
+        texture create_texture();
 
-        void set_texture_data(id_type p_id, int p_width, int p_height, const void* p_pixels);
+        void destroy_texture(texture p_id);
+
+        void set_texture_data(texture p_id, int p_width, int p_height, const void* p_pixels);
 
         void push_canvas_clip(float p_left, float p_top, float p_width, float p_height);
 
-        void push_canvas_primitives(id_type p_texture_id, const span<const vertex2d>& p_vertices, const span<const std::uint32_t>& p_indices);
+        void push_canvas_primitives(texture p_texture_id, const span<const vertex2d>& p_vertices, const span<const std::uint32_t>& p_indices);
 
         void present();
 
