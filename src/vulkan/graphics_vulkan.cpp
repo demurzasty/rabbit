@@ -789,6 +789,8 @@ void graphics::destroy_texture(id_type p_id) {
         vkDestroyImageView(m_impl->device, data.image_view, nullptr);
         vmaDestroyImage(m_impl->allocator, data.image, data.allocation);
     }
+
+    data = {};
 }
 
 void graphics::set_texture_data(id_type p_id, int p_width, int p_height, const void* p_pixels) {
@@ -946,6 +948,20 @@ void graphics::set_texture_data(id_type p_id, int p_width, int p_height, const v
     sampler_info.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
     sampler_info.unnormalizedCoordinates = VK_FALSE;
     vk(vkCreateSampler(m_impl->device, &sampler_info, nullptr, &data.sampler));
+
+    VkDescriptorImageInfo descriptor_image_info;
+    descriptor_image_info.sampler = data.sampler;
+    descriptor_image_info.imageView = data.image_view;
+    descriptor_image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+    VkWriteDescriptorSet write_info{ VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
+    write_info.dstSet = m_impl->main_descriptor_set;
+    write_info.dstBinding = 0;
+    write_info.dstArrayElement = p_id;
+    write_info.descriptorCount = 1;
+    write_info.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    write_info.pImageInfo = &descriptor_image_info;
+    vkUpdateDescriptorSets(m_impl->device, 1, &write_info, 0, nullptr);
 }
 
 void graphics::push_canvas_clip(float p_left, float p_top, float p_width, float p_height) {
