@@ -40,6 +40,13 @@ static VkBool32 VKAPI_CALL debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT
     return VK_FALSE;
 }
 
+struct texture {
+    VkImage image{ VK_NULL_HANDLE };
+    VmaAllocation allocation{ VK_NULL_HANDLE };
+    VkImageView image_view{ VK_NULL_HANDLE };
+    VkSampler sampler{ VK_NULL_HANDLE };
+};
+
 enum class canvas_draw_command_type {
     clip,
     primitives
@@ -121,6 +128,8 @@ struct graphics::impl {
 
     VkPipelineLayout pipeline_layout;
     VkPipeline pipeline;
+
+    arena<texture> textures;
 
     std::vector<canvas_draw_command> canvas_draw_commands;
 };
@@ -693,6 +702,185 @@ graphics::~graphics() {
     vkDestroyDevice(m_impl->device, nullptr);
     vkDestroySurfaceKHR(m_impl->instance, m_impl->surface, nullptr);
     vkDestroyInstance(m_impl->instance, nullptr);
+}
+
+id_type graphics::create_texture() {
+    std::unique_lock lock{ m_impl->mutex };
+
+    const auto id = m_impl->textures.create();
+
+    return id;
+}
+
+void graphics::destroy_texture(id_type p_id) {
+    std::unique_lock lock{ m_impl->mutex };
+
+    assert(m_impl->textures.valid(p_id));
+
+    auto& data = m_impl->textures[p_id];
+
+    if (data.image) {
+        vkDestroySampler(m_impl->device, data.sampler, nullptr);
+        vkDestroyImageView(m_impl->device, data.image_view, nullptr);
+        vmaDestroyImage(m_impl->allocator, data.image, data.allocation);
+    }
+}
+
+void graphics::set_texture_data(id_type p_id, int p_width, int p_height, const void* p_pixels) {
+    std::unique_lock lock{ m_impl->mutex };
+
+    assert(m_impl->textures.valid(p_id));
+
+    auto& data = m_impl->textures[p_id];
+
+    VkImageCreateInfo image_info{ VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
+    image_info.imageType = VK_IMAGE_TYPE_2D;
+    image_info.format = VK_FORMAT_R8G8B8A8_UNORM;
+    image_info.extent = { std::uint32_t(p_width), std::uint32_t(p_height), 1 };
+    image_info.mipLevels = 1;
+    image_info.arrayLayers = 1;
+    image_info.samples = VK_SAMPLE_COUNT_1_BIT;
+    image_info.tiling = VK_IMAGE_TILING_OPTIMAL;
+    image_info.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+    image_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    image_info.queueFamilyIndexCount = 0;
+    image_info.pQueueFamilyIndices = 0;
+    image_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+    VmaAllocationCreateInfo allocation_info{};
+    allocation_info.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+    vk(vmaCreateImage(m_impl->allocator, &image_info, &allocation_info, &data.image, &data.allocation, nullptr));
+
+    // Create staging buffer.
+    VkBufferCreateInfo buffer_info{ VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
+    buffer_info.size = p_width * p_height * 4;
+    buffer_info.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+    buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    buffer_info.queueFamilyIndexCount = 0;
+    buffer_info.pQueueFamilyIndices = nullptr;
+
+    VmaAllocationCreateInfo buffer_allocation_info{};
+    buffer_allocation_info.usage = VMA_MEMORY_USAGE_CPU_ONLY;
+
+    VkBuffer staging_buffer;
+    VmaAllocation staging_buffer_allocation;
+    vk(vmaCreateBuffer(m_impl->allocator, &buffer_info, &buffer_allocation_info, &staging_buffer, &staging_buffer_allocation, nullptr));
+
+    // Transfer pixels into buffer.
+    void* ptr;
+    vk(vmaMapMemory(m_impl->allocator, staging_buffer_allocation, &ptr));
+    memcpy(ptr, p_pixels, buffer_info.size);
+    vmaUnmapMemory(m_impl->allocator, staging_buffer_allocation);
+
+    // Create temporary buffer
+    VkCommandBufferAllocateInfo command_buffer_info{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
+    command_buffer_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    command_buffer_info.commandPool = m_impl->command_pool;
+    command_buffer_info.commandBufferCount = 1;
+
+    VkCommandBuffer command_buffer;
+    vkAllocateCommandBuffers(m_impl->device, &command_buffer_info, &command_buffer);
+
+    VkCommandBufferBeginInfo begin_info{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
+    begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+    begin_info.pInheritanceInfo = nullptr;
+
+    // Begin registering commands
+    vkBeginCommandBuffer(command_buffer, &begin_info);
+
+    VkImageMemoryBarrier barrier{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+    barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.image = data.image;
+    barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    barrier.subresourceRange.baseMipLevel = 0;
+    barrier.subresourceRange.levelCount = 1;
+    barrier.subresourceRange.baseArrayLayer = 0;
+    barrier.subresourceRange.layerCount = 1;
+    barrier.srcAccessMask = 0;
+    barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+    vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+        VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+
+    VkBufferImageCopy region{};
+    region.bufferOffset = 0;
+    region.bufferRowLength = 0;
+    region.bufferImageHeight = 0;
+    region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    region.imageSubresource.mipLevel = 0;
+    region.imageSubresource.baseArrayLayer = 0;
+    region.imageSubresource.layerCount = 1;
+    region.imageOffset = { 0, 0, 0 };
+    region.imageExtent = image_info.extent;
+    vkCmdCopyBufferToImage(command_buffer, staging_buffer, data.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+
+
+    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.image = data.image;
+    barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    barrier.subresourceRange.baseMipLevel = 0;
+    barrier.subresourceRange.levelCount = 1;
+    barrier.subresourceRange.baseArrayLayer = 0;
+    barrier.subresourceRange.layerCount = 1;
+    barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+    vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_TRANSFER_BIT,
+        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+
+    // End registering commands
+    vkEndCommandBuffer(command_buffer);
+
+    VkSubmitInfo submit_info{ VK_STRUCTURE_TYPE_SUBMIT_INFO };
+    submit_info.commandBufferCount = 1;
+    submit_info.pCommandBuffers = &command_buffer;
+
+    vkQueueSubmit(m_impl->graphics_queue, 1, &submit_info, VK_NULL_HANDLE);
+    vkQueueWaitIdle(m_impl->graphics_queue);
+
+    vkFreeCommandBuffers(m_impl->device, m_impl->command_pool, 1, &command_buffer);
+
+    vmaDestroyBuffer(m_impl->allocator, staging_buffer, staging_buffer_allocation);
+
+    VkImageViewCreateInfo image_view_info{ VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
+    image_view_info.image = data.image;
+    image_view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    image_view_info.format = VK_FORMAT_R8G8B8A8_UNORM;
+    image_view_info.components.r = VK_COMPONENT_SWIZZLE_R;
+    image_view_info.components.g = VK_COMPONENT_SWIZZLE_G;
+    image_view_info.components.b = VK_COMPONENT_SWIZZLE_B;
+    image_view_info.components.a = VK_COMPONENT_SWIZZLE_A;
+    image_view_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    image_view_info.subresourceRange.baseMipLevel = 0;
+    image_view_info.subresourceRange.levelCount = 1;
+    image_view_info.subresourceRange.baseArrayLayer = 0;
+    image_view_info.subresourceRange.layerCount = 1;
+    vk(vkCreateImageView(m_impl->device, &image_view_info, nullptr, &data.image_view));
+
+    VkSamplerCreateInfo sampler_info{ VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
+    sampler_info.magFilter = VK_FILTER_LINEAR; // TODO: Cubic filtering.
+    sampler_info.minFilter = sampler_info.magFilter;
+    sampler_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR; // TODO: Do mapping.
+    sampler_info.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler_info.addressModeV = sampler_info.addressModeU;
+    sampler_info.addressModeW = sampler_info.addressModeV;
+    sampler_info.mipLodBias = 0.0f;
+    sampler_info.anisotropyEnable = VK_FALSE;
+    sampler_info.maxAnisotropy = 0.0f;
+    sampler_info.compareEnable = VK_FALSE;
+    sampler_info.compareOp = VK_COMPARE_OP_ALWAYS;
+    sampler_info.minLod = 0.0f;
+    sampler_info.maxLod = 1.0f;
+    sampler_info.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+    sampler_info.unnormalizedCoordinates = VK_FALSE;
+    vk(vkCreateSampler(m_impl->device, &sampler_info, nullptr, &data.sampler));
 }
 
 void graphics::push_canvas_clip(float p_left, float p_top, float p_width, float p_height) {

@@ -34,9 +34,16 @@ ui::ui(window& p_window, graphics& p_graphics)
     unsigned char* pixels;
     int width, height;
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+
+    const auto id = m_graphics.create_texture();
+    m_graphics.set_texture_data(id, width, height, pixels);
+
+    io.Fonts->SetTexID((ImTextureID)(std::uintptr_t)id);
 }
 
 ui::~ui() {
+    ImGuiIO& io = ImGui::GetIO();
+    m_graphics.destroy_texture((id_type)io.Fonts->TexID);
     ImGui::DestroyContext();
 }
 

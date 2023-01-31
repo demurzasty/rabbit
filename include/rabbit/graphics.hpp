@@ -39,6 +39,12 @@ namespace rb {
 
         graphics& operator=(graphics&&) noexcept = default;
 
+        id_type create_texture();
+
+        void destroy_texture(id_type p_id);
+
+        void set_texture_data(id_type p_id, int p_width, int p_height, const void* p_pixels);
+
         void push_canvas_clip(float p_left, float p_top, float p_width, float p_height);
 
         void push_canvas_primitives(const span<const vertex2d>& p_vertices, const span<const std::uint32_t>& p_indices);
