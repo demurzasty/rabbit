@@ -31,6 +31,20 @@ ui::ui(window& p_window, graphics& p_graphics)
 
     ImGui::StyleColorsDark();
 
+    ImGuiStyle& style = ImGui::GetStyle();
+
+    style.Colors[ImGuiCol_Text] = ImVec4(240.0f / 255.0f, 239.0f / 255.0f, 241.0f / 255.0f, 1.00f);
+    style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+    style.Colors[ImGuiCol_MenuBarBg] = ImVec4(60.0f / 255.0f, 63.0f / 255.0f, 65.0f / 255.0f, 0.94f);
+    style.Colors[ImGuiCol_Border] = ImVec4(51.0f / 255.0f, 51.0f / 255.0f, 51.0f / 255.0f, 0.94f);
+    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(92.0f / 255.0f, 92.0f / 255.0f, 92.0f / 255.0f, 0.94f);
+    style.Colors[ImGuiCol_TabHovered] = ImVec4(92.0f / 255.0f, 92.0f / 255.0f, 92.0f / 255.0f, 0.94f);
+    // style.Colors[ImGuiCol_HeaderActive] = ImVec4(92.0f / 255.0f, 92.0f / 255.0f, 92.0f / 255.0f, 0.94f);
+    style.Colors[ImGuiCol_HeaderHovered] = ImVec4(92.0f / 255.0f, 92.0f / 255.0f, 92.0f / 255.0f, 0.94f);
+    style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+
+    style.WindowRounding = 0.0f;
+
     unsigned char* pixels;
     int width, height;
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
@@ -53,10 +67,6 @@ void ui::begin() {
     io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
 
     ImGui::NewFrame();
-    static bool show_demo_window = true;
-    if (show_demo_window) {
-        ImGui::ShowDemoWindow(&show_demo_window);
-    }
 }
 
 void ui::end() {

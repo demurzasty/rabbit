@@ -14,14 +14,9 @@ int main(int argc, char* argv[]) {
     bool open = true;
     window.on_close().connect<&on_close>(open);
 
+    stopwatch stopwatch;
     while (open) {
         window.dispatch_events();
-
-        ui.begin();
-
-        ui.end();
-
-        ui.render();
 
         graphics.present();
     }

@@ -30,7 +30,6 @@ if (WIN32)
 endif ()
 
 set (SRC ${SRC} 
-	"src/imgui/ui_imgui.cpp"
 	"src/vulkan/graphics_vulkan.cpp"
 )
 
