@@ -17,7 +17,10 @@ int main(int argc, char* argv[]) {
     while (open) {
         window.dispatch_events();
 
-        ui.main_menu_bar();
+        if (ui.begin_window("Inspector")) {
+
+            ui.end_window();
+        }
 
         ui.render();
 

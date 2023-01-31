@@ -119,6 +119,24 @@ LRESULT CALLBACK window_proc(HWND p_hwnd, UINT p_msg, WPARAM p_wparam, LPARAM p_
                 dispatcher->enqueue(event);
                 break;
             }
+            case WM_LBUTTONDOWN: {
+                mouse_button_event event;
+                event.position.x = float(LOWORD(p_lparam));
+                event.position.y = float(HIWORD(p_lparam));
+                event.button = mouse_button::left;
+                event.pressed = true;
+                dispatcher->enqueue(event);
+                break;
+            }
+            case WM_LBUTTONUP: {
+                mouse_button_event event;
+                event.position.x = float(LOWORD(p_lparam));
+                event.position.y = float(HIWORD(p_lparam));
+                event.button = mouse_button::left;
+                event.pressed = false;
+                dispatcher->enqueue(event);
+                break;
+            }
         }
     }
 
