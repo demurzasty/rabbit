@@ -126,6 +126,10 @@ struct graphics::impl {
 
     // Drawing
 
+    VkDescriptorSetLayout main_descriptor_set_layout;
+    VkDescriptorPool main_descriptor_pool;
+    VkDescriptorSet main_descriptor_set;
+
     VkPipelineLayout pipeline_layout;
     VkPipeline pipeline;
 
@@ -520,6 +524,57 @@ graphics::graphics(const window& p_window)
     canvas_index_buffer_allocation_info.preferredFlags = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
     vk(vmaCreateBuffer(m_impl->allocator, &canvas_index_buffer_info, &canvas_index_buffer_allocation_info, &m_impl->canvas_index_buffer, &m_impl->canvas_index_buffer_allocation, nullptr));
 
+    // Create bindless descriptor pool
+    VkDescriptorPoolSize pool_sizes[] = {
+        { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1024 + 1 },
+    };
+
+    // Update after bind is needed here, for each binding and in the descriptor set layout creation.
+    VkDescriptorPoolCreateInfo descriptor_pool_info{ VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
+    descriptor_pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT_EXT;
+    descriptor_pool_info.maxSets = 1024 + 1;
+    descriptor_pool_info.poolSizeCount = sizeof(pool_sizes) / sizeof(*pool_sizes);
+    descriptor_pool_info.pPoolSizes = pool_sizes;
+    vk(vkCreateDescriptorPool(m_impl->device, &descriptor_pool_info, nullptr, &m_impl->main_descriptor_pool));
+
+
+    VkDescriptorSetLayoutBinding layout_bindings[1];
+    layout_bindings[0].binding = 0;
+    layout_bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    layout_bindings[0].descriptorCount = 1024;
+    layout_bindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
+    layout_bindings[0].pImmutableSamplers = nullptr;
+
+    VkDescriptorBindingFlags binding_flags[1]{
+        VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT_EXT |
+        VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT_EXT |
+        VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT_EXT
+    };
+
+    VkDescriptorSetLayoutBindingFlagsCreateInfoEXT extendend_info{ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT };
+    extendend_info.bindingCount = 1;
+    extendend_info.pBindingFlags = binding_flags;
+
+    VkDescriptorSetLayoutCreateInfo descriptor_layout_info{ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
+    descriptor_layout_info.pNext = &extendend_info;
+    descriptor_layout_info.bindingCount = 1;
+    descriptor_layout_info.pBindings = layout_bindings;
+    descriptor_layout_info.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT_EXT;
+    vk(vkCreateDescriptorSetLayout(m_impl->device, &descriptor_layout_info, nullptr, &m_impl->main_descriptor_set_layout));
+
+    VkDescriptorSetVariableDescriptorCountAllocateInfoEXT count_info{ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO_EXT };
+    count_info.descriptorSetCount = 1;
+    // This number is the max allocatable count
+    std::uint32_t max_sampler_binding = 1023;
+    count_info.pDescriptorCounts = &max_sampler_binding;
+
+    VkDescriptorSetAllocateInfo descriptor_set_info{ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
+    descriptor_set_info.pNext = &count_info;
+    descriptor_set_info.descriptorPool = m_impl->main_descriptor_pool;
+    descriptor_set_info.descriptorSetCount = 1;
+    descriptor_set_info.pSetLayouts = &m_impl->main_descriptor_set_layout;
+    vk(vkAllocateDescriptorSets(m_impl->device, &descriptor_set_info, &m_impl->main_descriptor_set));
+
     VkPipelineLayoutCreateInfo pipeline_layout_info{ VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
     pipeline_layout_info.setLayoutCount = 0;
     pipeline_layout_info.pSetLayouts = nullptr;
@@ -684,6 +739,9 @@ graphics::~graphics() {
 
     vkDestroyPipeline(m_impl->device, m_impl->pipeline, nullptr);
     vkDestroyPipelineLayout(m_impl->device, m_impl->pipeline_layout, nullptr);
+
+    vkDestroyDescriptorSetLayout(m_impl->device, m_impl->main_descriptor_set_layout, nullptr);
+    vkDestroyDescriptorPool(m_impl->device, m_impl->main_descriptor_pool, nullptr);
 
     vmaDestroyBuffer(m_impl->allocator, m_impl->canvas_index_buffer, m_impl->canvas_index_buffer_allocation);
     vmaDestroyBuffer(m_impl->allocator, m_impl->canvas_vertex_buffer, m_impl->canvas_vertex_buffer_allocation);
