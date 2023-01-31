@@ -39,10 +39,12 @@ static VkBool32 VKAPI_CALL debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT
 }
 
 struct texture_data {
-    VkImage image{ VK_NULL_HANDLE };
-    VmaAllocation allocation{ VK_NULL_HANDLE };
-    VkImageView image_view{ VK_NULL_HANDLE };
-    VkSampler sampler{ VK_NULL_HANDLE };
+    VkImage image = VK_NULL_HANDLE;
+    VmaAllocation allocation = VK_NULL_HANDLE;
+    VkImageView image_view = VK_NULL_HANDLE;
+    VkSampler sampler = VK_NULL_HANDLE;
+    int width = 0;
+    int height = 0;
 };
 
 enum class canvas_draw_command_type {
@@ -973,6 +975,25 @@ void graphics::set_texture_data(texture p_id, int p_width, int p_height, const v
     write_info.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     write_info.pImageInfo = &descriptor_image_info;
     vkUpdateDescriptorSets(m_impl->device, 1, &write_info, 0, nullptr);
+
+    data.width = p_width;
+    data.height = p_height;
+}
+
+int graphics::get_texture_width(texture p_id) const {
+    std::unique_lock lock{ m_impl->mutex };
+
+    assert(m_impl->textures.valid(p_id));
+
+    return m_impl->textures[p_id].width;
+}
+
+int graphics::get_texture_height(texture p_id) const {
+    std::unique_lock lock{ m_impl->mutex };
+
+    assert(m_impl->textures.valid(p_id));
+
+    return m_impl->textures[p_id].height;
 }
 
 void graphics::push_canvas_clip(float p_left, float p_top, float p_width, float p_height) {

@@ -45,6 +45,9 @@ namespace rb {
         T operator[](std::size_t p_index) const { return (&x)[p_index]; }
         T& operator[](std::size_t p_index) { return (&x)[p_index]; }
 
+        basic_vec2<T>& xy() { return *reinterpret_cast<basic_vec2<T>*>(&x); }
+        const basic_vec2<T>& xy() const { return *reinterpret_cast<const basic_vec2<T>*>(&x); }
+
         T x, y, z;
     };
 
@@ -61,6 +64,12 @@ namespace rb {
 
         T operator[](std::size_t p_index) const { return (&x)[p_index]; }
         T& operator[](std::size_t p_index) { return (&x)[p_index]; }
+
+        basic_vec2<T>& xy() { return *reinterpret_cast<basic_vec2<T>*>(&x); }
+        const basic_vec2<T>& xy() const { return *reinterpret_cast<const basic_vec2<T>*>(&x); }
+
+        basic_vec3<T>& xyz() { return *reinterpret_cast<basic_vec3<T>*>(&x); }
+        const basic_vec3<T>& xyz() const { return *reinterpret_cast<const basic_vec3<T>*>(&x); }
 
         T x, y, z, w;
     };

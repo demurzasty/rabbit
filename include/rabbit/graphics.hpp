@@ -42,6 +42,10 @@ namespace rb {
 
         void set_texture_data(texture p_id, int p_width, int p_height, const void* p_pixels);
 
+        int get_texture_width(texture p_id) const;
+
+        int get_texture_height(texture p_id) const;
+
         void push_canvas_clip(float p_left, float p_top, float p_width, float p_height);
 
         void push_canvas_primitives(texture p_texture_id, const span<const vertex2d>& p_vertices, const span<const std::uint32_t>& p_indices);

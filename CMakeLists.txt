@@ -30,6 +30,7 @@ if (WIN32)
 endif ()
 
 set (SRC ${SRC} 
+	"src/image.cpp"
 	"src/vulkan/graphics_vulkan.cpp"
 )
 
@@ -37,7 +38,7 @@ add_library (rabbit STATIC ${SRC})
 target_include_directories (rabbit PUBLIC "include")
 target_compile_features (rabbit PUBLIC cxx_std_17)
 target_link_libraries (rabbit PUBLIC json fmt entt gsl)
-target_link_libraries (rabbit PRIVATE imgui vma volk)
+target_link_libraries (rabbit PRIVATE stb imgui vma volk)
 target_compile_definitions (rabbit PRIVATE VMA_STATIC_VULKAN_FUNCTIONS)
 add_dependencies (rabbit binaries)
 

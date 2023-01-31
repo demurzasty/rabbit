@@ -10,6 +10,8 @@ add_subdirectory ("imgui-1.89.2")
 
 add_subdirectory ("json-3.11.2")
 
+add_subdirectory ("stb")
+
 add_subdirectory ("vma-3.0.1")
 
 if (WIN32)
