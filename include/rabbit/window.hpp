@@ -25,19 +25,11 @@ namespace rb {
         bool pressed;
     };
 
-    class window {
+    class window : public non_copyable {
     public:
         window(const std::string& p_title = "RabBit", int p_width = 1280, int p_height = 720, bool p_fullscreen = false);
 
-        window(const window&) = delete;
-
-        window(window&&) noexcept = default;
-
         ~window();
-
-        window& operator=(const window&) = delete;
-
-        window& operator=(window&&) noexcept = default;
 
         void dispatch_events();
 

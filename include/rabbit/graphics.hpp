@@ -24,19 +24,11 @@ namespace rb {
         color color;
     };
 
-    class graphics {
+    class graphics : public non_copyable {
     public:
         graphics(const window& p_window);
 
-        graphics(const graphics&) = delete;
-
-        graphics(graphics&&) noexcept = default;
-
         ~graphics();
-
-        graphics& operator=(const graphics&) = delete;
-
-        graphics& operator=(graphics&&) noexcept = default;
 
         id_type create_texture();
 

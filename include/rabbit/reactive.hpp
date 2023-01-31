@@ -1,6 +1,6 @@
 #pragma once 
 
-#include <entt/entt.hpp>
+#include "config.hpp"
 
 namespace rb {
     using entt::delegate;
