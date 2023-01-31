@@ -538,7 +538,7 @@ graphics::graphics(const window& p_window)
     VkVertexInputAttributeDescription vertex_attributes[3]{
         { 0, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(vertex2d, position) },
         { 1, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(vertex2d, texcoord) },
-        { 2, 0, VK_FORMAT_B8G8R8A8_UNORM, offsetof(vertex2d, color) },
+        { 2, 0, VK_FORMAT_R8G8B8A8_UNORM, offsetof(vertex2d, color) },
     };
 
     VkPipelineVertexInputStateCreateInfo vertex_input_info{ VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO };

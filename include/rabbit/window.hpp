@@ -15,8 +15,8 @@ namespace rb {
 
     enum class mouse_button {
         left,
-        middle,
-        right
+        right,
+        middle
     };
 
     struct mouse_button_event {
