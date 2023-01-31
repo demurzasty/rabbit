@@ -764,6 +764,34 @@ void graphics::present() {
     VkRect2D scissor{ { 0, 0 }, { m_impl->swapchain_extent.width, m_impl->swapchain_extent.height } };
     vkCmdSetScissor(m_impl->command_buffers[m_impl->image_index], 0, 1, &scissor);
 
+    VkDeviceSize offset = 0;
+    vkCmdBindVertexBuffers(m_impl->command_buffers[m_impl->image_index], 0, 1, &m_impl->canvas_vertex_buffer, &offset);
+    vkCmdBindIndexBuffer(m_impl->command_buffers[m_impl->image_index], m_impl->canvas_index_buffer, 0, VK_INDEX_TYPE_UINT32);
+
+    vkCmdBindPipeline(m_impl->command_buffers[m_impl->image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, m_impl->pipeline);
+
+    for (auto& command : m_impl->canvas_draw_commands) {
+        switch (command.type) {
+        case canvas_draw_command_type::clip: {
+            VkRect2D rect;
+            rect.offset.x = std::int32_t(command.clip.left);
+            rect.offset.y = std::int32_t(command.clip.top);
+            rect.extent.width = std::uint32_t(command.clip.width);
+            rect.extent.height = std::uint32_t(command.clip.height);
+            vkCmdSetScissor(m_impl->command_buffers[m_impl->image_index], 0, 1, &rect);
+            break;
+        }
+        case canvas_draw_command_type::primitives:
+            vkCmdDrawIndexed(m_impl->command_buffers[m_impl->image_index],
+                command.primitives.index_count,
+                1,
+                command.primitives.index_offset,
+                command.primitives.vertex_offset,
+                0);
+            break;
+        }
+    }
+
     vkCmdEndRenderPass(m_impl->command_buffers[m_impl->image_index]);
 
     vkEndCommandBuffer(m_impl->command_buffers[m_impl->image_index]);
@@ -791,4 +819,5 @@ void graphics::present() {
 
     m_impl->canvas_vertex_buffer_offset = 0;
     m_impl->canvas_index_buffer_offset = 0;
+    m_impl->canvas_draw_commands.clear();
 }
