@@ -4,8 +4,7 @@
 #include "config.hpp"
 #include "window.hpp"
 #include "span.hpp"
-
-#include <memory>
+#include "memory.hpp"
 
 namespace rb {
     using color = basic_vec4<unsigned char>;

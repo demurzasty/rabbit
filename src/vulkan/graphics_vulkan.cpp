@@ -1,7 +1,5 @@
 #include <rabbit/graphics.hpp>
 #include <rabbit/format.hpp>
-#include <rabbit/arena.hpp>
-#include <rabbit/zone.hpp>
 
 #include "shaders/gen/canvas.vert.spv.h"
 #include "shaders/gen/canvas.frag.spv.h"
