@@ -4,10 +4,6 @@ project (rabbit)
 
 add_subdirectory ("lib")
 
-set (YAWN_SOURCE ${YAWN_SOURCE}
-	"Source/Physics/PhysX/PhysicsDriverPhysX.cpp"
-)
-
 add_executable (b2h "src/tools/b2h.cpp")
 
 file (GLOB_RECURSE BIN_SOURCE_FILES "src/*.spv")

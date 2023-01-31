@@ -9,7 +9,8 @@ void on_close(bool& p_open) {
 int main(int argc, char* argv[]) {
     window window;
     graphics graphics{ window };
-    
+    ui ui;
+
     bool open = true;
     window.on_close().connect<&on_close>(open);
 

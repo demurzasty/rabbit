@@ -10,5 +10,5 @@ layout (location = 1) out vec4 o_color;
 void main() {
     o_texcoord = i_texcoord;
     o_color = i_color;
-    gl_Position = vec4(i_position, 0, 1);
+    gl_Position = vec4(i_position / vec2(1280.0, 720.0) * 2.0 - 1.0, 0, 1);
 }

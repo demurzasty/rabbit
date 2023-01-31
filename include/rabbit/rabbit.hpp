@@ -14,5 +14,6 @@
 #include "stopwatch.hpp"
 #include "type_info.hpp"
 #include "type_traits.hpp"
+#include "ui.hpp"
 #include "window.hpp"
 #include "zone.hpp"
