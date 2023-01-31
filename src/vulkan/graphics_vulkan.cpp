@@ -742,6 +742,14 @@ graphics::~graphics() {
     vkQueueWaitIdle(m_impl->present_queue);
     vkDeviceWaitIdle(m_impl->device);
 
+    m_impl->textures.each([this](id_type id, texture& p_texture) {
+        if (p_texture.image) {
+            vkDestroySampler(m_impl->device, p_texture.sampler, nullptr);
+            vkDestroyImageView(m_impl->device, p_texture.image_view, nullptr);
+            vmaDestroyImage(m_impl->allocator, p_texture.image, p_texture.allocation);
+        }
+    });
+
     vkDestroyPipeline(m_impl->device, m_impl->pipeline, nullptr);
     vkDestroyPipelineLayout(m_impl->device, m_impl->pipeline_layout, nullptr);
 

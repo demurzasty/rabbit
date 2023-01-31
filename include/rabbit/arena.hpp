@@ -47,8 +47,8 @@ namespace rb {
 
         template<typename Func>
         void each(Func p_func) {
-            m_pool.each([&p_func](id_type p_id) {
-                auto& data = *std::launder(reinterpret_cast<T*>(&m_data[i]));
+            m_pool.each([this, &p_func](id_type p_id) {
+                auto& data = *std::launder(reinterpret_cast<T*>(&m_data[p_id]));
                 std::invoke(p_func, p_id, data);
             });
         }
@@ -56,7 +56,7 @@ namespace rb {
         template<typename Func>
         void each(Func p_func) const {
             m_pool.each([&p_func](id_type p_id) {
-                const auto& data = *std::launder(reinterpret_cast<const T*>(&m_data[i]));
+                const auto& data = *std::launder(reinterpret_cast<const T*>(&m_data[p_id]));
                 std::invoke(p_func, p_id, data);
             });
         }
