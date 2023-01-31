@@ -47,7 +47,7 @@ namespace rb {
 
         void push_canvas_clip(float p_left, float p_top, float p_width, float p_height);
 
-        void push_canvas_primitives(const span<const vertex2d>& p_vertices, const span<const std::uint32_t>& p_indices);
+        void push_canvas_primitives(id_type p_texture_id, const span<const vertex2d>& p_vertices, const span<const std::uint32_t>& p_indices);
 
         void present();
 

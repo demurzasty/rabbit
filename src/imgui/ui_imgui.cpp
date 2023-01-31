@@ -43,7 +43,7 @@ ui::ui(window& p_window, graphics& p_graphics)
 
 ui::~ui() {
     ImGuiIO& io = ImGui::GetIO();
-    m_graphics.destroy_texture((id_type)io.Fonts->TexID);
+    m_graphics.destroy_texture((id_type)(std::uintptr_t)io.Fonts->TexID);
     ImGui::DestroyContext();
 }
 
@@ -103,7 +103,7 @@ void ui::render() {
 
                 span<const vertex2d> cmd_vertices(vertices.data() + command->VtxOffset, std::size_t(max_vertex_index) + 1);
 
-                m_graphics.push_canvas_primitives(cmd_vertices, cmd_indices);
+                m_graphics.push_canvas_primitives((id_type)(std::uintptr_t)command->GetTexID(), cmd_vertices, cmd_indices);
             }
         }
     }

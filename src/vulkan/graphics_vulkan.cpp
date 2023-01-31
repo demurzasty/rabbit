@@ -575,11 +575,16 @@ graphics::graphics(const window& p_window)
     descriptor_set_info.pSetLayouts = &m_impl->main_descriptor_set_layout;
     vk(vkAllocateDescriptorSets(m_impl->device, &descriptor_set_info, &m_impl->main_descriptor_set));
 
+    VkPushConstantRange push_constant_range;
+    push_constant_range.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    push_constant_range.offset = 0;
+    push_constant_range.size = sizeof(int);
+
     VkPipelineLayoutCreateInfo pipeline_layout_info{ VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
-    pipeline_layout_info.setLayoutCount = 0;
-    pipeline_layout_info.pSetLayouts = nullptr;
-    pipeline_layout_info.pushConstantRangeCount = 0;
-    pipeline_layout_info.pPushConstantRanges = nullptr;
+    pipeline_layout_info.setLayoutCount = 1;
+    pipeline_layout_info.pSetLayouts = &m_impl->main_descriptor_set_layout;
+    pipeline_layout_info.pushConstantRangeCount = 1;
+    pipeline_layout_info.pPushConstantRanges = &push_constant_range;
     vk(vkCreatePipelineLayout(m_impl->device, &pipeline_layout_info, nullptr, &m_impl->pipeline_layout));
 
     VkShaderModule shader_modules[2];
@@ -976,7 +981,7 @@ void graphics::push_canvas_clip(float p_left, float p_top, float p_width, float 
     m_impl->canvas_draw_commands.push_back(command);
 }
 
-void graphics::push_canvas_primitives(const span<const vertex2d>& p_vertices, const span<const std::uint32_t>& p_indices) {
+void graphics::push_canvas_primitives(id_type p_texture_id, const span<const vertex2d>& p_vertices, const span<const std::uint32_t>& p_indices) {
     std::unique_lock lock{ m_impl->mutex };
 
     void* ptr;
@@ -991,7 +996,7 @@ void graphics::push_canvas_primitives(const span<const vertex2d>& p_vertices, co
 
     canvas_draw_command command;
     command.type = canvas_draw_command_type::primitives;
-    command.primitives.texture_index = -1;
+    command.primitives.texture_index = p_texture_id == null ? -1 : std::int32_t(p_texture_id);
     command.primitives.index_offset = std::uint32_t(m_impl->canvas_index_buffer_offset);
     command.primitives.index_count = std::uint32_t(p_indices.size());
     command.primitives.vertex_offset = std::uint32_t(m_impl->canvas_vertex_buffer_offset);
@@ -1037,27 +1042,33 @@ void graphics::present() {
     vkCmdBindVertexBuffers(m_impl->command_buffers[m_impl->image_index], 0, 1, &m_impl->canvas_vertex_buffer, &offset);
     vkCmdBindIndexBuffer(m_impl->command_buffers[m_impl->image_index], m_impl->canvas_index_buffer, 0, VK_INDEX_TYPE_UINT32);
 
+    vkCmdBindDescriptorSets(m_impl->command_buffers[m_impl->image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, m_impl->pipeline_layout,
+        0, 1, &m_impl->main_descriptor_set, 0, nullptr);
+
     vkCmdBindPipeline(m_impl->command_buffers[m_impl->image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, m_impl->pipeline);
 
     for (auto& command : m_impl->canvas_draw_commands) {
         switch (command.type) {
-        case canvas_draw_command_type::clip: {
-            VkRect2D rect;
-            rect.offset.x = std::int32_t(command.clip.left);
-            rect.offset.y = std::int32_t(command.clip.top);
-            rect.extent.width = std::uint32_t(command.clip.width);
-            rect.extent.height = std::uint32_t(command.clip.height);
-            vkCmdSetScissor(m_impl->command_buffers[m_impl->image_index], 0, 1, &rect);
-            break;
-        }
-        case canvas_draw_command_type::primitives:
-            vkCmdDrawIndexed(m_impl->command_buffers[m_impl->image_index],
-                command.primitives.index_count,
-                1,
-                command.primitives.index_offset,
-                command.primitives.vertex_offset,
-                0);
-            break;
+            case canvas_draw_command_type::clip: {
+                VkRect2D rect;
+                rect.offset.x = std::int32_t(command.clip.left);
+                rect.offset.y = std::int32_t(command.clip.top);
+                rect.extent.width = std::uint32_t(command.clip.width);
+                rect.extent.height = std::uint32_t(command.clip.height);
+                vkCmdSetScissor(m_impl->command_buffers[m_impl->image_index], 0, 1, &rect);
+                break;
+            }
+            case canvas_draw_command_type::primitives: {
+                vkCmdPushConstants(m_impl->command_buffers[m_impl->image_index], m_impl->pipeline_layout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(int), &command.primitives.texture_index);
+               
+                vkCmdDrawIndexed(m_impl->command_buffers[m_impl->image_index],
+                    command.primitives.index_count,
+                    1,
+                    command.primitives.index_offset,
+                    command.primitives.vertex_offset,
+                    0);
+                break;
+            }
         }
     }
 
