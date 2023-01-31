@@ -10,6 +10,15 @@
 namespace rb {
     using color = basic_vec4<unsigned char>;
 
+    namespace colors {
+        constexpr color white = { 255, 255, 255, 255 };
+        constexpr color black = { 0, 0, 0, 255 };
+        constexpr color red = { 255, 0, 0, 255 };
+        constexpr color green = { 0, 255, 0, 255 };
+        constexpr color blue = { 0, 0, 255, 255 };
+        constexpr color cornflower_blue = { 100, 149, 237, 255 };
+    }
+
     struct vertex2d {
         vec2 position;
         vec2 texcoord;

@@ -9,13 +9,17 @@ void on_close(bool& p_open) {
 int main(int argc, char* argv[]) {
     window window;
     graphics graphics{ window };
-    ui ui;
+    ui ui{ window, graphics };
 
     bool open = true;
     window.on_close().connect<&on_close>(open);
 
     while (open) {
         window.dispatch_events();
+
+        ui.main_menu_bar();
+
+        ui.render();
 
         graphics.present();
     }

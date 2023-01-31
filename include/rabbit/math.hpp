@@ -283,6 +283,13 @@ namespace rb {
     }
 
     template<class T>
+    constexpr bool contains(const basic_vec4<T>& p_rect, const basic_vec2<T>& p_point) {
+        return p_point.x >= p_rect.x && p_point.y >= p_rect.y &&
+            p_point.x < p_rect.x + p_rect.z &&
+            p_point.y < p_rect.y + p_rect.w;
+    }
+
+    template<class T>
     constexpr T dot(const basic_vec2<T>& p_left, const basic_vec2<T>& p_right) {
         return p_left.x * p_right.x + p_left.y * p_right.y;
     }

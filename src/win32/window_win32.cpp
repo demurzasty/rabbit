@@ -110,8 +110,15 @@ LRESULT CALLBACK window_proc(HWND p_hwnd, UINT p_msg, WPARAM p_wparam, LPARAM p_
     if (dispatcher) {
         switch (p_msg) {
             case WM_CLOSE:
-                dispatcher->enqueue<window::close_event>();
+                dispatcher->enqueue<close_event>();
                 break;
+            case WM_MOUSEMOVE: {
+                mouse_move_event event;
+                event.position.x = float(LOWORD(p_lparam));
+                event.position.y = float(HIWORD(p_lparam));
+                dispatcher->enqueue(event);
+                break;
+            }
         }
     }
 
