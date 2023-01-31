@@ -26,7 +26,9 @@ int main(int argc, char* argv[]) {
     const char* variable_name = argv[3];
     int column = 0;
 
-    fprintf(output, "const char %s[] = {\n", variable_name);
+    fprintf(output, "const unsigned char %s[] = {\n", variable_name);
+
+    int index = 0;
 
     int byte;
     while ((byte = fgetc(input)) != EOF) {
@@ -37,13 +39,16 @@ int main(int argc, char* argv[]) {
         fprintf(output, (column == 15) ? "0x%02X,\n" : "0x%02X, ", unsigned char(byte));
 
         column = (column + 1) % 16;
+        ++index;
+    }
+
+    for (int i = 0; i < (index % 4); ++i) {
+        fprintf(output, "0x00, ");
     }
 
     if (column == 0) {
         fprintf(output, "    ");
     }
-
-    fprintf(output, (column == 15) ? "0x00,\n" : "0x00, ");
 
     fprintf(output, (column == 0) ? "};" : "\n};");
 
