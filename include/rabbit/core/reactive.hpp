@@ -1,6 +1,6 @@
 #pragma once 
 
-#include <entt/signal/dispatcher.hpp>
+#include <entt/entt.hpp>
 
 namespace rb {
     using entt::delegate;
