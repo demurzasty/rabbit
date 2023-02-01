@@ -16,6 +16,7 @@ endif ()
 
 set (SRC ${SRC}
 	"src/graphics/vulkan/renderer_vulkan.cpp"
+	"src/graphics/vulkan/utils_vulkan.cpp"
 )
 
 add_library (rabbit STATIC ${SRC})

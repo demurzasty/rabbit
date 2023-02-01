@@ -2,8 +2,42 @@
 
 #include <rabbit/graphics/renderer.hpp>
 
+#include <volk.h>
+#include <vma/vk_mem_alloc.h>
+
+#include <vector>
+
 namespace rb {
     struct renderer::data {
+        VkInstance instance;
+        VkSurfaceKHR surface;
+        VkPhysicalDevice physical_device;
+        VkPhysicalDeviceProperties physical_device_properties;
+        uint32_t graphics_family;
+        uint32_t present_family;
+        VkDevice device;
+        VkQueue graphics_queue;
+        VkQueue present_queue;
+        VmaAllocator allocator;
 
+        VkSurfaceFormatKHR surface_format;
+        VkExtent2D swapchain_extent;
+        VkSwapchainKHR swapchain;
+        VkPresentModeKHR present_mode;
+
+        std::vector<VkImage> screen_images;
+        std::vector<VkImageView> screen_image_views;
+
+        VkRenderPass screen_render_pass;
+        std::vector<VkFramebuffer> screen_framebuffers;
+
+        VkCommandPool command_pool;
+        std::vector<VkCommandBuffer> command_buffers;
+        std::vector<VkFence> fences;
+
+        VkSemaphore render_semaphore;
+        VkSemaphore present_semaphore;
+
+        std::uint32_t image_index = 0;
     };
 }

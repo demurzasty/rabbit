@@ -1,12 +1,15 @@
 #include "renderer_vulkan.hpp"
+#include "utils_vulkan.hpp"
 
 using namespace rb;
 
 renderer::renderer(window& window)
     : m_window(window), m_data(std::make_unique<data>()) {
+    vku::setup(m_data, window);
 }
 
 renderer::~renderer() {
+    vku::quit(m_data);
 }
 
 handle renderer::create_texture() {

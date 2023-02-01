@@ -34,6 +34,11 @@ namespace rb {
     class renderer {
     public:
         /**
+         * @brief Opaque platform-specific implementation data structure.
+         */
+        struct data;
+
+        /**
          * @brief Construct a new renderer.
          *
          * @param window Window which is used for context creation.
@@ -127,11 +132,6 @@ namespace rb {
         void display();
 
     private:
-        /**
-         * @brief Opaque platform-specific implementation data structure.
-         */
-        struct data;
-
         /**
          * @brief Platform-specific implementation data of the window.
          */
