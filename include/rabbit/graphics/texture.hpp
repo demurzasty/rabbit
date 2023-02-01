@@ -45,6 +45,15 @@ namespace rb {
         texture& operator=(texture&&) noexcept = default;
 
         /**
+         * @brief Setup a texture data.
+         *
+         * @param size Texture size in pixels.
+         * @param format Texture pixel format.
+         * @param pixels Pixels data with pixel layout determined by a format.
+         */
+        void set_data(const uvec2& size, pixel_format format, const void* pixels);
+
+        /**
          * @brief Get the size of the texture.
          *
          * @return Size of the texture in pixels.
