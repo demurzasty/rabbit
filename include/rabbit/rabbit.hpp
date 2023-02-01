@@ -10,6 +10,7 @@
 #include "json.hpp"
 #include "math.hpp"
 #include "memory.hpp"
+#include "platform.hpp"
 #include "reactive.hpp"
 #include "span.hpp"
 #include "stopwatch.hpp"
@@ -17,4 +18,3 @@
 #include "type_info.hpp"
 #include "type_traits.hpp"
 #include "ui.hpp"
-#include "window.hpp"

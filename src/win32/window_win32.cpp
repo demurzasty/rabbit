@@ -1,4 +1,4 @@
-#include <rabbit/window.hpp>
+#include <rabbit/platform.hpp>
 
 #include <Windows.h>
 

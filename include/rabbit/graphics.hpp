@@ -2,7 +2,7 @@
 
 #include "math.hpp"
 #include "config.hpp"
-#include "window.hpp"
+#include "platform.hpp"
 #include "span.hpp"
 #include "memory.hpp"
 

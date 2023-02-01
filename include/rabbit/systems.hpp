@@ -2,7 +2,7 @@
 
 #include "components.hpp"
 
-namespace rb {
+namespace rb::systems {
     void render_sprites(registry& p_registry, graphics& p_graphics) {
         p_registry.view<transform, sprite>().each([&p_graphics](transform& p_transform, sprite& p_sprite) {
             if (p_sprite.texture != null) {

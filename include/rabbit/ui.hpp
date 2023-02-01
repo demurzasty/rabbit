@@ -1,6 +1,6 @@
 #pragma once 
 
-#include "window.hpp"
+#include "platform.hpp"
 #include "graphics.hpp"
 
 #include <vector>
