@@ -2,22 +2,12 @@
 
 using namespace rb;
 
-void on_close(bool& p_open) {
-    p_open = false;
-}
-
 int main(int argc, char* argv[]) {
-    window window;
-    graphics graphics{ window };
+    window window("hello_world", { 1280, 720 }, false);
 
-    bool open = true;
-    window.on_close().connect<&on_close>(open);
+    window.on<close_event>().connect<&window::close>(window);
 
-    while (open) {
-        window.dispatch_events();
-
-        graphics.present();
+    while (window.is_open()) {
+        window.wait_dispatch_events();
     }
-
-    return 0;
 }
