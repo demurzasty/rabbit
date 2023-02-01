@@ -417,3 +417,41 @@ void vku::quit(std::unique_ptr<renderer::data>& data) {
     vkDestroySurfaceKHR(data->instance, data->surface, nullptr);
     vkDestroyInstance(data->instance, nullptr);
 }
+
+void vku::begin(std::unique_ptr<renderer::data>& data) {
+    vk(vkAcquireNextImageKHR(data->device, data->swapchain, UINT64_MAX, data->present_semaphore, VK_NULL_HANDLE, &data->image_index));
+
+    vkWaitForFences(data->device, 1, &data->fences[data->image_index], VK_FALSE, UINT64_MAX);
+    vkResetFences(data->device, 1, &data->fences[data->image_index]);
+
+    vkResetCommandBuffer(data->command_buffers[data->image_index], 0);
+
+    VkCommandBufferBeginInfo begin_info{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
+    begin_info.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+    vkBeginCommandBuffer(data->command_buffers[data->image_index], &begin_info);
+}
+
+void vku::end(std::unique_ptr<renderer::data>& data) {
+    vkEndCommandBuffer(data->command_buffers[data->image_index]);
+
+    VkPipelineStageFlags wait_dst_stage_mask = VK_PIPELINE_STAGE_TRANSFER_BIT;
+
+    VkSubmitInfo submit_info{ VK_STRUCTURE_TYPE_SUBMIT_INFO };
+    submit_info.waitSemaphoreCount = 1;
+    submit_info.pWaitSemaphores = &data->present_semaphore;
+    submit_info.pWaitDstStageMask = &wait_dst_stage_mask;
+    submit_info.commandBufferCount = 1;
+    submit_info.pCommandBuffers = &data->command_buffers[data->image_index];
+    submit_info.signalSemaphoreCount = 1;
+    submit_info.pSignalSemaphores = &data->render_semaphore;
+    vkQueueSubmit(data->graphics_queue, 1, &submit_info, data->fences[data->image_index]);
+
+    VkPresentInfoKHR present_info{ VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
+    present_info.waitSemaphoreCount = 1;
+    present_info.pWaitSemaphores = &data->render_semaphore;
+    present_info.swapchainCount = 1;
+    present_info.pSwapchains = &data->swapchain;
+    present_info.pImageIndices = &data->image_index;
+    vkQueuePresentKHR(data->present_queue, &present_info);
+    vkQueueWaitIdle(data->present_queue);
+}

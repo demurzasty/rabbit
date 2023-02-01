@@ -17,4 +17,8 @@ namespace rb::vku {
     void setup(std::unique_ptr<renderer::data>& data, window& window);
 
     void quit(std::unique_ptr<renderer::data>& data);
+
+	void begin(std::unique_ptr<renderer::data>& data);
+
+	void end(std::unique_ptr<renderer::data>& data);
 }
