@@ -30,11 +30,11 @@ pixel_format renderer::get_texture_format(handle id) const {
     return pixel_format::undefined;
 }
 
-void renderer::display() {
+void renderer::display(color color) {
     vku::begin(m_data);
 
     VkClearValue clear_values[1];
-    clear_values[0].color = { 100.0f / 255.0f, 149.0f / 255.0f, 237.0f / 255.0f, 1.0f };
+    clear_values[0].color = { color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, color.a / 255.0f };
 
     VkRenderPassBeginInfo render_pass_begin_info{ VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
     render_pass_begin_info.renderPass = m_data->screen_render_pass;

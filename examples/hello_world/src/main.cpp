@@ -11,6 +11,6 @@ int main(int argc, char* argv[]) {
     while (window.is_open()) {
         window.dispatch_events();
 
-        renderer.display();
+        renderer.display(color::cornflower_blue());
     }
 }

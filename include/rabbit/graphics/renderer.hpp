@@ -1,5 +1,6 @@
 #pragma once 
 
+#include "color.hpp"
 #include "../core/handle.hpp"
 #include "../platform/window.hpp"
 
@@ -129,7 +130,7 @@ namespace rb {
         /**
          * @brief Render and display result onto a window surface.
          */
-        void display();
+        void display(color color);
 
     private:
         /**
