@@ -21,7 +21,13 @@ set (SRC ${SRC}
 add_library (rabbit STATIC ${SRC})
 target_include_directories (rabbit PUBLIC "include")
 target_compile_features (rabbit PUBLIC cxx_std_17)
-target_link_libraries (rabbit PUBLIC entt)
+target_link_libraries (rabbit PUBLIC json fmt entt gsl)
+target_link_libraries (rabbit PRIVATE stb vma volk)
+target_compile_definitions (rabbit PRIVATE VMA_STATIC_VULKAN_FUNCTIONS)
+
+if (WIN32)
+	target_compile_definitions (rabbit PRIVATE VK_USE_PLATFORM_WIN32_KHR)
+endif ()
 
 if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
 	add_subdirectory ("examples")
