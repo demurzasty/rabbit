@@ -4,11 +4,19 @@ project (rabbit)
 
 add_subdirectory ("lib")
 
+set (SRC 
+	"src/graphics/texture.cpp"
+)
+
 if (WIN32)
 	set (SRC ${SRC}
 		"src/platform/win32/window_win32.cpp"
 	)
 endif ()
+
+set (SRC ${SRC}
+	"src/graphics/vulkan/renderer_vulkan.cpp"
+)
 
 add_library (rabbit STATIC ${SRC})
 target_include_directories (rabbit PUBLIC "include")
