@@ -112,7 +112,7 @@ namespace rb {
 
     private:
         /**
-         * @brief Opaque pllatform-specific implementation data structure.
+         * @brief Opaque platform-specific implementation data structure.
          */
         struct data;
 
