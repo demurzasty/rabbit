@@ -4,10 +4,6 @@ project (rabbit)
 
 add_subdirectory ("lib")
 
-set (SRC 
-	"src/platform/window.cpp"
-)
-
 if (WIN32)
 	set (SRC ${SRC}
 		"src/platform/win32/window_win32.cpp"
