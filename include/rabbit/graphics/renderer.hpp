@@ -109,7 +109,7 @@ namespace rb {
          * @warning Attempting to fetch a texture that is invalid
          *          or being destroyed results in undefined behavior.
          * 
-         * @remarks For newly created texture this function alwayrs return zero size.
+         * @remarks For newly created texture this function always return zero size.
          * 
          * @return Texture size in pixels.
          */
@@ -121,7 +121,7 @@ namespace rb {
          * @warning Attempting to fetch a texture that is invalid
          *          or being destroyed results in undefined behavior.
          *
-         * @remarks For newly created texture this function alwayrs return pixel_format::undefined.
+         * @remarks For newly created texture this function always return pixel_format::undefined.
          *
          * @return Texture pixel format.
          */
