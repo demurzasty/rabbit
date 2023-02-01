@@ -12,6 +12,8 @@
 #include "graphics/renderer.hpp"
 #include "graphics/texture.hpp"
 
+#include "loaders/image_loader.hpp"
+
 #include "math/vec2.hpp"
 
 #include "platform/events.hpp"
