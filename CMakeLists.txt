@@ -5,6 +5,7 @@ project (rabbit)
 add_subdirectory ("lib")
 
 set (SRC 
+	"src/graphics/image.cpp"
 	"src/graphics/texture.cpp"
 )
 

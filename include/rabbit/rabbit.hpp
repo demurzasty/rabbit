@@ -5,7 +5,10 @@
 
 #include "core/handle.hpp"
 #include "core/reactive.hpp"
+#include "core/span.hpp"
 
+#include "graphics/color.hpp"
+#include "graphics/image.hpp"
 #include "graphics/renderer.hpp"
 #include "graphics/texture.hpp"
 
