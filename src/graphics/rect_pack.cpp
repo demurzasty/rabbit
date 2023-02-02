@@ -17,21 +17,25 @@ rect_pack::rect_pack(const uvec2& size)
     stbrp_init_target(&m_data->context, int(size.x), int(size.y), m_data->nodes.get(), int(size.x));
 }
 
+rect_pack::rect_pack(rect_pack&& rect_pack) noexcept
+    : m_data(std::move(rect_pack.m_data)) {
+}
+
 rect_pack::~rect_pack() {
     // For this specific implementation we do not need
     // this destructor at all. 
 }
 
-uvec4 rect_pack::pack(const uvec2& size) {
+rect_pack& rect_pack::operator=(rect_pack&& rect_pack) noexcept {
+    m_data = std::move(rect_pack.m_data);
+    return *this;
+}
+
+ivec4 rect_pack::pack(const uvec2& size) {
     stbrp_rect rect;
     rect.w = int(size.x);
     rect.h = int(size.y);
     stbrp_pack_rects(&m_data->context, &rect, 1);
 
-    return {
-        (unsigned int)(rect.x),
-        (unsigned int)(rect.y),
-        size.x, 
-        size.y
-    };
+    return { rect.x, rect.y, rect.w, rect.h };
 }

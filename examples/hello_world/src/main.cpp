@@ -9,6 +9,9 @@ int main(int argc, char* argv[]) {
     // Create renderer and attached window to it.
     renderer renderer(window);
 
+    // Load font from file using font loader.
+    font font = font_loader(renderer)("data/proggy_clean.ttf");
+
     // Load texture from file using texture loader.
     texture texture = texture_loader(renderer)("data/characters.png");
 

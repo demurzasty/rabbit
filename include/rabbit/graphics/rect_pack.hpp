@@ -26,7 +26,7 @@ namespace rb {
         /**
          * @brief Move constructor.
          */
-        rect_pack(rect_pack&&) noexcept = default;
+        rect_pack(rect_pack&&) noexcept;
 
         /**
          * @brief Disable copy assignment.
@@ -36,7 +36,7 @@ namespace rb {
         /**
          * @brief Move assignment.
          */
-        rect_pack& operator=(rect_pack&&) noexcept = default;
+        rect_pack& operator=(rect_pack&&) noexcept;
 
         /**
          * @brief Due to impementation defined member data
@@ -49,7 +49,7 @@ namespace rb {
          * 
          * @return Packed rectangle.
          */
-        [[nodiscard]] uvec4 pack(const uvec2& size);
+        [[nodiscard]] ivec4 pack(const uvec2& size);
 
     private:
         /**
