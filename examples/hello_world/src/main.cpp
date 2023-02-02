@@ -2,10 +2,6 @@
 
 using namespace rb;
 
-struct foo {
-    int value = 3;
-};
-
 int main(int argc, char* argv[]) {
     // Create new window.
     window window("hello_world", { 1280, 720 }, false);
