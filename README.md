@@ -21,21 +21,33 @@ To be able to use `RabBit`, users must provide a full-featured compiler that sup
 
 using namespace rb;
 
-void on_close(bool& p_open) {
-    p_open = false;
-}
-
 int main(int argc, char* argv[]) {
-    window window;
-    
-    bool open = true;
-    window.on_close().connect<&on_close>(open);
+    // Create new window.
+    window window("hello_world", { 1280, 720 }, false);
 
-    while (open) {
+    // Create renderer and attached window to it.
+    renderer renderer(window);
+
+    // Load texture from file using texture loader.
+    texture texture = texture_loader(renderer)("data/characters.png");
+
+    // Connect window close event to stop main loop.
+    window.on<close_event>().connect<&window::close>(window);
+
+    // Create stopwatch to use time factor.
+    stopwatch stopwatch;
+
+    // Run our example in loop until close button is pressed.
+    while (window.is_open()) {
+        // Dispatch window events and run all connected signals.
         window.dispatch_events();
-    }
 
-    return 0;
+        // Draw texture on screen.
+        renderer.draw(texture, { 0, 32, 32, 32 }, { stopwatch.time() * 32.0f, 296.0f, 128.0f, 128.0f}, color::white());
+
+        // Render and display it onto a screen.
+        renderer.display(color::cornflower_blue());
+    }
 }
 ```
 
