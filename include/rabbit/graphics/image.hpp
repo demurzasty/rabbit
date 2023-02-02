@@ -19,7 +19,7 @@ namespace rb {
          * 
          * @return Loaded image.
          */
-        static image from(std::string_view path);
+        static image from(std::string_view path, bool fix_alpha_border = false);
         
         /**
          * @brief Disabled copy constructor.
