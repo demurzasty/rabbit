@@ -155,21 +155,21 @@ namespace rb {
          * 
          * @return The result of dereferencing the stored pointer, i.e. *get().
          */
-        Ref& operator*() const { return *m_ptr; }
+        [[nodiscard]] Ref& operator*() const { return *m_ptr; }
 
         /**
          * @brief Get the stored pointer.
          *
          * @return The stored pointer, i.e. get().
          */
-        Ref* operator->() const { return m_ptr; }
+        [[nodiscard]] Ref* operator->() const { return m_ptr; }
 
         /**
          * @brief Get the stored pointer.
          *
          * @return Stored pointer.
          */
-        Ref* get() const { return m_ptr; }
+        [[nodiscard]] Ref* get() const { return m_ptr; }
 
     private:
         /**
