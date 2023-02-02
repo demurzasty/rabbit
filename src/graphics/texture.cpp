@@ -8,6 +8,7 @@ texture::texture(renderer& renderer)
 
 texture::~texture() {
     if (m_id != null) {
+        // We assume that if id is valid that renderer is valid also.
         m_renderer->destroy_texture(m_id);
     }
 }
