@@ -4,7 +4,9 @@
 #include "config/version.hpp"
 
 #include "core/arena.hpp"
+#include "core/format.hpp"
 #include "core/handle.hpp"
+#include "core/json.hpp"
 #include "core/reactive.hpp"
 #include "core/reference.hpp"
 #include "core/span.hpp"
