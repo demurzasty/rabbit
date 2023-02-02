@@ -19,6 +19,10 @@ texture::texture(texture&& texture) noexcept
     texture.m_id = null;
 }
 
+texture::operator handle() const {
+    return m_id;
+}
+
 void texture::set_data(const uvec2& size, pixel_format format, const void* pixels) {
     assert(valid());
 

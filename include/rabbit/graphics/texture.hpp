@@ -50,6 +50,13 @@ namespace rb {
         texture& operator=(texture&& texture) noexcept = delete;
 
         /**
+         * @brief Cast texture directly to texture handle.
+         * 
+         * @return Texture handle.
+         */
+        operator handle() const;
+
+        /**
          * @brief Setup a texture data.
          * 
          * @warning Attempting to change data of invalid texture 
