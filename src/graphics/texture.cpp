@@ -3,20 +3,47 @@
 using namespace rb;
 
 texture::texture(renderer& renderer)
-    : m_renderer(&renderer), m_id(renderer.create_texture()) {
+    : m_renderer(&renderer), m_id(renderer.create_texture()), m_ref(new int(1)) {
 }
 
-texture::~texture() {
-    if (m_id != null) {
-        // We assume that if id is valid that renderer is valid also.
-        m_renderer->destroy_texture(m_id);
-    }
+texture::texture(const texture& texture)
+    : m_renderer(texture.m_renderer), m_id(texture.m_id), m_ref(texture.m_ref) {
+    retain();
 }
 
 texture::texture(texture&& texture) noexcept
-    : m_renderer(texture.m_renderer), m_id(texture.m_id) {
+    : m_renderer(texture.m_renderer), m_id(texture.m_id), m_ref(texture.m_ref) {
+    texture.m_ref = nullptr;
     texture.m_renderer = nullptr;
     texture.m_id = null;
+}
+
+texture::~texture() {
+    release();
+}
+
+texture& texture::operator=(const texture& texture) {
+    release();
+
+    m_ref = texture.m_ref;
+    m_renderer = texture.m_renderer;
+    m_id = texture.m_id;
+
+    return retain();
+}
+
+texture& texture::operator=(texture&& texture) {
+    release();
+
+    m_ref = texture.m_ref;
+    m_renderer = texture.m_renderer;
+    m_id = texture.m_id;
+
+    texture.m_ref = nullptr;
+    texture.m_renderer = nullptr;
+    texture.m_id = null;
+
+    return *this;
 }
 
 texture::operator handle() const {
@@ -50,4 +77,21 @@ pixel_format texture::format() const {
     assert(valid());
 
     return m_renderer->get_texture_format(m_id);
+}
+
+texture& texture::retain() {
+    if (m_ref) {
+        (*m_ref)++;
+    }
+    return *this;
+}
+
+void texture::release() {
+    if (m_ref && --(*m_ref) == 0) {
+        // We assume that if ref is valid that renderer and id is valid also.
+        m_renderer->destroy_texture(m_id);
+
+        // Delete reference counter.
+        delete m_ref;
+    }
 }

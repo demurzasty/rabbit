@@ -27,7 +27,7 @@ namespace rb {
         /**
          * @brief Disabled copy constructor.
          */
-        texture(const texture&) = delete;
+        texture(const texture&);
 
         /**
          * @brief Enabled move constructor.
@@ -42,12 +42,12 @@ namespace rb {
         /**
          * @brief Disabled copy assignment.
          */
-        texture& operator=(const texture&) = delete;
+        texture& operator=(const texture& texture);
 
         /**
          * @brief Enabled move assignment.
          */
-        texture& operator=(texture&& texture) noexcept = delete;
+        texture& operator=(texture&& texture);
 
         /**
          * @brief Cast texture directly to texture handle.
@@ -103,7 +103,29 @@ namespace rb {
         [[nodiscard]] pixel_format format() const;
 
     private:
+        /**
+         * @brief Increment reference counter if exists.
+         */
+        texture& retain();
+
+        /**
+         * @brief DEcrement reference counter if exists.
+         */
+        void release();
+
+        /**
+         * @brief Reference counter.
+         */
+        int* m_ref = nullptr;
+
+        /**
+         * @biref Renderer to which this texture is attached.
+         */
         renderer* m_renderer = nullptr;
+
+        /**
+         * @brief Texture id created by a renderer.
+         */
         handle m_id = null;
     };
 }
