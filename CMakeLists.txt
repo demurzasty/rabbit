@@ -26,6 +26,7 @@ endforeach (BIN_SRC)
 add_custom_target (binaries DEPENDS ${BIN_FILES})
 
 set (SRC 
+	"src/core/reference.cpp"
 	"src/core/stopwatch.cpp"
 	"src/graphics/image.cpp"
 	"src/graphics/texture.cpp"

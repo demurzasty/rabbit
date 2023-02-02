@@ -6,6 +6,7 @@
 #include "core/arena.hpp"
 #include "core/handle.hpp"
 #include "core/reactive.hpp"
+#include "core/reference.hpp"
 #include "core/span.hpp"
 #include "core/stopwatch.hpp"
 

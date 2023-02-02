@@ -2,6 +2,7 @@
 
 #include "renderer.hpp"
 #include "../core/handle.hpp"
+#include "../core/reference.hpp"
 
 namespace rb {
     /**
@@ -10,12 +11,12 @@ namespace rb {
      *        This is an object-oriented wrapper of texture
      *        handle created by a renderer.
      */
-    class texture {
+    class texture : public reference {
     public:
         /**
-         * @brief Construct empty texture.
+         * @brief Disable default construction.
          */
-        texture() = default;
+        texture() = delete;
 
         /**
          * @brief Construct a new texture.
@@ -27,7 +28,7 @@ namespace rb {
         /**
          * @brief Disabled copy constructor.
          */
-        texture(const texture&);
+        texture(const texture&) = delete;
 
         /**
          * @brief Enabled move constructor.
@@ -42,12 +43,12 @@ namespace rb {
         /**
          * @brief Disabled copy assignment.
          */
-        texture& operator=(const texture& texture);
+        texture& operator=(const texture&) = delete;
 
         /**
-         * @brief Enabled move assignment.
+         * @brief Disabled move assignment.
          */
-        texture& operator=(texture&& texture);
+        texture& operator=(texture&&) = delete;
 
         /**
          * @brief Cast texture directly to texture handle.
@@ -103,21 +104,6 @@ namespace rb {
         [[nodiscard]] pixel_format format() const;
 
     private:
-        /**
-         * @brief Increment reference counter if exists.
-         */
-        texture& retain();
-
-        /**
-         * @brief DEcrement reference counter if exists.
-         */
-        void release();
-
-        /**
-         * @brief Reference counter.
-         */
-        int* m_ref = nullptr;
-
         /**
          * @biref Renderer to which this texture is attached.
          */
