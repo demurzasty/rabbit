@@ -8,7 +8,7 @@ texture_loader::texture_loader(renderer& renderer)
 }
 
 texture texture_loader::operator()(std::string_view path) const {
-    const auto image = image::from(path);
+    image image = image::from(path);
 
     texture texture{ m_renderer };
     texture.set_data(image.size(), pixel_format::rgba8, image.pixels().data());

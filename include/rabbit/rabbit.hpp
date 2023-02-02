@@ -3,6 +3,7 @@
 #include "config/config.hpp"
 #include "config/version.hpp"
 
+#include "core/arena.hpp"
 #include "core/handle.hpp"
 #include "core/reactive.hpp"
 #include "core/span.hpp"
