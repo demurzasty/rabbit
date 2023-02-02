@@ -18,6 +18,13 @@ namespace rb {
         pixel_format format = pixel_format::undefined;
     };
 
+    struct draw_data {
+        int texture_index = -1;
+        unsigned int index_offset = 0;
+        unsigned int index_count = 0;
+        unsigned int vertex_offset = 0;
+    };
+
     struct renderer::data {
         VkInstance instance;
         VkSurfaceKHR surface;
@@ -48,16 +55,16 @@ namespace rb {
         VkSemaphore render_semaphore;
         VkSemaphore present_semaphore;
 
-        std::uint32_t image_index = 0;
+        unsigned int image_index = 0;
 
 
         VkBuffer canvas_vertex_buffer;
         VmaAllocation canvas_vertex_buffer_allocation;
-        std::size_t canvas_vertex_buffer_offset = 0;
+        unsigned int canvas_vertex_buffer_offset = 0;
 
         VkBuffer canvas_index_buffer;
         VmaAllocation canvas_index_buffer_allocation;
-        std::size_t canvas_index_buffer_offset = 0;
+        unsigned int canvas_index_buffer_offset = 0;
 
 
         VkDescriptorSetLayout main_descriptor_set_layout;
@@ -69,5 +76,7 @@ namespace rb {
 
 
         arena<texture_data> textures;
+
+        std::vector<draw_data> draw_commands;
     };
 }
