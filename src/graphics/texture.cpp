@@ -22,10 +22,10 @@ texture::operator handle() const {
     return m_id;
 }
 
-void texture::set_data(const uvec2& size, pixel_format format, const void* pixels) {
+void texture::set_data(const uvec2& size, texture_filter filter, pixel_format format, const void* pixels) {
     assert(valid());
 
-    m_renderer->set_texture_data(m_id, size, format, pixels);
+    m_renderer->set_texture_data(m_id, size, filter, format, pixels);
 }
 
 bool texture::valid() const {

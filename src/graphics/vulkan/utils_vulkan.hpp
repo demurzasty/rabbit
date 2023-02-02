@@ -22,7 +22,9 @@ namespace rb::vku {
 
 	void end(std::unique_ptr<renderer::data>& data);
 
-	texture_data create_texture(std::unique_ptr<renderer::data>& data, const uvec2& size, pixel_format format, const void* pixels);
+	VkFilter get_filter(texture_filter filter);
+
+	texture_data create_texture(std::unique_ptr<renderer::data>& data, const uvec2& size, texture_filter filter, pixel_format format, const void* pixels);
 
 	void cleanup_texture(std::unique_ptr<renderer::data>& data, texture_data& texture);
 }

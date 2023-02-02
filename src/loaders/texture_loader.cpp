@@ -11,6 +11,6 @@ texture texture_loader::operator()(std::string_view path) const {
     image image = image::from(path);
 
     texture texture{ m_renderer };
-    texture.set_data(image.size(), pixel_format::rgba8, image.pixels().data());
+    texture.set_data(image.size(), texture_filter::nearest, pixel_format::rgba8, image.pixels().data());
     return texture;
 }

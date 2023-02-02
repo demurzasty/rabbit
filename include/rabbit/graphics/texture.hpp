@@ -64,10 +64,11 @@ namespace rb {
          *          results in undefined behavior.
          *
          * @param size Texture size in pixels.
+         * @param filter Texture filter type.
          * @param format Texture pixel format.
          * @param pixels Pixels data with pixel layout determined by a format.
          */
-        void set_data(const uvec2& size, pixel_format format, const void* pixels);
+        void set_data(const uvec2& size, texture_filter filter, pixel_format format, const void* pixels);
 
         /**
          * @brief Tell whether attached texture handle is valid.

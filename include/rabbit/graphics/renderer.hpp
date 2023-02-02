@@ -35,6 +35,24 @@ namespace rb {
         rgba8
     };
 
+    /**
+     * @brief Defines types of texture filtering.
+     */
+    enum class texture_filter : unsigned char {
+        /**
+         * @brief Nearest-neighbor filtering.
+         */
+        nearest,
+
+        /**
+         * @brief Linear filtering.
+         */
+        linear,
+    };
+
+    /**
+     * @brief Performs primitive-based rendering, creates resources, handles system-level variables, and creates shaders.
+     */
     class renderer {
     public:
         /**
@@ -104,7 +122,7 @@ namespace rb {
          * @param format Texture pixel format.
          * @param pixels Pixels data with pixel layout determined by a format.
          */
-        void set_texture_data(handle id, const uvec2& size, pixel_format format, const void* pixels);
+        void set_texture_data(handle id, const uvec2& size, texture_filter filter, pixel_format format, const void* pixels);
 
         /**
          * @brief Tell whether texture handle is valid.

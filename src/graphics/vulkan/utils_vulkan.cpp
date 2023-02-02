@@ -702,7 +702,18 @@ void vku::end(std::unique_ptr<renderer::data>& data) {
     vkQueueWaitIdle(data->present_queue);
 }
 
-texture_data vku::create_texture(std::unique_ptr<renderer::data>& data, const uvec2& size, pixel_format format, const void* pixels) {
+
+VkFilter vku::get_filter(texture_filter filter) {
+    switch (filter) {
+        case texture_filter::nearest: return VK_FILTER_NEAREST;
+        case texture_filter::linear: return VK_FILTER_LINEAR;
+    }
+
+    assert(0);
+    return VK_FILTER_MAX_ENUM;
+}
+
+texture_data vku::create_texture(std::unique_ptr<renderer::data>& data, const uvec2& size, texture_filter filter, pixel_format format, const void* pixels) {
     texture_data texture;
 
     VkImageCreateInfo image_info{ VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
@@ -837,9 +848,9 @@ texture_data vku::create_texture(std::unique_ptr<renderer::data>& data, const uv
     vk(vkCreateImageView(data->device, &image_view_info, nullptr, &texture.image_view));
 
     VkSamplerCreateInfo sampler_info{ VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
-    sampler_info.magFilter = VK_FILTER_NEAREST; // TODO: Cubic filtering.
+    sampler_info.magFilter = get_filter(filter); 
     sampler_info.minFilter = sampler_info.magFilter;
-    sampler_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST; // TODO: Do mapping.
+    sampler_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR; 
     sampler_info.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
     sampler_info.addressModeV = sampler_info.addressModeU;
     sampler_info.addressModeW = sampler_info.addressModeV;
