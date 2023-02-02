@@ -16,6 +16,7 @@
 
 #include "graphics/color.hpp"
 #include "graphics/image.hpp"
+#include "graphics/rect_pack.hpp"
 #include "graphics/renderer.hpp"
 #include "graphics/texture.hpp"
 

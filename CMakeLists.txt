@@ -29,6 +29,7 @@ set (SRC
 	"src/core/reference.cpp"
 	"src/core/stopwatch.cpp"
 	"src/graphics/image.cpp"
+	"src/graphics/rect_pack.cpp"
 	"src/graphics/texture.cpp"
 	"src/loaders/image_loader.cpp"
 	"src/loaders/texture_loader.cpp"

@@ -46,6 +46,9 @@ namespace rb {
         [[nodiscard]] texture operator()(std::string_view path) const;
 
     private:
+        /**
+         * @brief Renderer reference.
+         */
         renderer& m_renderer;
     };
 }
