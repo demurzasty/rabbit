@@ -50,6 +50,24 @@ namespace rb {
 
         std::uint32_t image_index = 0;
 
+
+        VkBuffer canvas_vertex_buffer;
+        VmaAllocation canvas_vertex_buffer_allocation;
+        std::size_t canvas_vertex_buffer_offset = 0;
+
+        VkBuffer canvas_index_buffer;
+        VmaAllocation canvas_index_buffer_allocation;
+        std::size_t canvas_index_buffer_offset = 0;
+
+
+        VkDescriptorSetLayout main_descriptor_set_layout;
+        VkDescriptorPool main_descriptor_pool;
+        VkDescriptorSet main_descriptor_set;
+
+        VkPipelineLayout pipeline_layout;
+        VkPipeline pipeline;
+
+
         arena<texture_data> textures;
     };
 }

@@ -1,6 +1,7 @@
 #pragma once 
 
 #include "color.hpp"
+#include "vertex.hpp"
 #include "../core/handle.hpp"
 #include "../platform/window.hpp"
 #include "../math/vec2.hpp"

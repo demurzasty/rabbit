@@ -82,7 +82,7 @@ namespace rb {
         void each(Func func) {
             for (std::size_t i = 0, size = m_pool.size(); i < size; ++i) {
                 if (m_pool[i] == handle(i)) {
-                    auto& data = *std::launder(reinterpret_cast<T*>(&m_data[std::size_t(id)]));
+                    auto& data = *std::launder(reinterpret_cast<T*>(&m_data[i]));
                     std::invoke(func, m_pool[i], data);
                 }
             }
@@ -99,7 +99,7 @@ namespace rb {
         void each(Func func) const {
             for (std::size_t i = 0, size = m_pool.size(); i < size; ++i) {
                 if (m_pool[i] == handle(i)) {
-                    const auto& data = *std::launder(reinterpret_cast<const T*>(&m_data[std::size_t(id)]));
+                    const auto& data = *std::launder(reinterpret_cast<const T*>(&m_data[i]));
                     std::invoke(func, m_pool[i], data);
                 }
             }
