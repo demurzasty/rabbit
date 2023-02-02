@@ -104,6 +104,13 @@ namespace rb {
         void set_texture_data(handle id, const uvec2& size, pixel_format format, const void* pixels);
 
         /**
+         * @brief Tell whether texture handle is valid.
+         *
+         * @return True if handle is valid, false otherwise.
+         */
+        [[nodiscard]] bool is_texture_valid(handle id) const;
+
+        /**
          * @brief Get texture size.
          * 
          * @warning Attempting to fetch a texture that is invalid

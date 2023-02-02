@@ -34,6 +34,10 @@ void renderer::set_texture_data(handle id, const uvec2& size, pixel_format forma
     texture = vku::create_texture(m_data, size, format, pixels);
 }
 
+bool renderer::is_texture_valid(handle id) const {
+    return m_data->textures.valid(id);
+}
+
 uvec2 renderer::get_texture_size(handle id) const {
     assert(m_data->textures.valid(id));
 

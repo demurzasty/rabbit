@@ -13,6 +13,11 @@ namespace rb {
     class texture {
     public:
         /**
+         * @brief Construct empty texture.
+         */
+        texture() = default;
+
+        /**
          * @brief Construct a new texture.
          *
          * @param renderer The renderer this texture belongs to.
@@ -32,7 +37,7 @@ namespace rb {
         /**
          * @brief Destructor of the texture.
          */
-        virtual ~texture();
+        ~texture();
 
         /**
          * @brief Disabled copy assignment.
@@ -46,6 +51,9 @@ namespace rb {
 
         /**
          * @brief Setup a texture data.
+         * 
+         * @warning Attempting to change data of invalid texture 
+         *          results in undefined behavior.
          *
          * @param size Texture size in pixels.
          * @param format Texture pixel format.
@@ -54,7 +62,24 @@ namespace rb {
         void set_data(const uvec2& size, pixel_format format, const void* pixels);
 
         /**
+         * @brief Tell whether attached texture handle is valid.
+         * 
+         * @return True if handle is valid, false otherwise.
+         */
+        [[nodiscard]] bool valid() const;
+
+        /**
+         * @brief Get the handle of the texture.
+         *
+         * @return Handle of the texture.
+         */
+        [[nodiscard]] handle id() const;
+
+        /**
          * @brief Get the size of the texture.
+         * 
+         * @warning Attempting to retrieve info from invalid texture 
+         *          results in undefined behavior.
          *
          * @return Size of the texture in pixels.
          */
@@ -62,13 +87,16 @@ namespace rb {
 
         /**
          * @brief Get the pixel format of the texture.
+         * 
+         * @warning Attempting to retrieve info from invalid texture 
+         *          results in undefined behavior.
          *
          * @return Pixel format of the texture.
          */
         [[nodiscard]] pixel_format format() const;
 
     private:
-        renderer& m_renderer;
+        renderer* m_renderer = nullptr;
         handle m_id = null;
     };
 }
