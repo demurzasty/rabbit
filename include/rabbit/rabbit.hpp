@@ -14,6 +14,7 @@
 
 #include "entity/entity.hpp"
 
+#include "graphics/canvas.hpp"
 #include "graphics/color.hpp"
 #include "graphics/font.hpp"
 #include "graphics/image.hpp"

@@ -2,6 +2,7 @@
 
 #include "color.hpp"
 #include "vertex.hpp"
+#include "../core/span.hpp"
 #include "../core/handle.hpp"
 #include "../platform/window.hpp"
 #include "../math/vec2.hpp"
@@ -158,14 +159,13 @@ namespace rb {
         [[nodiscard]] pixel_format get_texture_format(handle id) const;
 
         /**
-         * @brief Add draw quad command to the render queue.
-         * 
+         * @brief Add draw primitives command to the render queue.
+         *
          * @param id Texture handle. Can be null.
-         * @param source A rectangle that specifies (in pixels) the source pixels from a texture.
-         * @param destination A rectangle that specifies (in screen coordinates) the destination for drawing the quad.
-         * @param color The color to tint a quad. Use color::white for full color with no tinting.
+         * @param vertices List of vertices.
+         * @param indices List of indices.
          */
-        void draw(handle texture_id, const ivec4& source, const vec4& destination, color color);
+        void draw(handle texture_id, span<const vertex2d> vertices, span<const unsigned int> indices);
 
         /**
          * @brief Render and display result onto a window surface.

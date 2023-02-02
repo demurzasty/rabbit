@@ -74,14 +74,14 @@ namespace rb {
          * 
          * @return Codepoint glyph.
          */
-        const glyph& get_glyph(unsigned int codepoint, unsigned int character_size);
+        const glyph& get_glyph(unsigned int codepoint, unsigned int character_size) const;
 
         /**
          * @brief Retrieve a kerning between two codepoints.
          * 
          * @return Kerning in pixels.
          */
-        float get_kerning(unsigned int codepoint1, unsigned int codepoint2, unsigned int character_size);
+        float get_kerning(unsigned int codepoint1, unsigned int codepoint2, unsigned int character_size) const;
 
         /**
          * @brief Get the texture containing the loaded glyphs of a certain size.
@@ -97,17 +97,17 @@ namespace rb {
         /**
          * @brief Texture atlas of glyphs.
          */
-        texture m_texture;
+        mutable texture m_texture;
 
         /**
          * @brief Glyphs rectangle packer.
          */
-        rect_pack m_rect_pack;
+        mutable rect_pack m_rect_pack;
 
         /**
          * @brief Glyphs map.
          */
-        std::unordered_map<unsigned int, glyph> m_glyphs;
+        mutable std::unordered_map<unsigned int, glyph> m_glyphs;
 
         /**
          * @brief Impementation defined data pointer.

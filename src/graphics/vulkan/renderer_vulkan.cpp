@@ -66,52 +66,26 @@ pixel_format renderer::get_texture_format(handle id) const {
     return m_data->textures[id].format;
 }
 
-void renderer::draw(handle texture_id, const ivec4& source, const vec4& destination, color color) {
+void renderer::draw(handle texture_id, span<const vertex2d> vertices, span<const unsigned int> indices) {
     void* ptr;
 
-    vertex2d vertices[4];
-    vertices[0].position = { destination.x, destination.y };
-    vertices[1].position = { destination.x, destination.y + destination.w };
-    vertices[2].position = { destination.x + destination.z, destination.y + destination.w };
-    vertices[3].position = { destination.x + destination.z, destination.y };
-
-    if (is_texture_valid(texture_id)) {
-        uvec2 size = get_texture_size(texture_id);
-        vec2 inv_size = { 1.0f / size.x, 1.0f / size.y };
-
-        vertices[0].texcoord = { source.x * inv_size.x, source.y * inv_size.y };
-        vertices[1].texcoord = { source.x * inv_size.x, (source.y + source.w) * inv_size.y };
-        vertices[2].texcoord = { (source.x + source.z) * inv_size.x, (source.y + source.w) * inv_size.y };
-        vertices[3].texcoord = { (source.x + source.z) * inv_size.x, source.y * inv_size.y };
-    }
-
-    vertices[0].color = color;
-    vertices[1].color = color;
-    vertices[2].color = color;
-    vertices[3].color = color;
-
-    unsigned int indices[]{
-        0, 1, 2,
-        2, 3, 0
-    };
-
     vk(vmaMapMemory(m_data->allocator, m_data->canvas_vertex_buffer_allocation, &ptr));
-    memcpy(static_cast<vertex2d*>(ptr) + m_data->canvas_vertex_buffer_offset, vertices, sizeof(vertices));
+    memcpy(static_cast<vertex2d*>(ptr) + m_data->canvas_vertex_buffer_offset, vertices.data(), vertices.size_bytes());
     vmaUnmapMemory(m_data->allocator, m_data->canvas_vertex_buffer_allocation);
 
     vk(vmaMapMemory(m_data->allocator, m_data->canvas_index_buffer_allocation, &ptr));
-    memcpy(static_cast<std::uint32_t*>(ptr) + m_data->canvas_index_buffer_offset, indices, sizeof(indices));
+    memcpy(static_cast<unsigned int*>(ptr) + m_data->canvas_index_buffer_offset, indices.data(), indices.size_bytes());
     vmaUnmapMemory(m_data->allocator, m_data->canvas_index_buffer_allocation);
 
     draw_data command;
     command.texture_index = texture_id == null ? -1 : int(texture_id);
     command.index_offset = m_data->canvas_index_buffer_offset;
-    command.index_count = 6;
+    command.index_count = (unsigned int)(indices.size());
     command.vertex_offset = m_data->canvas_vertex_buffer_offset;
     m_data->draw_commands.push_back(command);
 
-    m_data->canvas_vertex_buffer_offset += 4;
-    m_data->canvas_index_buffer_offset += 6;
+    m_data->canvas_vertex_buffer_offset += (unsigned int)(vertices.size());
+    m_data->canvas_index_buffer_offset += (unsigned int)(indices.size());
 }
 
 void renderer::display(color color) {

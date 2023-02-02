@@ -42,7 +42,7 @@ font::~font() {
     // this destructor at all. 
 }
 
-const glyph& font::get_glyph(unsigned int code_point, unsigned int character_size) {
+const glyph& font::get_glyph(unsigned int code_point, unsigned int character_size) const {
     glyph& glyph = m_glyphs[code_point];
     if (glyph.rect.z > 0 && glyph.rect.w > 0) {
         return glyph;
@@ -75,7 +75,7 @@ const glyph& font::get_glyph(unsigned int code_point, unsigned int character_siz
 }
 
 
-float font::get_kerning(unsigned int codepoint1, unsigned int codepoint2, unsigned int character_size) {
+float font::get_kerning(unsigned int codepoint1, unsigned int codepoint2, unsigned int character_size) const {
     float scale = stbtt_ScaleForPixelHeight(&m_data->info, float(character_size));
 
     return stbtt_GetCodepointKernAdvance(&m_data->info, codepoint1, codepoint2) * scale;

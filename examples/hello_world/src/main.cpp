@@ -9,6 +9,9 @@ int main(int argc, char* argv[]) {
     // Create renderer and attached window to it.
     renderer renderer(window);
 
+    // Create canvas to render 2D stuff.
+    canvas canvas{ renderer };
+
     // Load font from file using font loader.
     font font = font_loader(renderer)("data/proggy_clean.ttf");
 
@@ -27,7 +30,10 @@ int main(int argc, char* argv[]) {
         window.dispatch_events();
 
         // Draw texture on screen.
-        renderer.draw(texture, { 0, 32, 32, 32 }, { stopwatch.time() * 32.0f, 296.0f, 128.0f, 128.0f}, color::white());
+        canvas.draw(texture, { 0, 32, 32, 32 }, { stopwatch.time() * 32.0f, 296.0f, 128.0f, 128.0f}, color::white());
+
+        // Draw text on screen.
+        canvas.draw(font, 39, "Hello World", { 16.0f, 32.0f }, color::white());
 
         // Render and display it onto a screen.
         renderer.display(color::cornflower_blue());
