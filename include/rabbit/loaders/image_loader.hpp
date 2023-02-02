@@ -13,10 +13,10 @@ namespace rb {
     class image_loader {
     public:
         /**
-         * @brief Load new image from filename.
+         * @brief Load new image from file.
          * 
          * @return Loaded image.
          */
-        image operator()(std::string_view path) const;
+        [[nodiscard]] image operator()(std::string_view path) const;
     };
 }

@@ -13,6 +13,7 @@
 #include "graphics/texture.hpp"
 
 #include "loaders/image_loader.hpp"
+#include "loaders/texture_loader.hpp"
 
 #include "math/vec2.hpp"
 

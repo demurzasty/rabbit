@@ -16,6 +16,10 @@ span<const std::uint8_t> image::pixels() const {
     return { m_pixels.get(), std::size_t(m_size.x) * m_size.y * 4 };
 }
 
+const uvec2& image::size() const {
+    return m_size;
+}
+
 image::image(unsigned char* pixels, const uvec2& size)
     : m_pixels(pixels, &free), m_size(size) {
 }

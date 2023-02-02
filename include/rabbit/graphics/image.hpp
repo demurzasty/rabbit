@@ -53,7 +53,7 @@ namespace rb {
          * 
          * @return Image size in pixels.
          */
-        [[nodiscard]] uvec2 size() const;
+        [[nodiscard]] const uvec2& size() const;
 
     private:
         /**

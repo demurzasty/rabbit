@@ -8,6 +8,7 @@ set (SRC
 	"src/graphics/image.cpp"
 	"src/graphics/texture.cpp"
 	"src/loaders/image_loader.cpp"
+	"src/loaders/texture_loader.cpp"
 )
 
 if (WIN32)
