@@ -2,6 +2,7 @@
 
 #include <atomic>
 #include <cstddef>
+#include <type_traits>
 
 namespace rb {
     /** 
@@ -77,6 +78,14 @@ namespace rb {
         ref(const ref<Ref>& ref) : m_ptr(ref.m_ptr) { retain(); }
 
         /**
+         * @brief Copy constructor.
+         *
+         * @param ref Reference wrapper to copy from.
+         */
+        template<typename Derived, std::enable_if_t<std::is_base_of_v<Ref, Derived>, int> = 0>
+        ref(const ref<Derived>& ref) : m_ptr(ref.m_ptr) { retain(); }
+
+        /**
          * @brief Move constructor.
          *
          * @param ref Reference wrapper to move from.
@@ -105,6 +114,19 @@ namespace rb {
             m_ptr = ref.m_ptr;
             retain();
             return *this;;
+        }
+
+        /**
+         * @brief Copy assignment.
+         *
+         * @param ref Reference wrapper to copy from.
+         */
+        template<typename Derived, std::enable_if_t<std::is_base_of_v<Ref, Derived>, int> = 0>
+        ref<Ref>& operator=(const ref<Derived>& ref) {
+            release();
+            m_ptr = ref.m_ptr;
+            retain();
+            return *this;
         }
 
         /**
@@ -168,7 +190,9 @@ namespace rb {
             }
         }
 
-    private:
+        /**
+         * @brief Pointer to a reference.
+         */
         Ref* m_ptr = nullptr;
     };
 }
