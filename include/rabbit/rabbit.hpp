@@ -9,6 +9,8 @@
 #include "core/span.hpp"
 #include "core/stopwatch.hpp"
 
+#include "entity/entity.hpp"
+
 #include "graphics/color.hpp"
 #include "graphics/image.hpp"
 #include "graphics/renderer.hpp"

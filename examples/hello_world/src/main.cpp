@@ -7,10 +7,16 @@ int main(int argc, char* argv[]) {
     window window("hello_world", { 1280, 720 }, false);
 
     // Create renderer and attached window to it.
-    renderer renderer{ window };
+    renderer renderer(window);
+
+    // Setup entity registry.
+    registry registry;
 
     // Load texture from file using texture loader.
     texture texture = texture_loader(renderer)("data/characters.png");
+
+    // Create an entity.
+    entity entity = registry.create();
 
     // Connect window close event to stop main loop.
     window.on<close_event>().connect<&window::close>(window);
