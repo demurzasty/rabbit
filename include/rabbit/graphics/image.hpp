@@ -16,6 +16,7 @@ namespace rb {
          * @brief Load image from file.
          * 
          * @param path Image filename path to load.
+         * @param fix_alpha_border Tell whether alpha border should be fixed.
          * 
          * @return Loaded image.
          */
