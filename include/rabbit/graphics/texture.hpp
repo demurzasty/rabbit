@@ -8,7 +8,7 @@ namespace rb {
      * @brief A structure that contains an efficient,
      *        driver-specific representation of pixel data.
      *        This is an object-oriented wrapper of texture
-     *        created by a renderer.
+     *        handle created by a renderer.
      */
     class texture {
     public:
