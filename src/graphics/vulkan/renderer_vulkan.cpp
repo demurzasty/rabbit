@@ -13,21 +13,37 @@ renderer::~renderer() {
 }
 
 handle renderer::create_texture() {
-    return null;
+    return m_data->textures.create();
 }
 
 void renderer::destroy_texture(handle id) {
+    assert(m_data->textures.valid(id));
+
+    vku::cleanup_texture(m_data, m_data->textures[id]);
+
+    m_data->textures.destroy(id);
 }
 
 void renderer::set_texture_data(handle id, const uvec2& size, pixel_format format, const void* pixels) {
+    assert(m_data->textures.valid(id));
+
+    texture_data& texture = m_data->textures[id];
+
+    vku::cleanup_texture(m_data, texture);
+
+    texture = vku::create_texture(m_data, size, format, pixels);
 }
 
 uvec2 renderer::get_texture_size(handle id) const {
-    return { 0, 0 };
+    assert(m_data->textures.valid(id));
+
+    return m_data->textures[id].size;
 }
 
 pixel_format renderer::get_texture_format(handle id) const {
-    return pixel_format::undefined;
+    assert(m_data->textures.valid(id));
+
+    return m_data->textures[id].format;
 }
 
 void renderer::display(color color) {

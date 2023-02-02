@@ -1,6 +1,7 @@
 #pragma once 
 
 #include <rabbit/graphics/renderer.hpp>
+#include <rabbit/core/arena.hpp>
 
 #include <volk.h>
 #include <vma/vk_mem_alloc.h>
@@ -8,6 +9,15 @@
 #include <vector>
 
 namespace rb {
+    struct texture_data {
+        VkImage image = VK_NULL_HANDLE;
+        VmaAllocation allocation = VK_NULL_HANDLE;
+        VkImageView image_view = VK_NULL_HANDLE;
+        VkSampler sampler = VK_NULL_HANDLE;
+        uvec2 size = { 0, 0 };
+        pixel_format format = pixel_format::undefined;
+    };
+
     struct renderer::data {
         VkInstance instance;
         VkSurfaceKHR surface;
@@ -39,5 +49,7 @@ namespace rb {
         VkSemaphore present_semaphore;
 
         std::uint32_t image_index = 0;
+
+        arena<texture_data> textures;
     };
 }

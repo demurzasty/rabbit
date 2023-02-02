@@ -7,7 +7,14 @@ texture::texture(renderer& renderer)
 }
 
 texture::~texture() {
-    m_renderer.destroy_texture(m_id);
+    if (m_id != null) {
+        m_renderer.destroy_texture(m_id);
+    }
+}
+
+texture::texture(texture&& texture) noexcept
+    : m_renderer(texture.m_renderer), m_id(texture.m_id) {
+    texture.m_id = null;
 }
 
 void texture::set_data(const uvec2& size, pixel_format format, const void* pixels) {

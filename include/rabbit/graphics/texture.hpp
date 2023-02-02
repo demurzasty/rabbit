@@ -27,7 +27,7 @@ namespace rb {
         /**
          * @brief Enabled move constructor.
          */
-        texture(texture&&) noexcept = default;
+        texture(texture&& texture) noexcept;
 
         /**
          * @brief Destructor of the texture.
@@ -42,7 +42,7 @@ namespace rb {
         /**
          * @brief Enabled move assignment.
          */
-        texture& operator=(texture&&) noexcept = default;
+        texture& operator=(texture&& texture) noexcept = delete;
 
         /**
          * @brief Setup a texture data.
