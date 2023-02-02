@@ -14,7 +14,7 @@ To be able to use `RabBit`, users must provide a full-featured compiler that sup
 
 ## Code examples
 
-### Simple window creation
+### Hello world example
 
 ```cpp
 #include <rabbit/rabbit.hpp>
