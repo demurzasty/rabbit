@@ -2,8 +2,8 @@
 
 using namespace rb;
 
-texture::texture(renderer& renderer)
-    : m_renderer(&renderer), m_id(renderer.create_texture()) {
+texture::texture(renderer& renderer, const uvec2& size, texture_filter filter, pixel_format format)
+    : m_renderer(&renderer), m_id(renderer.create_texture(size, filter, format)) {
 }
 
 texture::texture(texture&& texture) noexcept
@@ -22,10 +22,8 @@ texture::operator handle() const {
     return m_id;
 }
 
-void texture::set_data(const uvec2& size, texture_filter filter, pixel_format format, const void* pixels) {
-    assert(valid());
-
-    m_renderer->set_texture_data(m_id, size, filter, format, pixels);
+void texture::update(const void* pixels) {
+    m_renderer->update_texture_data(m_id, pixels);
 }
 
 bool texture::valid() const {
@@ -40,13 +38,9 @@ handle texture::id() const {
 }
 
 uvec2 texture::size() const {
-    assert(valid());
-
     return m_renderer->get_texture_size(m_id);
 }
 
 pixel_format texture::format() const {
-    assert(valid());
-
     return m_renderer->get_texture_format(m_id);
 }

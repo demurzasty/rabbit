@@ -713,7 +713,7 @@ VkFilter vku::get_filter(texture_filter filter) {
     return VK_FILTER_MAX_ENUM;
 }
 
-texture_data vku::create_texture(std::unique_ptr<renderer::data>& data, const uvec2& size, texture_filter filter, pixel_format format, const void* pixels) {
+texture_data vku::create_texture(std::unique_ptr<renderer::data>& data, const uvec2& size, texture_filter filter, pixel_format format) {
     texture_data texture;
 
     VkImageCreateInfo image_info{ VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
@@ -734,9 +734,48 @@ texture_data vku::create_texture(std::unique_ptr<renderer::data>& data, const uv
     allocation_info.usage = VMA_MEMORY_USAGE_GPU_ONLY;
     vk(vmaCreateImage(data->allocator, &image_info, &allocation_info, &texture.image, &texture.allocation, nullptr));
 
+    VkImageViewCreateInfo image_view_info{ VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
+    image_view_info.image = texture.image;
+    image_view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    image_view_info.format = VK_FORMAT_R8G8B8A8_UNORM;
+    image_view_info.components.r = VK_COMPONENT_SWIZZLE_R;
+    image_view_info.components.g = VK_COMPONENT_SWIZZLE_G;
+    image_view_info.components.b = VK_COMPONENT_SWIZZLE_B;
+    image_view_info.components.a = VK_COMPONENT_SWIZZLE_A;
+    image_view_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    image_view_info.subresourceRange.baseMipLevel = 0;
+    image_view_info.subresourceRange.levelCount = 1;
+    image_view_info.subresourceRange.baseArrayLayer = 0;
+    image_view_info.subresourceRange.layerCount = 1;
+    vk(vkCreateImageView(data->device, &image_view_info, nullptr, &texture.image_view));
+
+    VkSamplerCreateInfo sampler_info{ VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
+    sampler_info.magFilter = get_filter(filter); 
+    sampler_info.minFilter = sampler_info.magFilter;
+    sampler_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR; 
+    sampler_info.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler_info.addressModeV = sampler_info.addressModeU;
+    sampler_info.addressModeW = sampler_info.addressModeV;
+    sampler_info.mipLodBias = 0.0f;
+    sampler_info.anisotropyEnable = VK_FALSE;
+    sampler_info.maxAnisotropy = 0.0f;
+    sampler_info.compareEnable = VK_FALSE;
+    sampler_info.compareOp = VK_COMPARE_OP_ALWAYS;
+    sampler_info.minLod = 0.0f;
+    sampler_info.maxLod = 1.0f;
+    sampler_info.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+    sampler_info.unnormalizedCoordinates = VK_FALSE;
+    vk(vkCreateSampler(data->device, &sampler_info, nullptr, &texture.sampler));
+
+    texture.size = size;
+    texture.format = format;
+    return texture;
+}
+
+void vku::update_texture(std::unique_ptr<renderer::data>& data, texture_data& texture, const void* pixels) {
     // Create staging buffer.
     VkBufferCreateInfo buffer_info{ VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
-    buffer_info.size = size.x * size.y * 4;
+    buffer_info.size = texture.size.x * texture.size.y * 4;
     buffer_info.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
     buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     buffer_info.queueFamilyIndexCount = 0;
@@ -797,7 +836,7 @@ texture_data vku::create_texture(std::unique_ptr<renderer::data>& data, const uv
     region.imageSubresource.baseArrayLayer = 0;
     region.imageSubresource.layerCount = 1;
     region.imageOffset = { 0, 0, 0 };
-    region.imageExtent = image_info.extent;
+    region.imageExtent = { texture.size.x, texture.size.y, 1 };
     vkCmdCopyBufferToImage(command_buffer, staging_buffer, texture.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 
 
@@ -831,43 +870,6 @@ texture_data vku::create_texture(std::unique_ptr<renderer::data>& data, const uv
     vkFreeCommandBuffers(data->device, data->command_pool, 1, &command_buffer);
 
     vmaDestroyBuffer(data->allocator, staging_buffer, staging_buffer_allocation);
-
-    VkImageViewCreateInfo image_view_info{ VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
-    image_view_info.image = texture.image;
-    image_view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    image_view_info.format = VK_FORMAT_R8G8B8A8_UNORM;
-    image_view_info.components.r = VK_COMPONENT_SWIZZLE_R;
-    image_view_info.components.g = VK_COMPONENT_SWIZZLE_G;
-    image_view_info.components.b = VK_COMPONENT_SWIZZLE_B;
-    image_view_info.components.a = VK_COMPONENT_SWIZZLE_A;
-    image_view_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    image_view_info.subresourceRange.baseMipLevel = 0;
-    image_view_info.subresourceRange.levelCount = 1;
-    image_view_info.subresourceRange.baseArrayLayer = 0;
-    image_view_info.subresourceRange.layerCount = 1;
-    vk(vkCreateImageView(data->device, &image_view_info, nullptr, &texture.image_view));
-
-    VkSamplerCreateInfo sampler_info{ VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
-    sampler_info.magFilter = get_filter(filter); 
-    sampler_info.minFilter = sampler_info.magFilter;
-    sampler_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR; 
-    sampler_info.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    sampler_info.addressModeV = sampler_info.addressModeU;
-    sampler_info.addressModeW = sampler_info.addressModeV;
-    sampler_info.mipLodBias = 0.0f;
-    sampler_info.anisotropyEnable = VK_FALSE;
-    sampler_info.maxAnisotropy = 0.0f;
-    sampler_info.compareEnable = VK_FALSE;
-    sampler_info.compareOp = VK_COMPARE_OP_ALWAYS;
-    sampler_info.minLod = 0.0f;
-    sampler_info.maxLod = 1.0f;
-    sampler_info.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
-    sampler_info.unnormalizedCoordinates = VK_FALSE;
-    vk(vkCreateSampler(data->device, &sampler_info, nullptr, &texture.sampler));
-
-    texture.size = size;
-    texture.format = format;
-    return texture;
 }
 
 void vku::cleanup_texture(std::unique_ptr<renderer::data>& data, texture_data& texture) {

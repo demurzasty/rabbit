@@ -95,9 +95,13 @@ namespace rb {
         /**
          * @brief Create new texture handle. 
          * 
+         * @param size Texture size in pixels.
+         * @param filter Texture filtering type.
+         * @param format Texture pixel format.
+         * 
          * @return Handle for newly created texture.
          */
-        [[nodiscard]] handle create_texture();
+        [[nodiscard]] handle create_texture(const uvec2& size, texture_filter filter, pixel_format format);
 
         /**
          * @brief Destroy texture associated with provided handle.
@@ -110,7 +114,7 @@ namespace rb {
         void destroy_texture(handle id);
 
         /**
-         * @brief Setup a texture created before.
+         * @brief Update a texture created before.
          * 
          * @warning Attempting to setup a texture that is invalid 
          *          or being destroyed results in undefined behavior.
@@ -118,11 +122,9 @@ namespace rb {
          *          results in undefined behavior.
          * 
          * @param id Texture handle.
-         * @param size Texture size in pixels.
-         * @param format Texture pixel format.
          * @param pixels Pixels data with pixel layout determined by a format.
          */
-        void set_texture_data(handle id, const uvec2& size, texture_filter filter, pixel_format format, const void* pixels);
+        void update_texture_data(handle id, const void* pixels);
 
         /**
          * @brief Tell whether texture handle is valid.

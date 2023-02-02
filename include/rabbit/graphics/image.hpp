@@ -7,11 +7,35 @@
 #include <string_view>
 
 namespace rb {
+    /** 
+     * @brief Structure describing a image info.
+     */
+    struct image_info {
+        /** 
+         * @brief Size of the image.
+         */
+        uvec2 size = { 0, 0 };
+
+        /**
+         * @brief Number of channels of the image.
+         */
+        int channels = 0;
+    };
+
     /**
      * @brief Object oriented wrapper of pixels buffer.
      */
     class image {
     public:
+        /**
+         * @brief Get image dimensions and channels without fully decoding
+         *
+         * @param path Image filename path to fetch.
+         *
+         * @return Read image info.
+         */
+        static image_info info(std::string_view path);
+
         /** 
          * @brief Load image from file.
          * 

@@ -6,9 +6,21 @@
 
 using namespace rb;
 
+image_info image::info(std::string_view path) {
+    int width, height, channels;
+    if (stbi_info(std::string(path).c_str(), &width, &height, &channels)) {
+        return {
+            { (unsigned int)(width), (unsigned int)(height) },
+            channels
+        };
+    }
+
+    return {};
+}
+
 image image::from(std::string_view path, bool fix_alpha_border) {
-    int width, height, comp;
-    stbi_uc* data = stbi_load(std::string(path).c_str(), &width, &height, &comp, 4);
+    int width, height, channels;
+    stbi_uc* data = stbi_load(std::string(path).c_str(), &width, &height, &channels, 4);
     assert(data);
 
     if (fix_alpha_border) {

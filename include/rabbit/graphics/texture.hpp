@@ -22,8 +22,11 @@ namespace rb {
          * @brief Construct a new texture.
          *
          * @param renderer The renderer this texture belongs to.
+         * @param size Texture size in pixels.
+         * @param filter Texture filter type.
+         * @param format Texture pixel format.
          */
-        texture(renderer& renderer);
+        texture(renderer& renderer, const uvec2& size, texture_filter filter, pixel_format format);
 
         /**
          * @brief Disabled copy constructor.
@@ -58,17 +61,11 @@ namespace rb {
         operator handle() const;
 
         /**
-         * @brief Setup a texture data.
-         * 
-         * @warning Attempting to change data of invalid texture 
-         *          results in undefined behavior.
+         * @brief Update a texture data.
          *
-         * @param size Texture size in pixels.
-         * @param filter Texture filter type.
-         * @param format Texture pixel format.
          * @param pixels Pixels data with pixel layout determined by a format.
          */
-        void set_data(const uvec2& size, texture_filter filter, pixel_format format, const void* pixels);
+        void update(const void* pixels);
 
         /**
          * @brief Tell whether attached texture handle is valid.
@@ -86,9 +83,6 @@ namespace rb {
 
         /**
          * @brief Get the size of the texture.
-         * 
-         * @warning Attempting to retrieve info from invalid texture 
-         *          results in undefined behavior.
          *
          * @return Size of the texture in pixels.
          */
@@ -96,9 +90,6 @@ namespace rb {
 
         /**
          * @brief Get the pixel format of the texture.
-         * 
-         * @warning Attempting to retrieve info from invalid texture 
-         *          results in undefined behavior.
          *
          * @return Pixel format of the texture.
          */

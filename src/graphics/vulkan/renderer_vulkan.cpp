@@ -12,8 +12,12 @@ renderer::~renderer() {
     vku::quit(m_data);
 }
 
-handle renderer::create_texture() {
-    return m_data->textures.create();
+handle renderer::create_texture(const uvec2& size, texture_filter filter, pixel_format format) {
+    handle id = m_data->textures.create();
+
+    m_data->textures[id] = vku::create_texture(m_data, size, filter, format);
+
+    return id;
 }
 
 void renderer::destroy_texture(handle id) {
@@ -24,14 +28,12 @@ void renderer::destroy_texture(handle id) {
     m_data->textures.destroy(id);
 }
 
-void renderer::set_texture_data(handle id, const uvec2& size, texture_filter filter, pixel_format format, const void* pixels) {
+void renderer::update_texture_data(handle id, const void* pixels) {
     assert(m_data->textures.valid(id));
 
     texture_data& texture = m_data->textures[id];
 
-    vku::cleanup_texture(m_data, texture);
-
-    texture = vku::create_texture(m_data, size, filter, format, pixels);
+    vku::update_texture(m_data, texture, pixels);
 
     VkDescriptorImageInfo descriptor_image_info{};
     descriptor_image_info.sampler = texture.sampler;
