@@ -7,6 +7,7 @@
 #include "core/handle.hpp"
 #include "core/reactive.hpp"
 #include "core/span.hpp"
+#include "core/stopwatch.hpp"
 
 #include "graphics/color.hpp"
 #include "graphics/image.hpp"
