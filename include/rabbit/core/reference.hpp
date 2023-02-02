@@ -151,6 +151,13 @@ namespace rb {
         }
 
         /**
+         * @brief Tell whether pointer is not null.
+         * 
+         * @return True is pointer is not null, false otherwise.
+         */
+        [[nodiscard]] operator bool() const { return m_ptr; }
+
+        /**
          * @brief Dereference the stored pointer.
          * 
          * @return The result of dereferencing the stored pointer, i.e. *get().
