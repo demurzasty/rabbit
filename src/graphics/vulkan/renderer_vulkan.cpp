@@ -50,6 +50,10 @@ pixel_format renderer::get_texture_format(handle id) const {
     return m_data->textures[id].format;
 }
 
+void renderer::draw(handle texture_id, const ivec4& source, const vec4& destination, color color) {
+
+}
+
 void renderer::display(color color) {
     vku::begin(m_data);
 
