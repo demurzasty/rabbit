@@ -131,16 +131,16 @@ LRESULT CALLBACK window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) 
                 break;
             case WM_MOUSEMOVE: {
                 mouse_move_event event;
-                event.position.x = LOWORD(lparam);
-                event.position.y = HIWORD(lparam);
+                event.position.x = float(LOWORD(lparam));
+                event.position.y = float(HIWORD(lparam));
                 dispatcher->enqueue(event);
                 break;
             }
             case WM_LBUTTONDOWN:
             case WM_LBUTTONUP: {
                 mouse_button_event event;
-                event.position.x = LOWORD(lparam);
-                event.position.y = HIWORD(lparam);
+                event.position.x = float(LOWORD(lparam));
+                event.position.y = float(HIWORD(lparam));
                 event.button = mouse_button::left;
                 event.pressed = msg == WM_LBUTTONDOWN;
                 dispatcher->enqueue(event);
@@ -149,8 +149,8 @@ LRESULT CALLBACK window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) 
             case WM_RBUTTONDOWN:
             case WM_RBUTTONUP: {
                 mouse_button_event event;
-                event.position.x = LOWORD(lparam);
-                event.position.y = HIWORD(lparam);
+                event.position.x = float(LOWORD(lparam));
+                event.position.y = float(HIWORD(lparam));
                 event.button = mouse_button::right;
                 event.pressed = msg == WM_RBUTTONDOWN;
                 dispatcher->enqueue(event);
@@ -159,8 +159,8 @@ LRESULT CALLBACK window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) 
             case WM_MBUTTONDOWN:
             case WM_MBUTTONUP: {
                 mouse_button_event event;
-                event.position.x = LOWORD(lparam);
-                event.position.y = HIWORD(lparam);
+                event.position.x = float(LOWORD(lparam));
+                event.position.y = float(HIWORD(lparam));
                 event.button = mouse_button::middle;
                 event.pressed = msg == WM_MBUTTONDOWN;
                 dispatcher->enqueue(event);

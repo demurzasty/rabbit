@@ -17,7 +17,7 @@ namespace rb {
         /**
          * @brief Mouse position relative to the window.
          */
-        ivec2 position;
+        vec2 position;
     };
 
     /**
@@ -27,7 +27,7 @@ namespace rb {
         /**
          * @brief Mouse position relative to the window.
          */
-        ivec2 position;
+        vec2 position;
 
         /**
          * @brief Which mouse button has been pressed or released.

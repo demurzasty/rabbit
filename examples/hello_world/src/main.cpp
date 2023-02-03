@@ -10,7 +10,7 @@ int main(int argc, char* argv[]) {
     renderer renderer(window);
 
     // Create canvas to render 2D stuff.
-    canvas canvas{ renderer };
+    canvas canvas(renderer);
 
     // Load font from file using font loader.
     font font = font_loader(renderer)("data/proggy_clean.ttf");
