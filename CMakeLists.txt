@@ -36,6 +36,7 @@ set (SRC
 	"src/graphics/texture.cpp"
 	"src/loaders/font_loader.cpp"
 	"src/loaders/image_loader.cpp"
+	"src/loaders/json_loader.cpp"
 	"src/loaders/texture_loader.cpp"
 )
 

@@ -25,6 +25,7 @@
 
 #include "loaders/font_loader.hpp"
 #include "loaders/image_loader.hpp"
+#include "loaders/json_loader.hpp"
 #include "loaders/texture_loader.hpp"
 
 #include "math/vec2.hpp"

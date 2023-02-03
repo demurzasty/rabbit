@@ -33,9 +33,9 @@ rect_pack& rect_pack::operator=(rect_pack&& rect_pack) noexcept {
 
 ivec4 rect_pack::pack(const uvec2& size) {
     stbrp_rect rect;
-    rect.w = int(size.x);
-    rect.h = int(size.y);
+    rect.w = int(size.x + 2);
+    rect.h = int(size.y + 2);
     stbrp_pack_rects(&m_data->context, &rect, 1);
 
-    return { rect.x, rect.y, rect.w, rect.h };
+    return { rect.x + 1, rect.y + 1, int(size.x), int(size.y) };
 }
