@@ -28,6 +28,7 @@ add_custom_target (binaries DEPENDS ${BIN_FILES})
 set (SRC 
 	"src/core/reference.cpp"
 	"src/core/stopwatch.cpp"
+	"src/core/thread_pool.cpp"
 	"src/graphics/canvas.cpp"
 	"src/graphics/font.cpp"
 	"src/graphics/image.cpp"

@@ -11,6 +11,7 @@
 #include "core/reference.hpp"
 #include "core/span.hpp"
 #include "core/stopwatch.hpp"
+#include "core/thread_pool.hpp"
 
 #include "entity/entity.hpp"
 
