@@ -1,17 +1,24 @@
-#include <rabbit/graphics/canvas.hpp>
+#include <rabbit/graphics/painter.hpp>
 
 using namespace rb;
 
-canvas::canvas(renderer& renderer)
-    : m_renderer(renderer) {
+painter::painter(renderer& renderer)
+    : m_renderer(renderer), viewport_size(renderer.surface_size()) {
 }
 
-void canvas::draw(const vec4& destination, color color) {
+void painter::draw(const vec4& destination, color color) {
     vertex2d vertices[4];
     vertices[0].position = { destination.x, destination.y };
     vertices[1].position = { destination.x, destination.y + destination.w };
     vertices[2].position = { destination.x + destination.z, destination.y + destination.w };
     vertices[3].position = { destination.x + destination.z, destination.y };
+
+    uvec2 surface_size = m_renderer.surface_size();
+    vec2 scale = { surface_size.x / float(viewport_size.x), surface_size.y / float(viewport_size.y) };
+
+    for (vertex2d& vertex : vertices) {
+        vertex.position = vertex.position * scale;
+    }
 
     vertices[0].color = color;
     vertices[1].color = color;
@@ -26,7 +33,7 @@ void canvas::draw(const vec4& destination, color color) {
     m_renderer.draw(null, vertices, indices);
 }
 
-void canvas::draw(const texture& texture, const vec2& position, color color) {
+void painter::draw(const texture& texture, const vec2& position, color color) {
     uvec2 size = texture.size();
 
     vertex2d vertices[4];
@@ -34,6 +41,13 @@ void canvas::draw(const texture& texture, const vec2& position, color color) {
     vertices[1].position = { position.x, position.y + size.y };
     vertices[2].position = { position.x + size.x, position.y + size.y };
     vertices[3].position = { position.x + size.x, position.y };
+
+    uvec2 surface_size = m_renderer.surface_size();
+    vec2 scale = { surface_size.x / float(viewport_size.x), surface_size.y / float(viewport_size.y) };
+
+    for (vertex2d& vertex : vertices) {
+        vertex.position = vertex.position * scale;
+    }
 
     vertices[0].texcoord = { 0.0, 0.0f };
     vertices[1].texcoord = { 0.0, 1.0f };
@@ -53,12 +67,19 @@ void canvas::draw(const texture& texture, const vec2& position, color color) {
     m_renderer.draw(texture, vertices, indices);
 }
 
-void canvas::draw(const texture& texture, const ivec4& source, const vec4& destination, color color) {
+void painter::draw(const texture& texture, const ivec4& source, const vec4& destination, color color) {
     vertex2d vertices[4];
     vertices[0].position = { destination.x, destination.y };
     vertices[1].position = { destination.x, destination.y + destination.w };
     vertices[2].position = { destination.x + destination.z, destination.y + destination.w };
     vertices[3].position = { destination.x + destination.z, destination.y };
+
+    uvec2 surface_size = m_renderer.surface_size();
+    vec2 scale = { surface_size.x / float(viewport_size.x), surface_size.y / float(viewport_size.y) };
+
+    for (vertex2d& vertex : vertices) {
+        vertex.position = vertex.position * scale;
+    }
 
     uvec2 size = texture.size();
     vec2 inv_size = { 1.0f / size.x, 1.0f / size.y };
@@ -81,7 +102,7 @@ void canvas::draw(const texture& texture, const ivec4& source, const vec4& desti
     m_renderer.draw(texture, vertices, indices);
 }
 
-void canvas::draw(const texture& texture, const ivec4& source, const vec4& destination, color color, const vec2& center, float rotation) {
+void painter::draw(const texture& texture, const ivec4& source, const vec4& destination, color color, const vec2& center, float rotation) {
     vec2 position{ destination.x - center.x, destination.y - center.y };
 
     vertex2d vertices[4];
@@ -89,6 +110,13 @@ void canvas::draw(const texture& texture, const ivec4& source, const vec4& desti
     vertices[1].position = { position.x, position.y + destination.w };
     vertices[2].position = { position.x + destination.z, position.y + destination.w };
     vertices[3].position = { position.x + destination.z, position.y };
+
+    uvec2 surface_size = m_renderer.surface_size();
+    vec2 scale = { surface_size.x / float(viewport_size.x), surface_size.y / float(viewport_size.y) };
+
+    for (vertex2d& vertex : vertices) {
+        vertex.position = vertex.position * scale;
+    }
 
     vec2 pivot{ destination.x, destination.y };
     for (vertex2d& vertex : vertices) {
@@ -116,7 +144,7 @@ void canvas::draw(const texture& texture, const ivec4& source, const vec4& desti
     m_renderer.draw(texture, vertices, indices);
 }
 
-void canvas::draw(const font& font, unsigned char size, std::string_view text, const vec2& position, color color) {
+void painter::draw(const font& font, unsigned char size, std::string_view text, const vec2& position, color color) {
     vec2 location = position;
     for (std::size_t i = 0; i < text.size(); ++i) {
         const glyph& glyph = font.get_glyph(text[i], size);
@@ -129,4 +157,8 @@ void canvas::draw(const font& font, unsigned char size, std::string_view text, c
             location.x += font.get_kerning(text[i], text[i] + 1, size);
         }
     }
+}
+
+void painter::draw(const sprite& sprite) {
+
 }

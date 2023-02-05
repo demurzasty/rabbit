@@ -137,3 +137,7 @@ void renderer::display(color color) {
     m_data->canvas_index_buffer_offset = 0;
     m_data->draw_commands.clear();
 }
+
+uvec2 renderer::surface_size() const {
+    return { m_data->swapchain_extent.width, m_data->swapchain_extent.height };
+}

@@ -4,40 +4,42 @@
 #include "texture.hpp"
 #include "font.hpp"
 
+#include "../components/sprite.hpp"
+
 #include <string_view>
 
 namespace rb {
     /**
-     * @brief Canvas class to simplify 2D rendering.
+     * @brief Painter class to simplify 2D rendering.
      */
-    class canvas {
+    class painter {
     public:
         /**
-         * @brief Construct a new canvas.
+         * @brief Construct a new painter.
          * 
          * @param renderer Renderer reference used to draw stuff.
          */
-        canvas(renderer& renderer);
+        painter(renderer& renderer);
 
         /**
          * @brief Disable copy constructor.
          */
-        canvas(const canvas&) = delete;
+        painter(const painter&) = delete;
 
         /**
          * @brief Move constructor.
          */
-        canvas(canvas&&) noexcept = default;
+        painter(painter&&) noexcept = default;
 
         /**
          * @brief Disable copy assignment.
          */
-        canvas& operator=(const canvas&) = delete;
+        painter& operator=(const painter&) = delete;
 
         /**
          * @brief Move assignment.
          */
-        canvas& operator=(canvas&&) noexcept = delete;
+        painter& operator=(painter&&) noexcept = delete;
 
         /**
          * @brief Add draw quad command to the render queue.
@@ -88,6 +90,23 @@ namespace rb {
          * @param color The color to tint a quad. Use color::white for full color with no tinting.
          */
         void draw(const font& font, unsigned char size, std::string_view text, const vec2& position, color color);
+
+        /**
+         * @brief Draw sprite.
+         * 
+         * @param sprite Sprite to draw.
+         */
+        void draw(const sprite& sprite);
+
+        /**
+         * Viewport size (in screen coordinates).
+         */
+        uvec2 viewport_size = uvec2::zero();
+
+        /**
+         * Viewport position (in screen coordinates).
+         */
+        vec2 viewport_position = vec2::zero();
 
     private:
         renderer& m_renderer;

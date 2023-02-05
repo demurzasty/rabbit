@@ -9,8 +9,8 @@ int main(int argc, char* argv[]) {
     // Create renderer and attached window to it.
     renderer renderer(window);
 
-    // Create canvas to render 2D stuff.
-    canvas canvas(renderer);
+    // Create painter to dynamically render 2D stuff.
+    painter painter(renderer);
 
     // Create assets menager (not required).
     assets assets;
@@ -35,10 +35,10 @@ int main(int argc, char* argv[]) {
         window.dispatch_events();
 
         // Draw texture on screen.
-        canvas.draw(*texture, { 0, 32, 32, 32 }, { stopwatch.time() * 32.0f, 296.0f, 128.0f, 128.0f }, color::white(), { 64.0f, 64.0f }, stopwatch.time());
+        painter.draw(*texture, { 0, 32, 32, 32 }, { stopwatch.time() * 32.0f, 296.0f, 128.0f, 128.0f }, color::white(), { 64.0f, 64.0f }, stopwatch.time());
 
         // Draw text on screen.
-        canvas.draw(*font, 39, "Hello World", { 16.0f, 32.0f }, color::white());
+        painter.draw(*font, 39, "Hello World", { 16.0f, 32.0f }, color::white());
 
         // Render and display it onto a screen.
         renderer.display(color::cornflower_blue());

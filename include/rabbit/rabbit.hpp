@@ -1,8 +1,6 @@
 #pragma once 
 
 #include "components/sprite.hpp"
-#include "components/subrect.hpp"
-#include "components/tint.hpp"
 
 #include "config/config.hpp"
 #include "config/version.hpp"
@@ -21,10 +19,10 @@
 
 #include "entity/entity.hpp"
 
-#include "graphics/canvas.hpp"
 #include "graphics/color.hpp"
 #include "graphics/font.hpp"
 #include "graphics/image.hpp"
+#include "graphics/painter.hpp"
 #include "graphics/rect_pack.hpp"
 #include "graphics/renderer.hpp"
 #include "graphics/texture.hpp"

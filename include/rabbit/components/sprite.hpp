@@ -11,5 +11,25 @@ namespace rb {
          * @brief Source texture.
          */
         ref<texture> texture;
+
+        /**
+         * @brief Color tint.
+         */
+        color color = color::white();
+
+        /**
+         * @brief Horizontal frames.
+         */
+        unsigned int hframes = 1;
+
+        /**
+         * @brief Vertical frames.
+         */
+        unsigned int vframes = 1;
+
+        /**
+         * @brief Current frame index.
+         */
+        unsigned int frame = 0;
     };
 }

@@ -76,7 +76,7 @@ void vku::setup(std::unique_ptr<renderer::data>& data, window& window) {
     vk(vkCreateInstance(&instance_info, nullptr, &data->instance));
 
     volkLoadInstance(data->instance);
-    
+
 #if _WIN32
     VkWin32SurfaceCreateInfoKHR surface_info{ VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR };
     surface_info.hinstance = GetModuleHandle(NULL);
@@ -190,7 +190,8 @@ void vku::setup(std::unique_ptr<renderer::data>& data, window& window) {
     // Choose surface color format.
     if (surface_format_count == 1 && surface_formats[0].format == VK_FORMAT_UNDEFINED) {
         data->surface_format.format = VK_FORMAT_B8G8R8A8_UNORM;
-    } else {
+    }
+    else {
         data->surface_format.format = surface_formats[0].format;
     }
 
@@ -235,7 +236,8 @@ void vku::setup(std::unique_ptr<renderer::data>& data, window& window) {
         swapchain_info.queueFamilyIndexCount = sizeof(queue_indices) / sizeof(*queue_indices);
         swapchain_info.pQueueFamilyIndices = queue_indices;
         swapchain_info.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-    } else {
+    }
+    else {
         swapchain_info.queueFamilyIndexCount = 0;
         swapchain_info.pQueueFamilyIndices = nullptr;
         swapchain_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -630,7 +632,7 @@ void vku::quit(std::unique_ptr<renderer::data>& data) {
 
     data->textures.each([&data](handle id, texture_data& texture) {
         cleanup_texture(data, texture);
-    });
+        });
 
     vkDestroyPipeline(data->device, data->pipeline, nullptr);
     vkDestroyPipelineLayout(data->device, data->pipeline_layout, nullptr);
@@ -705,8 +707,8 @@ void vku::end(std::unique_ptr<renderer::data>& data) {
 
 VkFilter vku::get_filter(texture_filter filter) {
     switch (filter) {
-        case texture_filter::nearest: return VK_FILTER_NEAREST;
-        case texture_filter::linear: return VK_FILTER_LINEAR;
+    case texture_filter::nearest: return VK_FILTER_NEAREST;
+    case texture_filter::linear: return VK_FILTER_LINEAR;
     }
 
     assert(0);
@@ -750,9 +752,9 @@ texture_data vku::create_texture(std::unique_ptr<renderer::data>& data, const uv
     vk(vkCreateImageView(data->device, &image_view_info, nullptr, &texture.image_view));
 
     VkSamplerCreateInfo sampler_info{ VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
-    sampler_info.magFilter = get_filter(filter); 
+    sampler_info.magFilter = get_filter(filter);
     sampler_info.minFilter = sampler_info.magFilter;
-    sampler_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR; 
+    sampler_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
     sampler_info.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
     sampler_info.addressModeV = sampler_info.addressModeU;
     sampler_info.addressModeW = sampler_info.addressModeV;

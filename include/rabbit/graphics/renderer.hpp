@@ -172,6 +172,13 @@ namespace rb {
          */
         void display(color color);
 
+        /**
+         * @brief Get a size of the surface.
+         * 
+         * @return Surface size in pixels.
+         */
+        uvec2 surface_size() const;
+
     private:
         /**
          * @brief Platform-specific implementation data of the window.
