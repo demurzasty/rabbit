@@ -57,7 +57,7 @@ void client::dispatch() {
                     id_type packet_id;
                     memcpy(&packet_id, event.packet->data, sizeof(id_type));
 
-                    if (auto& handler = m_customs[packet_id];  handler) {
+                    if (auto& handler = m_customs[packet_id]; handler) {
                         handler({ event.packet->data + sizeof(id_type), event.packet->dataLength - sizeof(id_type) }, m_dispatcher);
                     }
                 }

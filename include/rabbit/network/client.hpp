@@ -66,7 +66,7 @@ namespace rb {
         template<typename Event>
         [[nodiscard]] auto on() {
             // Handle custom event differently.
-            if constexpr (!std::is_same_v<Event, server_event_connect> && !std::is_same_v<Event, server_event_disconnect>) {
+            if constexpr (!std::is_same_v<Event, client_event_connect> && !std::is_same_v<Event, client_event_disconnect>) {
                 auto& handler = m_customs[type_hash<Event>()];
                 if (!handler) {
                     handler = [](span<const unsigned char> data, dispatcher& dispatcher) {
