@@ -4,14 +4,22 @@ using namespace rb;
 
 static bool can_stop = false;
 
+struct custom_packet {
+    int value = 5;
+};
+
 void on_client_connected(client& client) {
     println("connected");
 
-    client.disconnect();
+    client.send(custom_packet{ 7 });
 }
 
 void on_client_disconnected() {
     println("disconnected");
+}
+
+void on_client_custom_packet_sent(custom_packet& packet) {
+    println("custom_packet.value = {}", packet.value);
 
     can_stop = true;
 }
@@ -20,6 +28,7 @@ void start_server() {
     server server(6969);
 
     server.on<server_event_disconnect>().connect<&on_client_disconnected>();
+    server.on<custom_packet>().connect<&on_client_custom_packet_sent>();
 
     while (!can_stop) {
         server.dispatch();

@@ -1,10 +1,13 @@
 #pragma once 
 
 #include "../core/reactive.hpp"
+#include "../core/type_info.hpp"
+#include "../core/span.hpp"
 
 #include <memory>
-#include <vector>
+#include <functional>
 #include <string_view>
+#include <type_traits>
 
 namespace rb {
     /**
@@ -16,16 +19,6 @@ namespace rb {
      * @brief Disconnected from the server event.
      */
     struct client_event_disconnect { };
-
-    /**
-     * @brief Packet from server has been delivered.
-     */
-    struct client_event_packet { 
-        /**
-         * @brief Packet data sent by the server.
-         */
-        std::vector<unsigned char> data;
-    };
 
     /**
      * @brief Client class.
@@ -51,6 +44,14 @@ namespace rb {
         void disconnect();
 
         /**
+         * @brief Sending data to the server.
+         */
+        template<typename T, std::enable_if_t<std::is_trivially_copyable_v<T>, int> = 0>
+        void send(const T& data) {
+            send(type_hash<T>(), &data, sizeof(T));
+        };
+
+        /**
          * @brief Dispatch network events.
          */
         void dispatch();
@@ -63,9 +64,31 @@ namespace rb {
          * @return Event sink of the window.
          */
         template<typename Event>
-        [[nodiscard]] auto on() { return m_dispatcher.sink<Event>(); }
+        [[nodiscard]] auto on() {
+            // Handle custom event differently.
+            if constexpr (!std::is_same_v<Event, server_event_connect> && !std::is_same_v<Event, server_event_disconnect>) {
+                auto& handler = m_customs[type_hash<Event>()];
+                if (!handler) {
+                    handler = [](span<const unsigned char> data, dispatcher& dispatcher) {
+                        if (sizeof(Event) == data.size()) {
+                            Event event;
+                            memcpy(&event, data.data(), sizeof(Event));
+
+                            dispatcher.trigger(event);
+                        }
+                    };
+                }
+            }
+
+            return m_dispatcher.sink<Event>(); 
+        }
 
     private:
+        /**
+         * @brief Sending raw-data to the server.
+         */
+        void send(id_type packet_id, const void* data, std::size_t size);
+
         /**
          * @brief Implementation specific data structure.
          */
@@ -80,5 +103,10 @@ namespace rb {
          * @brief Event dispatcher.
          */
         dispatcher m_dispatcher;
+
+        /**
+         * @brief Custom events handler.
+         */
+        std::unordered_map<id_type, std::function<void(span<const unsigned char>, dispatcher&)>> m_customs;
     };
 }

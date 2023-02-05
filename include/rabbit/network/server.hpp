@@ -1,8 +1,12 @@
 #pragma once 
 
 #include "../core/reactive.hpp"
+#include "../core/type_info.hpp"
+#include "../core/span.hpp"
 
 #include <memory>
+#include <functional>
+#include <unordered_map>
 
 namespace rb {
     /**
@@ -45,7 +49,24 @@ namespace rb {
          * @return Event sink of the window.
          */
         template<typename Event>
-        [[nodiscard]] auto on() { return m_dispatcher.sink<Event>(); }
+        [[nodiscard]] auto on() { 
+            // Handle custom event differently.
+            if constexpr (!std::is_same_v<Event, server_event_connect> && !std::is_same_v<Event, server_event_disconnect>) {
+                auto& handler = m_customs[type_hash<Event>()];
+                if (!handler) {
+                    handler = [](span<const unsigned char> data, dispatcher& dispatcher) {
+                        if (sizeof(Event) == data.size()) {
+                            Event event;
+                            memcpy(&event, data.data(), sizeof(Event));
+
+                            dispatcher.trigger(event);
+                        }
+                    };
+                }
+            }
+
+            return m_dispatcher.sink<Event>(); 
+        }
 
     private:
         /**
@@ -62,5 +83,10 @@ namespace rb {
          * @brief Event dispatcher.
          */
         dispatcher m_dispatcher;
+
+        /**
+         * @brief Custom events handler.
+         */
+        std::unordered_map<id_type, std::function<void(span<const unsigned char>, dispatcher&)>> m_customs;
     };
 }
