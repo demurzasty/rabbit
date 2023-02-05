@@ -76,8 +76,32 @@ namespace rb {
         static constexpr color cornflower_blue() { return { 100, 149, 237, 255 }; }
 
         /**
-         * @brief Retrieve the color as a 32-bit unsigned integer.
+         * @brief Construct a new uninitialized color.
+         */
+        color() = default;
+
+        /**
+         * @brief Construct a new color.
          * 
+         * @param r Red component.
+         * @param g Green component.
+         * @param b Blue component.
+         */
+        constexpr color(unsigned char r, unsigned char g, unsigned char b) : r(r), g(g), b(b), a(255) {}
+
+        /**
+         * @brief Construct a new color.
+         *
+         * @param r Red component.
+         * @param g Green component.
+         * @param b Blue component.
+         * @param a Alpha component.
+         */
+        constexpr color(unsigned char r, unsigned char g, unsigned char b, unsigned char) : r(r), g(g), b(b), a(a) {}
+
+        /**
+         * @brief Retrieve the color as a 32-bit unsigned integer.
+         *
          * @return Color represented as a 32-bit unsigned integer.
          */
         constexpr unsigned int to_integer() const {
