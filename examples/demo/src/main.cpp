@@ -3,7 +3,7 @@
 using namespace rb;
 
 int main(int argc, char* argv[]) {
-    window window("home", { 1280, 720 }, false);
+    window window("demo", { 1280, 720 }, false);
     renderer renderer(window);
     painter painter(renderer, { 320, 180 });
     canvas canvas(painter);
