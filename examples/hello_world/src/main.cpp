@@ -1,7 +1,5 @@
 #include <rabbit/rabbit.hpp>
 
-#include <optional>
-
 using namespace rb;
 
 int main(int argc, char* argv[]) {
