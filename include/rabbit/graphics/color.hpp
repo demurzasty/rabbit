@@ -97,7 +97,7 @@ namespace rb {
          * @param b Blue component.
          * @param a Alpha component.
          */
-        constexpr color(unsigned char r, unsigned char g, unsigned char b, unsigned char) : r(r), g(g), b(b), a(a) {}
+        constexpr color(unsigned char r, unsigned char g, unsigned char b, unsigned char a) : r(r), g(g), b(b), a(a) {}
 
         /**
          * @brief Retrieve the color as a 32-bit unsigned integer.
