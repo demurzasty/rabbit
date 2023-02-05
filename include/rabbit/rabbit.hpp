@@ -38,5 +38,8 @@
 #include "math/vec2.hpp"
 #include "math/vec4.hpp"
 
+#include "network/client.hpp"
+#include "network/server.hpp"
+
 #include "platform/events.hpp"
 #include "platform/window.hpp"

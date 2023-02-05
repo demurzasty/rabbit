@@ -38,6 +38,9 @@ set (SRC
 	"src/loaders/image_loader.cpp"
 	"src/loaders/json_loader.cpp"
 	"src/loaders/texture_loader.cpp"
+	"src/network/enet/client.cpp"
+	"src/network/enet/enet.cpp"
+	"src/network/enet/server.cpp"
 )
 
 if (WIN32)
@@ -61,6 +64,7 @@ add_dependencies (rabbit binaries)
 
 if (WIN32)
 	target_compile_definitions (rabbit PRIVATE VK_USE_PLATFORM_WIN32_KHR)
+	target_link_libraries (rabbit PRIVATE ws2_32 winmm)
 endif ()
 
 if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
