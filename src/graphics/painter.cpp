@@ -103,22 +103,28 @@ void painter::draw(const texture& texture, const ivec4& source, const vec4& dest
 }
 
 void painter::draw(const texture& texture, const ivec4& source, const vec4& destination, color color, const vec2& center, float rotation) {
-    vec2 position{ destination.x - center.x, destination.y - center.y };
-
-    vertex2d vertices[4];
-    vertices[0].position = { position.x, position.y };
-    vertices[1].position = { position.x, position.y + destination.w };
-    vertices[2].position = { position.x + destination.z, position.y + destination.w };
-    vertices[3].position = { position.x + destination.z, position.y };
-
     uvec2 surface_size = m_renderer.surface_size();
     vec2 scale = { surface_size.x / float(m_viewport_size.x), surface_size.y / float(m_viewport_size.y) };
 
-    for (vertex2d& vertex : vertices) {
-        vertex.position = vertex.position * scale;
-    }
+    vec4 scaled_destination{
+        destination.x * scale.x,
+        destination.y * scale.y,
+        destination.z * scale.x,
+        destination.w * scale.y,
+    };
 
-    vec2 pivot{ destination.x, destination.y };
+
+    vertex2d vertices[4];
+    vertices[0].position = { scaled_destination.x, scaled_destination.y };
+    vertices[1].position = { scaled_destination.x, scaled_destination.y + scaled_destination.w };
+    vertices[2].position = { scaled_destination.x + scaled_destination.z, scaled_destination.y + scaled_destination.w };
+    vertices[3].position = { scaled_destination.x + scaled_destination.z, scaled_destination.y };
+
+    //for (vertex2d& vertex : vertices) {
+    //    vertex.position = vertex.position * scale;
+    //}
+
+    vec2 pivot = vec2(destination.x + center.x, destination.y + center.y) * scale;
     for (vertex2d& vertex : vertices) {
         vertex.position = vertex.position.rotated(pivot, rotation);
     }

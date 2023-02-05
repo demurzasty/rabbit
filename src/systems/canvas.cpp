@@ -27,7 +27,7 @@ void canvas::process(registry& registry, float time_step) {
             destination.z = float(frame_size.x);
             destination.w = float(frame_size.y);
 
-            m_painter.draw(*sprite.texture, source, destination, sprite.color);
+            m_painter.draw(*sprite.texture, source, destination, sprite.color, sprite.offset, transform.rotation);
         }
     });
 }

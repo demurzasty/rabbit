@@ -27,6 +27,8 @@ int main(int argc, char* argv[]) {
     while (window.is_open()) {
         window.dispatch();
 
+        transform.rotation += 1.0f / 60.0f;
+
         canvas.process(registry, stopwatch.restart());
 
         renderer.display(color::cornflower_blue());
