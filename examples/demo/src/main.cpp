@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
 
     stopwatch stopwatch;
     while (window.is_open()) {
-        window.dispatch_events();
+        window.dispatch();
 
         canvas.process(registry, stopwatch.restart());
 

@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
     // Run our example in loop until close button is pressed.
     while (window.is_open()) {
         // Dispatch window events and run all connected signals.
-        window.dispatch_events();
+        window.dispatch();
 
         // Draw text on screen.
         painter.draw(*font, 13, "Hello World", { 120.0f, 90.0f }, color::white());

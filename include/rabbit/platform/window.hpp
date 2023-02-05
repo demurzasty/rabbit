@@ -65,12 +65,12 @@ namespace rb {
         /**
          * @brief Call the event handlers for each pending event.
          */
-        void dispatch_events();
+        void dispatch();
 
         /**
          * @brief Wait for a new event and dispatch it to the corresponding event handler.
          */
-        void wait_dispatch_events();
+        void wait_dispatch();
 
         /**
          * @brief Get the window event sink.

@@ -76,7 +76,7 @@ bool window::is_open() const {
     return m_data->open;
 }
 
-void window::dispatch_events() {
+void window::dispatch() {
     MSG message;
     while (PeekMessage(&message, m_data->hwnd, 0, 0, PM_REMOVE)) {
         TranslateMessage(&message);
@@ -86,7 +86,7 @@ void window::dispatch_events() {
     m_dispatcher.update();
 }
 
-void window::wait_dispatch_events() {
+void window::wait_dispatch() {
     MSG message;
     if (GetMessage(&message, m_data->hwnd, 0, 0)) {
         TranslateMessage(&message);
