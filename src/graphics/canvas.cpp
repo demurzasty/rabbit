@@ -92,7 +92,7 @@ void canvas::draw(const texture& texture, const ivec4& source, const vec4& desti
 
     vec2 pivot{ destination.x, destination.y };
     for (vertex2d& vertex : vertices) {
-        vertex.position = rotate(pivot, vertex.position, rotation);
+        vertex.position = vertex.position.rotated(pivot, rotation);
     }
 
     uvec2 size = texture.size();
