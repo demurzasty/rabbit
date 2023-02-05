@@ -8,6 +8,7 @@
 #include "config/version.hpp"
 
 #include "core/arena.hpp"
+#include "core/assets.hpp"
 #include "core/format.hpp"
 #include "core/handle.hpp"
 #include "core/json.hpp"
@@ -16,6 +17,7 @@
 #include "core/span.hpp"
 #include "core/stopwatch.hpp"
 #include "core/thread_pool.hpp"
+#include "core/type_info.hpp"
 
 #include "entity/entity.hpp"
 

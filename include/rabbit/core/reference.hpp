@@ -52,6 +52,9 @@ namespace rb {
      */
     template<typename Ref>
     class ref {
+        template<typename Derived>
+        friend class ref;
+
     public:
         /**
          * @brief Construct an empty reference wrapper.
