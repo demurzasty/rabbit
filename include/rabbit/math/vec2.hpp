@@ -321,7 +321,7 @@ namespace rb {
          *
          * @return Vector with all components in absolute values.
          */
-        [[nodiscard]] basic_vec2<T> abs() const {
+        [[nodiscard]] constexpr basic_vec2<T> abs() const {
             return { rb::abs(x), rb::abs(y) };
         }
 
