@@ -58,6 +58,18 @@ namespace rb {
         void draw(const texture& texture, const ivec4& source, const vec4& destination, color color);
 
         /**
+         * @brief Add draw quad command to the render queue.
+         *
+         * @param texture Texture to draw.
+         * @param source A rectangle that specifies (in pixels) the source pixels from a texture.
+         * @param destination A rectangle that specifies (in screen coordinates) the destination for drawing the quad.
+         * @param color The color to tint a quad. Use color::white for full color with no tinting.
+         * @param center Center of destination rectangle.
+         * @param rotation Rotation in radians.
+         */
+        void draw(const texture& texture, const ivec4& source, const vec4& destination, color color, const vec2& center, float rotation);
+
+        /**
          * @brief Add draw text command to the render queue.
          *
          * @param font Font used to draw text.

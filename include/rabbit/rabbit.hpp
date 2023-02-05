@@ -1,5 +1,9 @@
 #pragma once 
 
+#include "components/sprite.hpp"
+#include "components/subrect.hpp"
+#include "components/tint.hpp"
+
 #include "config/config.hpp"
 #include "config/version.hpp"
 

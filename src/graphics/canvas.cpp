@@ -54,6 +54,41 @@ void canvas::draw(const texture& texture, const ivec4& source, const vec4& desti
     m_renderer.draw(texture, vertices, indices);
 }
 
+void canvas::draw(const texture& texture, const ivec4& source, const vec4& destination, color color, const vec2& center, float rotation) {
+    vec2 position{ destination.x - center.x, destination.y - center.y };
+
+    vertex2d vertices[4];
+    vertices[0].position = { position.x, position.y };
+    vertices[1].position = { position.x, position.y + destination.w };
+    vertices[2].position = { position.x + destination.z, position.y + destination.w };
+    vertices[3].position = { position.x + destination.z, position.y };
+
+    vec2 pivot{ destination.x, destination.y };
+    for (vertex2d& vertex : vertices) {
+        vertex.position = rotate(pivot, vertex.position, rotation);
+    }
+
+    uvec2 size = texture.size();
+    vec2 inv_size = { 1.0f / size.x, 1.0f / size.y };
+
+    vertices[0].texcoord = { source.x * inv_size.x, source.y * inv_size.y };
+    vertices[1].texcoord = { source.x * inv_size.x, (source.y + source.w) * inv_size.y };
+    vertices[2].texcoord = { (source.x + source.z) * inv_size.x, (source.y + source.w) * inv_size.y };
+    vertices[3].texcoord = { (source.x + source.z) * inv_size.x, source.y * inv_size.y };
+
+    vertices[0].color = color;
+    vertices[1].color = color;
+    vertices[2].color = color;
+    vertices[3].color = color;
+
+    unsigned int indices[]{
+        0, 1, 2,
+        2, 3, 0
+    };
+
+    m_renderer.draw(texture, vertices, indices);
+}
+
 void canvas::draw(const font& font, unsigned char size, std::string_view text, const vec2& position, color color) {
     vec2 location = position;
     for (std::size_t i = 0; i < text.size(); ++i) {
