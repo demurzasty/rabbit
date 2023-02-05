@@ -94,6 +94,4 @@ var menudata={children:[
 {text:"w",url:"functions_vars.html#index_w"},
 {text:"x",url:"functions_vars.html#index_x"},
 {text:"y",url:"functions_vars.html#index_y"},
-{text:"z",url:"functions_vars.html#index_z"}]}]}]},
-{text:"Files",url:"files.html",children:[
-{text:"File List",url:"files.html"}]}]}
+{text:"z",url:"functions_vars.html#index_z"}]}]}]}]}

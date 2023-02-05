@@ -32,9 +32,29 @@ namespace rb {
         server(unsigned short port);
 
         /**
+         * @brief Disabled copy constructor.
+         */
+        server(const server&) = delete;
+
+        /**
+         * @brief Enabled move constructor.
+         */
+        server(server&& server) noexcept;
+
+        /**
          * @brief Destruct the server.
          */
         ~server();
+
+        /**
+         * @brief Disabled copy assignment.
+         */
+        server& operator=(const server&) = delete;
+
+        /**
+         * @brief Disabled move assignment.
+         */
+        server& operator=(server&&) = delete;
 
         /**
          * @brief Dispatch network events.

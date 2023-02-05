@@ -40,9 +40,6 @@ var NAVTREE =
         [ "Functions", "functions_func.html", null ],
         [ "Variables", "functions_vars.html", null ]
       ] ]
-    ] ],
-    [ "Files", "files.html", [
-      [ "File List", "files.html", "files_dup" ]
     ] ]
   ] ]
 ];
@@ -50,7 +47,7 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "annotated.html",
-"stopwatch_8hpp_source.html"
+"structrb_1_1color.html#a1fee55fb8ac1d61b4a05d126aaa019d0"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

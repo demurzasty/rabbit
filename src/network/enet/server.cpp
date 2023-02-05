@@ -19,6 +19,10 @@ server::server(unsigned short port)
     assert(m_data->host);
 }
 
+server::server(server&& server) noexcept
+    : m_data(std::move(server.m_data)) {
+}
+
 server::~server() {
     enet_host_destroy(m_data->host);
 

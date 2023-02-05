@@ -24,6 +24,10 @@ client::client(std::string_view host, unsigned short port)
     assert(m_data->peer);
 }
 
+client::client(client&& client) noexcept
+    : m_data(std::move(client.m_data)) {
+}
+
 client::~client() {
     enet_peer_disconnect(m_data->peer, 0);
     enet_peer_reset(m_data->peer);

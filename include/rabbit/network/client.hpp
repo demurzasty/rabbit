@@ -34,9 +34,29 @@ namespace rb {
         client(std::string_view host, unsigned short port);
 
         /**
+         * @brief Disabled copy constructor.
+         */
+        client(const client&) = delete;
+
+        /**
+         * @brief Enabled move constructor.
+         */
+        client(client&& client) noexcept;
+
+        /**
          * @brief Destruct the client.
          */
         ~client();
+
+        /**
+         * @brief Disabled copy assignment.
+         */
+        client& operator=(const client&) = delete;
+
+        /**
+         * @brief Disabled move assignment.
+         */
+        client& operator=(client&&) = delete;
 
         /**
          * @brief Disconnect from the server.

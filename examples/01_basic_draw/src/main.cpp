@@ -13,7 +13,7 @@ int main(int argc, char* argv[]) {
     painter painter(renderer, { 320, 180 });
 
     // Load texture from file using texture loader.
-    ref<texture> texture = texture_loader(renderer)("data/buddy.png");
+    texture texture = texture_loader(renderer)("data/buddy.png");
 
     // Connect window close event to stop main loop.
     window.on<close_event>().connect<&window::close>(window);
@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
         window.dispatch();
 
         // Draw texture on screen.
-        painter.draw(*texture, { 146.0f, 60.0f }, color::white());
+        painter.draw(texture, { 146.0f, 60.0f }, color::white());
 
         // Render and display it onto a screen.
         renderer.display(color::cornflower_blue());
