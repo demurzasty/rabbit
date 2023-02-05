@@ -1,5 +1,7 @@
 cmake_minimum_required (VERSION 3.8.2)
 
+add_subdirectory ("box2d-2.4.1")
+
 add_subdirectory ("enet-1.3.17")
 
 add_subdirectory ("entt-3.11.1")

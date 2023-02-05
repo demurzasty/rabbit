@@ -41,6 +41,7 @@ set (SRC
 	"src/network/enet/client.cpp"
 	"src/network/enet/enet.cpp"
 	"src/network/enet/server.cpp"
+	"src/physics/physics.cpp"
 	"src/systems/canvas.cpp"
 )
 
@@ -59,7 +60,7 @@ add_library (rabbit STATIC ${SRC})
 target_include_directories (rabbit PUBLIC "include")
 target_compile_features (rabbit PUBLIC cxx_std_17)
 target_link_libraries (rabbit PUBLIC json fmt entt gsl)
-target_link_libraries (rabbit PRIVATE enet stb vma volk)
+target_link_libraries (rabbit PRIVATE box2d enet stb vma volk)
 target_compile_definitions (rabbit PRIVATE VMA_STATIC_VULKAN_FUNCTIONS)
 add_dependencies (rabbit binaries)
 
