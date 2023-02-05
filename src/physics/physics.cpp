@@ -12,5 +12,9 @@ physics::physics()
     : m_data(new data()) {
 }
 
+physics::physics(physics&& physics) noexcept
+    : m_data(std::move(physics.m_data)) {
+}
+
 physics::~physics() {
 }
