@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
     font font = font_loader(renderer)("data/proggy_clean.ttf");
 
     // Load texture from file using texture loader.
-    ref<texture> texture = texture_loader(renderer)("data/characters.png");
+    texture texture = texture_loader(renderer)("data/characters.png");
 
     // Connect window close event to stop main loop.
     window.on<close_event>().connect<&window::close>(window);
@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
         window.dispatch_events();
 
         // Draw texture on screen.
-        canvas.draw(*texture, { 0, 32, 32, 32 }, { stopwatch.time() * 32.0f, 296.0f, 128.0f, 128.0f }, color::white(), { 64.0f, 64.0f }, stopwatch.time());
+        canvas.draw(texture, { 0, 32, 32, 32 }, { stopwatch.time() * 32.0f, 296.0f, 128.0f, 128.0f }, color::white(), { 64.0f, 64.0f }, stopwatch.time());
 
         // Draw text on screen.
         canvas.draw(font, 39, "Hello World", { 16.0f, 32.0f }, color::white());
