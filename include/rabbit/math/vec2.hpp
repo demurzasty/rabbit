@@ -280,10 +280,10 @@ namespace rb {
             T c = std::cos(angle);
 
             // Translate point back to origin.
-            basic_vec2<T> origin{ x - pivot.x, y - pivot.y };
+            basic_vec2<T> origin(x - pivot.x, y - pivot.y);
 
             // Rotate point around a pivot.
-            basic_vec2<T> offset{ origin.x * c - origin.y * s, origin.x * s + origin.y * c };
+            basic_vec2<T> offset(origin.x* c - origin.y * s, origin.x* s + origin.y * c);
 
             // Translate point back.
             return { offset.x + pivot.x, offset.y + pivot.y };
@@ -322,7 +322,7 @@ namespace rb {
          * @return Vector with all components in absolute values.
          */
         [[nodiscard]] basic_vec2<T> abs() const {
-            return { std::abs(x), std::abs(y) };
+            return { rb::abs(x), rb::abs(y) };
         }
 
         /**
