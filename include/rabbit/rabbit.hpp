@@ -1,6 +1,7 @@
 #pragma once 
 
 #include "components/sprite.hpp"
+#include "components/transform.hpp"
 
 #include "config/config.hpp"
 #include "config/version.hpp"
@@ -41,3 +42,5 @@
 
 #include "platform/events.hpp"
 #include "platform/window.hpp"
+
+#include "systems/canvas.hpp"

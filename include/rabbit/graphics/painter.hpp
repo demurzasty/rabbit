@@ -19,7 +19,7 @@ namespace rb {
          * 
          * @param renderer Renderer reference used to draw stuff.
          */
-        painter(renderer& renderer);
+        painter(renderer& renderer, const uvec2& viewport_size);
 
         /**
          * @brief Disable copy constructor.
@@ -92,23 +92,19 @@ namespace rb {
         void draw(const font& font, unsigned char size, std::string_view text, const vec2& position, color color);
 
         /**
-         * @brief Draw sprite.
-         * 
-         * @param sprite Sprite to draw.
-         */
-        void draw(const sprite& sprite);
-
-        /**
-         * Viewport size (in screen coordinates).
-         */
-        uvec2 viewport_size = uvec2::zero();
-
-        /**
          * Viewport position (in screen coordinates).
          */
         vec2 viewport_position = vec2::zero();
 
     private:
+        /** 
+         * @brief Renderer.
+         */
         renderer& m_renderer;
+
+        /**
+         * Viewport size (in screen coordinates).
+         */
+        uvec2 m_viewport_size = uvec2::zero();
     };
 }

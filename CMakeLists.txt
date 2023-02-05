@@ -41,6 +41,7 @@ set (SRC
 	"src/network/enet/client.cpp"
 	"src/network/enet/enet.cpp"
 	"src/network/enet/server.cpp"
+	"src/systems/canvas.cpp"
 )
 
 if (WIN32)

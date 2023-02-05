@@ -2,8 +2,8 @@
 
 using namespace rb;
 
-painter::painter(renderer& renderer)
-    : m_renderer(renderer), viewport_size(renderer.surface_size()) {
+painter::painter(renderer& renderer, const uvec2& viewport_size)
+    : m_renderer(renderer), m_viewport_size(viewport_size) {
 }
 
 void painter::draw(const vec4& destination, color color) {
@@ -14,7 +14,7 @@ void painter::draw(const vec4& destination, color color) {
     vertices[3].position = { destination.x + destination.z, destination.y };
 
     uvec2 surface_size = m_renderer.surface_size();
-    vec2 scale = { surface_size.x / float(viewport_size.x), surface_size.y / float(viewport_size.y) };
+    vec2 scale = { surface_size.x / float(m_viewport_size.x), surface_size.y / float(m_viewport_size.y) };
 
     for (vertex2d& vertex : vertices) {
         vertex.position = vertex.position * scale;
@@ -43,7 +43,7 @@ void painter::draw(const texture& texture, const vec2& position, color color) {
     vertices[3].position = { position.x + size.x, position.y };
 
     uvec2 surface_size = m_renderer.surface_size();
-    vec2 scale = { surface_size.x / float(viewport_size.x), surface_size.y / float(viewport_size.y) };
+    vec2 scale = { surface_size.x / float(m_viewport_size.x), surface_size.y / float(m_viewport_size.y) };
 
     for (vertex2d& vertex : vertices) {
         vertex.position = vertex.position * scale;
@@ -75,7 +75,7 @@ void painter::draw(const texture& texture, const ivec4& source, const vec4& dest
     vertices[3].position = { destination.x + destination.z, destination.y };
 
     uvec2 surface_size = m_renderer.surface_size();
-    vec2 scale = { surface_size.x / float(viewport_size.x), surface_size.y / float(viewport_size.y) };
+    vec2 scale = { surface_size.x / float(m_viewport_size.x), surface_size.y / float(m_viewport_size.y) };
 
     for (vertex2d& vertex : vertices) {
         vertex.position = vertex.position * scale;
@@ -112,7 +112,7 @@ void painter::draw(const texture& texture, const ivec4& source, const vec4& dest
     vertices[3].position = { position.x + destination.z, position.y };
 
     uvec2 surface_size = m_renderer.surface_size();
-    vec2 scale = { surface_size.x / float(viewport_size.x), surface_size.y / float(viewport_size.y) };
+    vec2 scale = { surface_size.x / float(m_viewport_size.x), surface_size.y / float(m_viewport_size.y) };
 
     for (vertex2d& vertex : vertices) {
         vertex.position = vertex.position * scale;
@@ -157,8 +157,4 @@ void painter::draw(const font& font, unsigned char size, std::string_view text, 
             location.x += font.get_kerning(text[i], text[i] + 1, size);
         }
     }
-}
-
-void painter::draw(const sprite& sprite) {
-
 }

@@ -10,18 +10,14 @@ int main(int argc, char* argv[]) {
     renderer renderer(window);
 
     // Create painter to dynamically render 2D stuff.
-    painter painter(renderer);
+    painter painter(renderer, { 320, 180 });
 
     // Create assets menager (not required).
     assets assets;
-    assets.loader<font, font_loader>(renderer);
     assets.loader<texture, texture_loader>(renderer);
 
-    // Load font from file using font loader.
-    ref<font> font = assets.load<rb::font>("data/proggy_clean.ttf");
-
     // Load texture from file using texture loader.
-    ref<texture> texture = assets.load<rb::texture>("data/characters.png");
+    ref<texture> texture = assets.load<rb::texture>("data/buddy.png");
 
     // Connect window close event to stop main loop.
     window.on<close_event>().connect<&window::close>(window);
@@ -35,10 +31,7 @@ int main(int argc, char* argv[]) {
         window.dispatch_events();
 
         // Draw texture on screen.
-        painter.draw(*texture, { 0, 32, 32, 32 }, { stopwatch.time() * 32.0f, 296.0f, 128.0f, 128.0f }, color::white(), { 64.0f, 64.0f }, stopwatch.time());
-
-        // Draw text on screen.
-        painter.draw(*font, 39, "Hello World", { 16.0f, 32.0f }, color::white());
+        painter.draw(*texture, { stopwatch.time(), 60.0f }, color::white());
 
         // Render and display it onto a screen.
         renderer.display(color::cornflower_blue());
