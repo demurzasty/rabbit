@@ -14,14 +14,15 @@ int main(int argc, char* argv[]) {
     // Create canvas to render 2D stuff.
     canvas canvas(renderer);
 
+    // Create assets menager (not required).
     assets assets;
+    assets.loader<font, font_loader>(renderer);
     assets.loader<texture, texture_loader>(renderer);
 
     // Load font from file using font loader.
-    font font = font_loader(renderer)("data/proggy_clean.ttf");
+    ref<font> font = assets.load<rb::font>("data/proggy_clean.ttf");
 
     // Load texture from file using texture loader.
-    //texture texture = texture_loader(renderer)("data/characters.png");
     ref<texture> texture = assets.load<rb::texture>("data/characters.png");
 
     // Connect window close event to stop main loop.
@@ -39,7 +40,7 @@ int main(int argc, char* argv[]) {
         canvas.draw(*texture, { 0, 32, 32, 32 }, { stopwatch.time() * 32.0f, 296.0f, 128.0f, 128.0f }, color::white(), { 64.0f, 64.0f }, stopwatch.time());
 
         // Draw text on screen.
-        canvas.draw(font, 39, "Hello World", { 16.0f, 32.0f }, color::white());
+        canvas.draw(*font, 39, "Hello World", { 16.0f, 32.0f }, color::white());
 
         // Render and display it onto a screen.
         renderer.display(color::cornflower_blue());

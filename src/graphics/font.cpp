@@ -33,8 +33,10 @@ font::font(renderer& renderer, span<const unsigned char> data)
 }
 
 font::font(font&& font) noexcept
-    : m_texture(std::move(font.m_texture))
-    , m_rect_pack(std::move(font.m_rect_pack)) {
+    : m_data(std::move(font.m_data))
+    , m_texture(std::move(font.m_texture))
+    , m_rect_pack(std::move(font.m_rect_pack))
+    , m_glyphs(std::move(font.m_glyphs)) {
 }
 
 font::~font() {
