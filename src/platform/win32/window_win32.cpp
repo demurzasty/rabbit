@@ -92,8 +92,6 @@ void window::wait_dispatch() {
         TranslateMessage(&message);
         DispatchMessage(&message);
     }
-
-    m_dispatcher.update();
 }
 
 void window::set_title(std::string_view title) {
@@ -127,13 +125,13 @@ LRESULT CALLBACK window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) 
     if (dispatcher) {
         switch (msg) {
             case WM_CLOSE:
-                dispatcher->enqueue<close_event>();
+                dispatcher->trigger<close_event>();
                 break;
             case WM_MOUSEMOVE: {
                 mouse_move_event event;
                 event.position.x = float(LOWORD(lparam));
                 event.position.y = float(HIWORD(lparam));
-                dispatcher->enqueue(event);
+                dispatcher->trigger(event);
                 break;
             }
             case WM_LBUTTONDOWN:
@@ -143,7 +141,7 @@ LRESULT CALLBACK window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) 
                 event.position.y = float(HIWORD(lparam));
                 event.button = mouse_button::left;
                 event.pressed = msg == WM_LBUTTONDOWN;
-                dispatcher->enqueue(event);
+                dispatcher->trigger(event);
                 break;
             }
             case WM_RBUTTONDOWN:
@@ -153,7 +151,7 @@ LRESULT CALLBACK window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) 
                 event.position.y = float(HIWORD(lparam));
                 event.button = mouse_button::right;
                 event.pressed = msg == WM_RBUTTONDOWN;
-                dispatcher->enqueue(event);
+                dispatcher->trigger(event);
                 break;
             }
             case WM_MBUTTONDOWN:
@@ -163,7 +161,7 @@ LRESULT CALLBACK window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) 
                 event.position.y = float(HIWORD(lparam));
                 event.button = mouse_button::middle;
                 event.pressed = msg == WM_MBUTTONDOWN;
-                dispatcher->enqueue(event);
+                dispatcher->trigger(event);
                 break;
             }
         }
