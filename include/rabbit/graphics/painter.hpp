@@ -91,11 +91,6 @@ namespace rb {
          */
         void draw(const font& font, unsigned char size, std::string_view text, const vec2& position, color color);
 
-        /**
-         * Viewport position (in screen coordinates).
-         */
-        vec2 viewport_position = vec2::zero();
-
     private:
         /** 
          * @brief Renderer.

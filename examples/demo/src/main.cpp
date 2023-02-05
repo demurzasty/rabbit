@@ -15,7 +15,6 @@ int main(int argc, char* argv[]) {
 
     transform& transform = registry.emplace<rb::transform>(hero);
     transform.position = { 160.0f, 90.0f };
-    transform.scale = { 2.0f, 2.0f };
 
     sprite& sprite = registry.emplace<rb::sprite>(hero);
     sprite.texture = texture_loader(renderer)("data/characters.png");
