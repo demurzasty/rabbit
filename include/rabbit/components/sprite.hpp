@@ -18,6 +18,11 @@ namespace rb {
         color color = color::white();
 
         /**
+         * @brief Texture's drawing offset.
+         */
+        vec2 offset = vec2::zero();
+
+        /**
          * @brief Horizontal frames.
          */
         unsigned int hframes = 1;

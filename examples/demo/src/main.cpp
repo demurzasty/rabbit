@@ -13,13 +13,15 @@ int main(int argc, char* argv[]) {
 
     entity hero = registry.create();
 
-    registry.emplace<transform>(hero);
+    transform& transform = registry.emplace<rb::transform>(hero);
+    transform.position = { 160.0f, 90.0f };
 
     sprite& sprite = registry.emplace<rb::sprite>(hero);
     sprite.texture = texture_loader(renderer)("data/characters.png");
     sprite.hframes = 23;
     sprite.vframes = 4;
     sprite.frame = 23;
+    sprite.offset = { 16.0f, 32.0f };
 
     stopwatch stopwatch;
     while (window.is_open()) {

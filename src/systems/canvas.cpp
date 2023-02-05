@@ -22,8 +22,8 @@ void canvas::process(registry& registry, float time_step) {
             source.w = frame_size.y;
 
             vec4 destination;
-            destination.x = transform.position.x;
-            destination.y = transform.position.y;
+            destination.x = transform.position.x - sprite.offset.x;
+            destination.y = transform.position.y - sprite.offset.y;
             destination.z = float(frame_size.x);
             destination.w = float(frame_size.y);
 
