@@ -99,7 +99,7 @@ namespace rb {
         /**
          * @biref Renderer to which this texture is attached.
          */
-        renderer* m_renderer = nullptr;
+        renderer& m_renderer;
 
         /**
          * @brief Texture id created by a renderer.

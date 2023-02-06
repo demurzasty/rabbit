@@ -3,18 +3,17 @@
 using namespace rb;
 
 texture::texture(renderer& renderer, const uvec2& size, texture_filter filter, pixel_format format)
-    : m_renderer(&renderer), m_id(renderer.create_texture(size, filter, format)) {
+    : m_renderer(renderer), m_id(renderer.create_texture(size, filter, format)) {
 }
 
 texture::texture(texture&& texture) noexcept
     : m_renderer(texture.m_renderer), m_id(texture.m_id) {
-    texture.m_renderer = nullptr;
     texture.m_id = null;
 }
 
 texture::~texture() {
     if (m_id != null) {
-        m_renderer->destroy_texture(m_id);
+        m_renderer.destroy_texture(m_id);
     }
 }
 
@@ -23,7 +22,7 @@ texture::operator handle() const {
 }
 
 void texture::update(const void* pixels) {
-    m_renderer->update_texture_data(m_id, pixels);
+    m_renderer.update_texture_data(m_id, pixels);
 }
 
 bool texture::valid() const {
@@ -38,9 +37,9 @@ handle texture::id() const {
 }
 
 uvec2 texture::size() const {
-    return m_renderer->get_texture_size(m_id);
+    return m_renderer.get_texture_size(m_id);
 }
 
 pixel_format texture::format() const {
-    return m_renderer->get_texture_format(m_id);
+    return m_renderer.get_texture_format(m_id);
 }
