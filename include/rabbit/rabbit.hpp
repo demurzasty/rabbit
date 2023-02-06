@@ -47,6 +47,4 @@
 #include "platform/events.hpp"
 #include "platform/window.hpp"
 
-#include "systems/canvas.hpp"
-
 #include "ui/ui.hpp"
