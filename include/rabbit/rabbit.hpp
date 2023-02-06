@@ -1,7 +1,6 @@
 #pragma once 
 
 #include "components/sprite.hpp"
-#include "components/transform.hpp"
 
 #include "config/config.hpp"
 #include "config/version.hpp"
@@ -19,6 +18,7 @@
 #include "core/type_info.hpp"
 
 #include "entity/entity.hpp"
+#include "entity/transform.hpp"
 
 #include "graphics/color.hpp"
 #include "graphics/font.hpp"
