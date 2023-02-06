@@ -41,7 +41,9 @@ set (SRC
 	"src/network/enet/client.cpp"
 	"src/network/enet/enet.cpp"
 	"src/network/enet/server.cpp"
+	"src/physics/body.cpp"
 	"src/physics/physics.cpp"
+	"src/physics/shape.cpp"
 	"src/systems/canvas.cpp"
 )
 

@@ -8,6 +8,8 @@ add_subdirectory ("02_draw_font")
 
 add_subdirectory ("03_assets_manager")
 
+add_subdirectory ("04_physics")
+
 add_subdirectory ("demo")
 
 add_subdirectory ("networking")

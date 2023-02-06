@@ -40,6 +40,10 @@
 #include "network/client.hpp"
 #include "network/server.hpp"
 
+#include "physics/body.hpp"
+#include "physics/physics.hpp"
+#include "physics/shape.hpp"
+
 #include "platform/events.hpp"
 #include "platform/window.hpp"
 

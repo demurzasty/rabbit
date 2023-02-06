@@ -632,7 +632,7 @@ void vku::quit(std::unique_ptr<renderer::data>& data) {
 
     data->textures.each([&data](handle id, texture_data& texture) {
         cleanup_texture(data, texture);
-        });
+    });
 
     vkDestroyPipeline(data->device, data->pipeline, nullptr);
     vkDestroyPipelineLayout(data->device, data->pipeline_layout, nullptr);
