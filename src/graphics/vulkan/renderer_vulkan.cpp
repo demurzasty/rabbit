@@ -66,6 +66,41 @@ pixel_format renderer::get_texture_format(handle id) const {
     return m_data->textures[id].format;
 }
 
+handle renderer::create_sprite() {
+    return null;
+}
+
+void renderer::destroy_sprite(handle id) {
+}
+
+void renderer::set_sprite_position(handle id, const vec2& position) {
+}
+
+void renderer::set_sprite_rotation(handle id, float rotation) {
+}
+
+void renderer::set_sprite_scale(handle id, const vec2& scale) {
+}
+
+void renderer::set_sprite_texture(handle id, handle texture_id) {
+}
+
+vec2 renderer::get_sprite_position(handle id) {
+    return vec2::zero();
+}
+
+float renderer::get_sprite_rotation(handle id) {
+    return 0.0f;
+}
+
+vec2 renderer::get_sprite_scale(handle id) {
+    return vec2::one();
+}
+
+handle renderer::get_sprite_texture(handle id) {
+    return null;
+}
+
 void renderer::draw(handle texture_id, span<const vertex2d> vertices, span<const unsigned int> indices) {
     void* ptr;
 

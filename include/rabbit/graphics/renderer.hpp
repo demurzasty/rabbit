@@ -159,6 +159,115 @@ namespace rb {
         [[nodiscard]] pixel_format get_texture_format(handle id) const;
 
         /**
+         * @brief Create a new sprite.
+         * 
+         * @return Handle for newly created sprite.
+         */
+        [[nodiscard]] handle create_sprite();
+
+        /**
+         * @brief Destroy sprite associated with provided handle.
+         *
+         * @warning Attempting to destroy a sprite that is invalid
+                    or being destroyed results in undefined behavior.
+         *
+         * @param id Sprite handle.
+         */
+        void destroy_sprite(handle id);
+
+        /**
+         * @brief Set sprite position.
+         * 
+         * @warning Attempting to change a sprite that is invalid
+         *          or being destroyed results in undefined behavior.
+         * 
+         * @param id Sprite handle.
+         * @param position Sprite position.
+         */
+        void set_sprite_position(handle id, const vec2& position);
+
+        /**
+         * @brief Set sprite rotation.
+         *
+         * @warning Attempting to change a sprite that is invalid
+         *          or being destroyed results in undefined behavior.
+         *
+         * @param id Sprite handle.
+         * @param rotation Sprite rotation.
+         */
+        void set_sprite_rotation(handle id, float rotation);
+
+        /**
+         * @brief Set sprite scale.
+         *
+         * @warning Attempting to change a sprite that is invalid
+         *          or being destroyed results in undefined behavior.
+         *
+         * @param id Sprite handle.
+         * @param scale Sprite scale.
+         */
+        void set_sprite_scale(handle id, const vec2& scale);
+
+        /** 
+         * @brief Set sprite texture.
+         *
+         * @warning Attempting to change a sprite that is invalid
+         *          or being destroyed results in undefined behavior.
+         * 
+         * @param id Sprite handle.
+         * @param texture_id Texture handle. Can be null.
+         */
+        void set_sprite_texture(handle id, handle texture_id);
+
+        /**
+         * @brief Get sprite position.
+         *
+         * @warning Attempting to fetch a sprite that is invalid
+         *          or being destroyed results in undefined behavior.
+         *
+         * @param id Sprite handle.
+         *
+         * @return Sprite position.
+         */
+        [[nodiscard]] vec2 get_sprite_position(handle id);
+
+        /**
+         * @brief Get sprite rotation.
+         *
+         * @warning Attempting to fetch a sprite that is invalid
+         *          or being destroyed results in undefined behavior.
+         *
+         * @param id Sprite handle.
+         *
+         * @return Sprite rotation.
+         */
+        [[nodiscard]] float get_sprite_rotation(handle id);
+
+        /**
+         * @brief Get sprite scale.
+         *
+         * @warning Attempting to fetch a sprite that is invalid
+         *          or being destroyed results in undefined behavior.
+         *
+         * @param id Sprite handle.
+         *
+         * @return Sprite scale.
+         */
+        [[nodiscard]] vec2 get_sprite_scale(handle id);
+
+        /** 
+         * @brief Get texture associated in sprite.
+         * 
+         * @warning Attempting to fetch a sprite that is invalid
+         *          or being destroyed results in undefined behavior.
+         * 
+         * @param id Sprite handle.
+         * 
+         * @return Texture handle.
+         */
+        [[nodiscard]] handle get_sprite_texture(handle id);
+
+        /**
          * @brief Add draw primitives command to the render queue.
          *
          * @param id Texture handle. Can be null.

@@ -1,6 +1,5 @@
 #pragma once 
 
-#include "components/sprite.hpp"
 
 #include "config/config.hpp"
 #include "config/version.hpp"
@@ -26,7 +25,9 @@
 #include "graphics/painter.hpp"
 #include "graphics/rect_pack.hpp"
 #include "graphics/renderer.hpp"
+#include "graphics/sprite.hpp"
 #include "graphics/texture.hpp"
+#include "graphics/vertex.hpp"
 
 #include "loaders/font_loader.hpp"
 #include "loaders/image_loader.hpp"

@@ -9,6 +9,10 @@
 #include <vector>
 
 namespace rb {
+    struct sampler_gpu_data {
+        int 
+    };
+
     struct texture_data {
         VkImage image = VK_NULL_HANDLE;
         VmaAllocation allocation = VK_NULL_HANDLE;
@@ -16,6 +20,10 @@ namespace rb {
         VkSampler sampler = VK_NULL_HANDLE;
         uvec2 size = { 0, 0 };
         pixel_format format = pixel_format::undefined;
+    };
+
+    struct sprite_data {
+        
     };
 
     struct draw_data {

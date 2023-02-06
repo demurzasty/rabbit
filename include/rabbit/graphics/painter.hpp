@@ -4,8 +4,6 @@
 #include "texture.hpp"
 #include "font.hpp"
 
-#include "../components/sprite.hpp"
-
 #include <string_view>
 
 namespace rb {
