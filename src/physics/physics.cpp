@@ -7,6 +7,8 @@
 
 using namespace rb;
 
+constexpr float scale = 1.0f / 16.0f;
+
 struct shape_data {
     std::shared_ptr<b2Shape> shape;
 };
@@ -16,7 +18,7 @@ struct body_data {
 };
 
 struct physics::data {
-    b2World world = b2World(b2Vec2(0.0f, 100.0f));
+    b2World world = b2World(b2Vec2(0.0f, 10.0f));
 
     arena<shape_data> shapes;
     arena<body_data> bodies;
@@ -37,7 +39,7 @@ handle physics::create_circle_shape(float radius) {
     handle id = m_data->shapes.create();
 
     b2CircleShape shape;
-    shape.m_radius = radius;
+    shape.m_radius = radius * scale;
 
     m_data->shapes[id].shape = std::make_shared<b2CircleShape>(shape);
 
@@ -48,7 +50,7 @@ handle physics::create_box_shape(const vec2& extents) {
     handle id = m_data->shapes.create();
 
     b2PolygonShape shape;
-    shape.SetAsBox(extents.x, extents.y);
+    shape.SetAsBox(extents.x * scale, extents.y * scale);
 
     m_data->shapes[id].shape = std::make_shared<b2PolygonShape>(shape);
 
@@ -105,7 +107,7 @@ void physics::set_body_position(handle id, const vec2& position) {
 
     body_data& body_data = m_data->bodies[id];
 
-    body_data.body->SetTransform({ position.x, position.y }, body_data.body->GetAngle());
+    body_data.body->SetTransform({ position.x * scale, position.y * scale }, body_data.body->GetAngle());
 }
 
 void physics::set_body_rotation(handle id, float rotation) {
@@ -122,7 +124,7 @@ vec2 physics::get_body_position(handle id) const {
     body_data& body_data = m_data->bodies[id];
 
     const b2Vec2& position = body_data.body->GetPosition();
-    return { position.x, position.y };
+    return { position.x / scale, position.y / scale };
 }
 
 float physics::get_body_rotation(handle id) const {
