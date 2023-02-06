@@ -10,6 +10,8 @@ add_subdirectory ("03_assets_manager")
 
 add_subdirectory ("04_physics")
 
+add_subdirectory ("05_ui")
+
 add_subdirectory ("demo")
 
 add_subdirectory ("networking")

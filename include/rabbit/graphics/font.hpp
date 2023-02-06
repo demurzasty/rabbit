@@ -84,6 +84,13 @@ namespace rb {
         float get_kerning(unsigned int codepoint1, unsigned int codepoint2, unsigned int character_size) const;
 
         /**
+         * @brief Get size of text.
+         * 
+         * @return Size of text.
+         */
+        vec2 get_text_size(unsigned int character_size, std::string_view text) const;
+
+        /**
          * @brief Get the texture containing the loaded glyphs of a certain size.
          */
         const texture& atlas() const;

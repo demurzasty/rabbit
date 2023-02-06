@@ -83,6 +83,23 @@ float font::get_kerning(unsigned int codepoint1, unsigned int codepoint2, unsign
     return stbtt_GetCodepointKernAdvance(&m_data->info, codepoint1, codepoint2) * scale;
 }
 
+vec2 font::get_text_size(unsigned int character_size, std::string_view text) const {
+    float scale = stbtt_ScaleForPixelHeight(&m_data->info, float(character_size));
+
+    vec2 size = { 0.0f, float(character_size) };
+    for (std::size_t i = 0; i < text.size(); ++i) {
+        int advance, lsb;
+        stbtt_GetCodepointHMetrics(&m_data->info, text[i], &advance, &lsb);
+
+        size.x += advance * scale;
+
+        if (i + 1 < text.size()) {
+            size.x += stbtt_GetCodepointKernAdvance(&m_data->info, text[i], text[i + 1]) * scale;
+        }
+    }
+    return size;
+}
+
 const texture& font::atlas() const {
     return m_texture;
 }

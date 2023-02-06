@@ -160,7 +160,7 @@ void painter::draw(const font& font, unsigned char size, std::string_view text, 
         location.x += glyph.advance;
 
         if (i + 1 < text.size()) {
-            location.x += font.get_kerning(text[i], text[i] + 1, size);
+            location.x += font.get_kerning(text[i], text[i + 1], size);
         }
     }
 }
