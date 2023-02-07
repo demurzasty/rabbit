@@ -9,8 +9,20 @@
 #include <vector>
 
 namespace rb {
-    struct sampler_gpu_data {
-        int 
+    struct alignas(16) gpu_global_data {
+        int sprite_count = 0;
+    };
+
+    struct alignas(16) gpu_texture_data {
+        int sampler_id = -1;
+    };
+
+    struct alignas(16) gpu_sprite_data {
+        vec2 position = vec2::zero();
+        float rotation = 0.0f;
+        vec2 scale = vec2::one();
+        int visible = 1;
+        int texture_id = -1;
     };
 
     struct texture_data {
@@ -20,10 +32,6 @@ namespace rb {
         VkSampler sampler = VK_NULL_HANDLE;
         uvec2 size = { 0, 0 };
         pixel_format format = pixel_format::undefined;
-    };
-
-    struct sprite_data {
-        
     };
 
     struct draw_data {
@@ -65,6 +73,8 @@ namespace rb {
 
         unsigned int image_index = 0;
 
+        VkBuffer global_buffer;
+        VmaAllocation global_buffer_allocation;
 
         VkBuffer canvas_vertex_buffer;
         VmaAllocation canvas_vertex_buffer_allocation;
@@ -74,6 +84,14 @@ namespace rb {
         VmaAllocation canvas_index_buffer_allocation;
         unsigned int canvas_index_buffer_offset = 0;
 
+        VkBuffer texture_buffer;
+        VmaAllocation texture_buffer_allocation;
+
+        VkBuffer sprite_buffer;
+        VmaAllocation sprite_buffer_allocation;
+
+        VkBuffer sprite_draw_buffer;
+        VmaAllocation sprite_draw_buffer_allocation;
 
         VkDescriptorSetLayout main_descriptor_set_layout;
         VkDescriptorPool main_descriptor_pool;
@@ -82,6 +100,9 @@ namespace rb {
         VkPipelineLayout pipeline_layout;
         VkPipeline pipeline;
 
+        gpu_global_data gpu_global_data;
+        arena<void> gpu_samplers;
+        arena<gpu_sprite_data> gpu_sprites;
 
         arena<texture_data> textures;
 

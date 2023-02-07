@@ -388,6 +388,18 @@ void vku::setup(std::unique_ptr<renderer::data>& data, window& window) {
     }
 
 
+    VkBufferCreateInfo global_buffer_info{ VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
+    global_buffer_info.size = sizeof(gpu_global_data);
+    global_buffer_info.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+    global_buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    global_buffer_info.queueFamilyIndexCount = 0;
+    global_buffer_info.pQueueFamilyIndices = nullptr;
+
+    VmaAllocationCreateInfo global_buffer_allocation_info{};
+    global_buffer_allocation_info.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+    global_buffer_allocation_info.preferredFlags = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+    vk(vmaCreateBuffer(data->allocator, &global_buffer_info, &global_buffer_allocation_info, &data->global_buffer, &data->global_buffer_allocation, nullptr));
+
     VkBufferCreateInfo canvas_vertex_buffer_info{ VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
     canvas_vertex_buffer_info.size = sizeof(vertex2d) * 0x10000;
     canvas_vertex_buffer_info.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
@@ -412,40 +424,102 @@ void vku::setup(std::unique_ptr<renderer::data>& data, window& window) {
     canvas_index_buffer_allocation_info.preferredFlags = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
     vk(vmaCreateBuffer(data->allocator, &canvas_index_buffer_info, &canvas_index_buffer_allocation_info, &data->canvas_index_buffer, &data->canvas_index_buffer_allocation, nullptr));
 
+    VkBufferCreateInfo texture_buffer_info{ VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
+    texture_buffer_info.size = sizeof(gpu_texture_data) * 0x10000;
+    texture_buffer_info.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+    texture_buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    texture_buffer_info.queueFamilyIndexCount = 0;
+    texture_buffer_info.pQueueFamilyIndices = nullptr;
+
+    VmaAllocationCreateInfo texture_buffer_allocation_info{};
+    texture_buffer_allocation_info.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+    texture_buffer_allocation_info.preferredFlags = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+    vk(vmaCreateBuffer(data->allocator, &texture_buffer_info, &texture_buffer_allocation_info, &data->texture_buffer, &data->texture_buffer_allocation, nullptr));
+
+    VkBufferCreateInfo sprite_buffer_info{ VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
+    sprite_buffer_info.size = sizeof(gpu_sprite_data) * 0x10000;
+    sprite_buffer_info.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+    sprite_buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    sprite_buffer_info.queueFamilyIndexCount = 0;
+    sprite_buffer_info.pQueueFamilyIndices = nullptr;
+
+    VmaAllocationCreateInfo sprite_buffer_allocation_info{};
+    sprite_buffer_allocation_info.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+    sprite_buffer_allocation_info.preferredFlags = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+    vk(vmaCreateBuffer(data->allocator, &sprite_buffer_info, &sprite_buffer_allocation_info, &data->sprite_buffer, &data->sprite_buffer_allocation, nullptr));
+
+    VkBufferCreateInfo sprite_draw_buffer_info{ VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
+    sprite_draw_buffer_info.size = sizeof(VkDrawIndirectCommand) * 0x10000;
+    sprite_draw_buffer_info.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
+    sprite_draw_buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    sprite_draw_buffer_info.queueFamilyIndexCount = 0;
+    sprite_draw_buffer_info.pQueueFamilyIndices = nullptr;
+
+    VmaAllocationCreateInfo sprite_draw_buffer_allocation_info{};
+    sprite_draw_buffer_allocation_info.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+    sprite_draw_buffer_allocation_info.preferredFlags = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+    vk(vmaCreateBuffer(data->allocator, &sprite_draw_buffer_info, &sprite_draw_buffer_allocation_info, &data->sprite_draw_buffer, &data->sprite_draw_buffer_allocation, nullptr));
+
     // Create bindless descriptor pool
     VkDescriptorPoolSize pool_sizes[] = {
-        { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1024 + 1 },
+        { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1024 + 3 },
     };
 
     // Update after bind is needed here, for each binding and in the descriptor set layout creation.
     VkDescriptorPoolCreateInfo descriptor_pool_info{ VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
     descriptor_pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT_EXT;
-    descriptor_pool_info.maxSets = 1024 + 1;
+    descriptor_pool_info.maxSets = 1024 + 3;
     descriptor_pool_info.poolSizeCount = sizeof(pool_sizes) / sizeof(*pool_sizes);
     descriptor_pool_info.pPoolSizes = pool_sizes;
     vk(vkCreateDescriptorPool(data->device, &descriptor_pool_info, nullptr, &data->main_descriptor_pool));
 
 
-    VkDescriptorSetLayoutBinding layout_bindings[1];
+    VkDescriptorSetLayoutBinding layout_bindings[4];
     layout_bindings[0].binding = 0;
-    layout_bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    layout_bindings[0].descriptorCount = 1024;
+    layout_bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    layout_bindings[0].descriptorCount = 1;
     layout_bindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
     layout_bindings[0].pImmutableSamplers = nullptr;
 
-    VkDescriptorBindingFlags binding_flags[1]{
+    layout_bindings[1].binding = 1;
+    layout_bindings[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    layout_bindings[1].descriptorCount = 1;
+    layout_bindings[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
+    layout_bindings[1].pImmutableSamplers = nullptr;
+
+    layout_bindings[2].binding = 2;
+    layout_bindings[2].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    layout_bindings[2].descriptorCount = 1;
+    layout_bindings[2].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
+    layout_bindings[2].pImmutableSamplers = nullptr;
+
+    layout_bindings[3].binding = 3;
+    layout_bindings[3].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    layout_bindings[3].descriptorCount = 1024;
+    layout_bindings[3].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
+    layout_bindings[3].pImmutableSamplers = nullptr;
+
+    VkDescriptorBindingFlags binding_flags[4]{
+        0,
+
+        VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT_EXT |
+        VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT_EXT,
+
+        VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT_EXT |
+        VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT_EXT,
+
         VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT_EXT |
         VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT_EXT |
         VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT_EXT
     };
 
     VkDescriptorSetLayoutBindingFlagsCreateInfoEXT extendend_info{ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT };
-    extendend_info.bindingCount = 1;
+    extendend_info.bindingCount = 4;
     extendend_info.pBindingFlags = binding_flags;
 
     VkDescriptorSetLayoutCreateInfo descriptor_layout_info{ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
     descriptor_layout_info.pNext = &extendend_info;
-    descriptor_layout_info.bindingCount = 1;
+    descriptor_layout_info.bindingCount = 4;
     descriptor_layout_info.pBindings = layout_bindings;
     descriptor_layout_info.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT_EXT;
     vk(vkCreateDescriptorSetLayout(data->device, &descriptor_layout_info, nullptr, &data->main_descriptor_set_layout));
@@ -462,6 +536,20 @@ void vku::setup(std::unique_ptr<renderer::data>& data, window& window) {
     descriptor_set_info.descriptorSetCount = 1;
     descriptor_set_info.pSetLayouts = &data->main_descriptor_set_layout;
     vk(vkAllocateDescriptorSets(data->device, &descriptor_set_info, &data->main_descriptor_set));
+
+    VkDescriptorBufferInfo buffer_infos[3]{
+        { data->global_buffer, 0, sizeof(gpu_global_data) },
+        { data->texture_buffer, 0, sizeof(gpu_texture_data) * 0x10000 },
+        { data->sprite_buffer, 0, sizeof(gpu_sprite_data) * 0x10000 }
+    };
+
+    VkWriteDescriptorSet write_infos[3]{
+        { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET, nullptr, data->main_descriptor_set, 0, 0, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, nullptr, &buffer_infos[0] },
+        { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET, nullptr, data->main_descriptor_set, 1, 0, 1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, nullptr, &buffer_infos[1] },
+        { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET, nullptr, data->main_descriptor_set, 2, 0, 1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, nullptr, &buffer_infos[2] }
+    };
+
+    vkUpdateDescriptorSets(data->device, 3, write_infos, 0, nullptr);
 
     VkPushConstantRange push_constant_range;
     push_constant_range.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
@@ -617,6 +705,8 @@ void vku::setup(std::unique_ptr<renderer::data>& data, window& window) {
 
     vkDestroyShaderModule(data->device, shader_modules[1], nullptr);
     vkDestroyShaderModule(data->device, shader_modules[0], nullptr);
+
+    vku::clear_buffer(data, data->sprite_draw_buffer_allocation, sizeof(VkDrawIndirectCommand) * 0x10000);
 }
 
 void vku::quit(std::unique_ptr<renderer::data>& data) {
@@ -640,8 +730,12 @@ void vku::quit(std::unique_ptr<renderer::data>& data) {
     vkDestroyDescriptorSetLayout(data->device, data->main_descriptor_set_layout, nullptr);
     vkDestroyDescriptorPool(data->device, data->main_descriptor_pool, nullptr);
 
+    vmaDestroyBuffer(data->allocator, data->sprite_draw_buffer, data->sprite_draw_buffer_allocation);
+    vmaDestroyBuffer(data->allocator, data->sprite_buffer, data->sprite_buffer_allocation);
+    vmaDestroyBuffer(data->allocator, data->texture_buffer, data->texture_buffer_allocation);
     vmaDestroyBuffer(data->allocator, data->canvas_index_buffer, data->canvas_index_buffer_allocation);
     vmaDestroyBuffer(data->allocator, data->canvas_vertex_buffer, data->canvas_vertex_buffer_allocation);
+    vmaDestroyBuffer(data->allocator, data->global_buffer, data->global_buffer_allocation);
 
     vkDestroySemaphore(data->device, data->present_semaphore, nullptr);
     vkDestroySemaphore(data->device, data->render_semaphore, nullptr);
@@ -882,4 +976,21 @@ void vku::cleanup_texture(std::unique_ptr<renderer::data>& data, texture_data& t
     }
 
     texture = {};
+}
+
+
+void vku::clear_buffer(std::unique_ptr<renderer::data>& data, VmaAllocation allocation, std::size_t size_bytes) {
+    void* dst_data;
+
+    vk(vmaMapMemory(data->allocator, allocation, &dst_data));
+    memset(dst_data, 0, size_bytes);
+    vmaUnmapMemory(data->allocator, allocation);
+}
+
+void vku::update_buffer(std::unique_ptr<renderer::data>& data, VmaAllocation allocation, const void* src_data, std::size_t src_size_bytes, std::size_t dst_offset_bytes) {
+    void* dst_data;
+
+    vk(vmaMapMemory(data->allocator, allocation, &dst_data));
+    memcpy((unsigned char*)(dst_data) + dst_offset_bytes, src_data, src_size_bytes);
+    vmaUnmapMemory(data->allocator, allocation);
 }

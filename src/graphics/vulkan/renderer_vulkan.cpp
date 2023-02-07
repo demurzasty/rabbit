@@ -15,7 +15,10 @@ renderer::~renderer() {
 handle renderer::create_texture(const uvec2& size, texture_filter filter, pixel_format format) {
     handle id = m_data->textures.create();
 
-    m_data->textures[id] = vku::create_texture(m_data, size, filter, format);
+    vku::update_buffer_index(m_data, m_data->texture_buffer_allocation, gpu_texture_data(), std::size_t(id));
+
+    texture_data& data = m_data->textures[id];
+    data = vku::create_texture(m_data, size, filter, format);
 
     return id;
 }
@@ -24,6 +27,8 @@ void renderer::destroy_texture(handle id) {
     assert(m_data->textures.valid(id));
 
     vku::cleanup_texture(m_data, m_data->textures[id]);
+
+    vku::update_buffer_index(m_data, m_data->texture_buffer_allocation, gpu_texture_data(), std::size_t(id));
 
     m_data->textures.destroy(id);
 }
@@ -42,7 +47,7 @@ void renderer::update_texture_data(handle id, const void* pixels) {
 
     VkWriteDescriptorSet write_info{ VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
     write_info.dstSet = m_data->main_descriptor_set;
-    write_info.dstBinding = 0;
+    write_info.dstBinding = 3;
     write_info.dstArrayElement = std::uint32_t(id);
     write_info.descriptorCount = 1;
     write_info.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -67,50 +72,81 @@ pixel_format renderer::get_texture_format(handle id) const {
 }
 
 handle renderer::create_sprite() {
-    return null;
+    handle id = m_data->gpu_sprites.create();
+
+    vku::update_buffer_index(m_data, m_data->sprite_buffer_allocation, m_data->gpu_sprites[id], std::size_t(id));
+
+    return id;
 }
 
 void renderer::destroy_sprite(handle id) {
+    assert(m_data->gpu_sprites.valid(id));
+
+    m_data->gpu_sprites.destroy(id);
 }
 
 void renderer::set_sprite_position(handle id, const vec2& position) {
+    assert(m_data->gpu_sprites.valid(id));
+
+    m_data->gpu_sprites[id].position = position;
+
+    vku::update_buffer_index(m_data, m_data->sprite_buffer_allocation, m_data->gpu_sprites[id], std::size_t(id));
 }
 
 void renderer::set_sprite_rotation(handle id, float rotation) {
+    assert(m_data->gpu_sprites.valid(id));
+
+    m_data->gpu_sprites[id].rotation = rotation;
+
+    vku::update_buffer_index(m_data, m_data->sprite_buffer_allocation, m_data->gpu_sprites[id], std::size_t(id));
 }
 
 void renderer::set_sprite_scale(handle id, const vec2& scale) {
+    assert(m_data->gpu_sprites.valid(id));
+
+    m_data->gpu_sprites[id].scale = scale;
+
+    vku::update_buffer_index(m_data, m_data->sprite_buffer_allocation, m_data->gpu_sprites[id], std::size_t(id));
 }
 
 void renderer::set_sprite_texture(handle id, handle texture_id) {
+    assert(m_data->gpu_sprites.valid(id));
+
+    m_data->gpu_sprites[id].texture_id = texture_id != null ? int(texture_id) : -1;
+
+    vku::update_buffer_index(m_data, m_data->sprite_buffer_allocation, m_data->gpu_sprites[id], std::size_t(id));
 }
 
 vec2 renderer::get_sprite_position(handle id) {
-    return vec2::zero();
+    assert(m_data->gpu_sprites.valid(id));
+
+    return m_data->gpu_sprites[id].position;
 }
 
 float renderer::get_sprite_rotation(handle id) {
-    return 0.0f;
+    assert(m_data->gpu_sprites.valid(id));
+
+    return m_data->gpu_sprites[id].rotation;
 }
 
 vec2 renderer::get_sprite_scale(handle id) {
-    return vec2::one();
+    assert(m_data->gpu_sprites.valid(id));
+
+    return m_data->gpu_sprites[id].scale;
 }
 
 handle renderer::get_sprite_texture(handle id) {
-    return null;
+    assert(m_data->gpu_sprites.valid(id));
+
+    gpu_sprite_data& data = m_data->gpu_sprites[id];
+
+    return data.texture_id >= 0 ? handle(data.texture_id) : null;
 }
 
 void renderer::draw(handle texture_id, span<const vertex2d> vertices, span<const unsigned int> indices) {
-    void* ptr;
+    vku::update_buffer_range(m_data, m_data->canvas_vertex_buffer_allocation, vertices, m_data->canvas_vertex_buffer_offset);
 
-    vk(vmaMapMemory(m_data->allocator, m_data->canvas_vertex_buffer_allocation, &ptr));
-    memcpy(static_cast<vertex2d*>(ptr) + m_data->canvas_vertex_buffer_offset, vertices.data(), vertices.size_bytes());
-    vmaUnmapMemory(m_data->allocator, m_data->canvas_vertex_buffer_allocation);
-
-    vk(vmaMapMemory(m_data->allocator, m_data->canvas_index_buffer_allocation, &ptr));
-    memcpy(static_cast<unsigned int*>(ptr) + m_data->canvas_index_buffer_offset, indices.data(), indices.size_bytes());
-    vmaUnmapMemory(m_data->allocator, m_data->canvas_index_buffer_allocation);
+    vku::update_buffer_range(m_data, m_data->canvas_index_buffer_allocation, indices, m_data->canvas_index_buffer_offset);
 
     draw_data command;
     command.texture_index = texture_id == null ? -1 : int(texture_id);
@@ -124,6 +160,10 @@ void renderer::draw(handle texture_id, span<const vertex2d> vertices, span<const
 }
 
 void renderer::display(color color) {
+    vku::update_buffer(m_data, m_data->global_buffer_allocation, m_data->gpu_global_data);
+
+    // TODO: Global buffer memory barrier.
+
     vku::begin(m_data);
 
     VkClearValue clear_values[1];
