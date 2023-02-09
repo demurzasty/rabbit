@@ -3,6 +3,7 @@
 #include "physics.hpp"
 #include "shape.hpp"
 #include "../core/reference.hpp"
+#include "../math/mat2x3.hpp"
 
 namespace rb {
     /**
@@ -89,6 +90,13 @@ namespace rb {
          * @return Rotation of the body in radians.
          */
         float rotation() const;
+
+        /**
+         * @brief Get transform of the body.
+         *
+         * @return Transform of the body.
+         */
+        mat2x3 transform() const;
 
     private:
         /**

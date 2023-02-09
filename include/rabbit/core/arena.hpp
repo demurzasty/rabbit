@@ -23,6 +23,15 @@ namespace rb {
                 return std::size_t(id) < m_pool.size() && m_pool[std::size_t(id)] == id;
             }
 
+            /**
+             * @brief Get current maximum size of arena container.
+             * 
+             * @return Maximum size.
+             */
+            std::size_t max_size() const {
+                return m_pool.size();
+            }
+
         protected:
             /**
              * @brief Acquire new free id.

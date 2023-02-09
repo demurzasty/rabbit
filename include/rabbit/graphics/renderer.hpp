@@ -7,6 +7,7 @@
 #include "../platform/window.hpp"
 #include "../math/vec2.hpp"
 #include "../math/vec4.hpp"
+#include "../math/mat2x3.hpp"
 
 #include <memory>
 
@@ -176,37 +177,15 @@ namespace rb {
         void destroy_sprite(handle id);
 
         /**
-         * @brief Set sprite position.
+         * @brief Set sprite transform.
          * 
          * @warning Attempting to change a sprite that is invalid
          *          or being destroyed results in undefined behavior.
          * 
          * @param id Sprite handle.
-         * @param position Sprite position.
+         * @param transform Sprite transform.
          */
-        void set_sprite_position(handle id, const vec2& position);
-
-        /**
-         * @brief Set sprite rotation.
-         *
-         * @warning Attempting to change a sprite that is invalid
-         *          or being destroyed results in undefined behavior.
-         *
-         * @param id Sprite handle.
-         * @param rotation Sprite rotation.
-         */
-        void set_sprite_rotation(handle id, float rotation);
-
-        /**
-         * @brief Set sprite scale.
-         *
-         * @warning Attempting to change a sprite that is invalid
-         *          or being destroyed results in undefined behavior.
-         *
-         * @param id Sprite handle.
-         * @param scale Sprite scale.
-         */
-        void set_sprite_scale(handle id, const vec2& scale);
+        void set_sprite_transform(handle id, const mat2x3& transform);
 
         /** 
          * @brief Set sprite texture.
@@ -220,40 +199,16 @@ namespace rb {
         void set_sprite_texture(handle id, handle texture_id);
 
         /**
-         * @brief Get sprite position.
+         * @brief Get sprite transform.
          *
          * @warning Attempting to fetch a sprite that is invalid
          *          or being destroyed results in undefined behavior.
          *
          * @param id Sprite handle.
          *
-         * @return Sprite position.
+         * @return Sprite transform.
          */
-        [[nodiscard]] vec2 get_sprite_position(handle id);
-
-        /**
-         * @brief Get sprite rotation.
-         *
-         * @warning Attempting to fetch a sprite that is invalid
-         *          or being destroyed results in undefined behavior.
-         *
-         * @param id Sprite handle.
-         *
-         * @return Sprite rotation.
-         */
-        [[nodiscard]] float get_sprite_rotation(handle id);
-
-        /**
-         * @brief Get sprite scale.
-         *
-         * @warning Attempting to fetch a sprite that is invalid
-         *          or being destroyed results in undefined behavior.
-         *
-         * @param id Sprite handle.
-         *
-         * @return Sprite scale.
-         */
-        [[nodiscard]] vec2 get_sprite_scale(handle id);
+        [[nodiscard]] const mat2x3& get_sprite_transform(handle id);
 
         /** 
          * @brief Get texture associated in sprite.

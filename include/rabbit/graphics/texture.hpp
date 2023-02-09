@@ -68,13 +68,6 @@ namespace rb {
         void update(const void* pixels);
 
         /**
-         * @brief Tell whether attached texture handle is valid.
-         * 
-         * @return True if handle is valid, false otherwise.
-         */
-        [[nodiscard]] bool valid() const;
-
-        /**
          * @brief Get the handle of the texture.
          *
          * @return Handle of the texture.

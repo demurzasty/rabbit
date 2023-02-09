@@ -2,6 +2,8 @@
 
 #include "shaders/gen/canvas.vert.spv.h"
 #include "shaders/gen/canvas.frag.spv.h"
+#include "shaders/gen/sprite.vert.spv.h"
+#include "shaders/gen/sprite.frag.spv.h"
 
 #define VMA_IMPLEMENTATION
 #include <vma/vk_mem_alloc.h>
@@ -190,8 +192,7 @@ void vku::setup(std::unique_ptr<renderer::data>& data, window& window) {
     // Choose surface color format.
     if (surface_format_count == 1 && surface_formats[0].format == VK_FORMAT_UNDEFINED) {
         data->surface_format.format = VK_FORMAT_B8G8R8A8_UNORM;
-    }
-    else {
+    } else {
         data->surface_format.format = surface_formats[0].format;
     }
 
@@ -236,8 +237,7 @@ void vku::setup(std::unique_ptr<renderer::data>& data, window& window) {
         swapchain_info.queueFamilyIndexCount = sizeof(queue_indices) / sizeof(*queue_indices);
         swapchain_info.pQueueFamilyIndices = queue_indices;
         swapchain_info.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-    }
-    else {
+    } else {
         swapchain_info.queueFamilyIndexCount = 0;
         swapchain_info.pQueueFamilyIndices = nullptr;
         swapchain_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -561,7 +561,7 @@ void vku::setup(std::unique_ptr<renderer::data>& data, window& window) {
     pipeline_layout_info.pSetLayouts = &data->main_descriptor_set_layout;
     pipeline_layout_info.pushConstantRangeCount = 1;
     pipeline_layout_info.pPushConstantRanges = &push_constant_range;
-    vk(vkCreatePipelineLayout(data->device, &pipeline_layout_info, nullptr, &data->pipeline_layout));
+    vk(vkCreatePipelineLayout(data->device, &pipeline_layout_info, nullptr, &data->canvas_pipeline_layout));
 
     VkShaderModule shader_modules[2];
 
@@ -697,11 +697,35 @@ void vku::setup(std::unique_ptr<renderer::data>& data, window& window) {
     pipeline_info.pMultisampleState = &multisample_state_info;
     pipeline_info.pColorBlendState = &color_blend_state_info;
     pipeline_info.pDepthStencilState = &depth_stencil_info;
-    pipeline_info.layout = data->pipeline_layout;
+    pipeline_info.layout = data->canvas_pipeline_layout;
     pipeline_info.renderPass = data->screen_render_pass;
     pipeline_info.basePipelineHandle = VK_NULL_HANDLE;
     pipeline_info.pDynamicState = &dynamic_state_info;
-    vk(vkCreateGraphicsPipelines(data->device, VK_NULL_HANDLE, 1, &pipeline_info, nullptr, &data->pipeline));
+    vk(vkCreateGraphicsPipelines(data->device, VK_NULL_HANDLE, 1, &pipeline_info, nullptr, &data->canvas_pipeline));
+
+    vkDestroyShaderModule(data->device, shader_modules[1], nullptr);
+    vkDestroyShaderModule(data->device, shader_modules[0], nullptr);
+
+    vertex_shader_module_info.codeSize = sizeof(sprite_vert_spv);
+    vertex_shader_module_info.pCode = (const std::uint32_t*)sprite_vert_spv;
+    vk(vkCreateShaderModule(data->device, &vertex_shader_module_info, nullptr, &shader_modules[0]));
+
+    fragment_shader_module_info.codeSize = sizeof(sprite_frag_spv);
+    fragment_shader_module_info.pCode = (const std::uint32_t*)sprite_frag_spv;
+    vk(vkCreateShaderModule(data->device, &fragment_shader_module_info, nullptr, &shader_modules[1]));
+
+    shader_stages[0].module = shader_modules[0];
+    shader_stages[1].module = shader_modules[1];
+
+    VkPipelineLayoutCreateInfo sprite_pipeline_layout_info{ VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
+    sprite_pipeline_layout_info.setLayoutCount = 1;
+    sprite_pipeline_layout_info.pSetLayouts = &data->main_descriptor_set_layout;
+    sprite_pipeline_layout_info.pushConstantRangeCount = 0;
+    sprite_pipeline_layout_info.pPushConstantRanges = nullptr;
+    vk(vkCreatePipelineLayout(data->device, &sprite_pipeline_layout_info, nullptr, &data->sprite_pipeline_layout));
+
+    pipeline_info.layout = data->sprite_pipeline_layout;
+    vk(vkCreateGraphicsPipelines(data->device, VK_NULL_HANDLE, 1, &pipeline_info, nullptr, &data->sprite_pipeline));
 
     vkDestroyShaderModule(data->device, shader_modules[1], nullptr);
     vkDestroyShaderModule(data->device, shader_modules[0], nullptr);
@@ -724,8 +748,11 @@ void vku::quit(std::unique_ptr<renderer::data>& data) {
         cleanup_texture(data, texture);
     });
 
-    vkDestroyPipeline(data->device, data->pipeline, nullptr);
-    vkDestroyPipelineLayout(data->device, data->pipeline_layout, nullptr);
+    vkDestroyPipeline(data->device, data->sprite_pipeline, nullptr);
+    vkDestroyPipelineLayout(data->device, data->sprite_pipeline_layout, nullptr);
+
+    vkDestroyPipeline(data->device, data->canvas_pipeline, nullptr);
+    vkDestroyPipelineLayout(data->device, data->canvas_pipeline_layout, nullptr);
 
     vkDestroyDescriptorSetLayout(data->device, data->main_descriptor_set_layout, nullptr);
     vkDestroyDescriptorPool(data->device, data->main_descriptor_pool, nullptr);
@@ -887,7 +914,7 @@ void vku::update_texture(std::unique_ptr<renderer::data>& data, texture_data& te
     // Transfer pixels into buffer.
     void* ptr;
     vk(vmaMapMemory(data->allocator, staging_buffer_allocation, &ptr));
-    memcpy(ptr, pixels, buffer_info.size);
+    memcpy(ptr, pixels, std::size_t(buffer_info.size));
     vmaUnmapMemory(data->allocator, staging_buffer_allocation);
 
     // Create temporary buffer

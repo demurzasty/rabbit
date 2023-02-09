@@ -34,6 +34,7 @@
 #include "loaders/json_loader.hpp"
 #include "loaders/texture_loader.hpp"
 
+#include "math/mat2x3.hpp"
 #include "math/math.hpp"
 #include "math/vec2.hpp"
 #include "math/vec4.hpp"

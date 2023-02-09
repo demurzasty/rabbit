@@ -41,3 +41,7 @@ vec2 body::position() const {
 float body::rotation() const {
     return m_physics.get_body_rotation(m_id);
 }
+
+mat2x3 body::transform() const {
+    return mat2x3::rotation(rotation()) * mat2x3::translation(position());
+}

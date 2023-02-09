@@ -25,13 +25,6 @@ void texture::update(const void* pixels) {
     m_renderer.update_texture_data(m_id, pixels);
 }
 
-bool texture::valid() const {
-    // We don't need to check that handle is valid within renderer.
-    // We assume that once created handle in the constructor
-    // makes handle valid until destructor is called.
-    return m_id != null;
-}
-
 handle texture::id() const {
     return m_id;
 }

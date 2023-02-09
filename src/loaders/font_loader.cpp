@@ -15,7 +15,7 @@ font font_loader::operator()(std::string_view path) const {
     std::streamsize size = file.tellg();
     file.seekg(0, std::ios::beg);
 
-    std::vector<unsigned char> buffer(size);
+    std::vector<unsigned char> buffer((std::size_t)size);
     file.read((char*)buffer.data(), size);
 
     return { m_renderer, buffer };

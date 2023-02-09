@@ -34,6 +34,7 @@ set (SRC
 	"src/graphics/painter.cpp"
 	"src/graphics/rect_pack.cpp"
 	"src/graphics/texture.cpp"
+	"src/graphics/sprite.cpp"
 	"src/loaders/font_loader.cpp"
 	"src/loaders/image_loader.cpp"
 	"src/loaders/json_loader.cpp"

@@ -14,13 +14,13 @@ namespace rb {
     };
 
     struct alignas(16) gpu_texture_data {
-        int sampler_id = -1;
+        vec2 size = vec2::zero();
+        int valid = 0;
     };
 
     struct alignas(16) gpu_sprite_data {
-        vec2 position = vec2::zero();
-        float rotation = 0.0f;
-        vec2 scale = vec2::one();
+        mat2x3 transform = mat2x3::identity();
+        vec2 dummy = vec2::zero();
         int visible = 1;
         int texture_id = -1;
     };
@@ -97,8 +97,11 @@ namespace rb {
         VkDescriptorPool main_descriptor_pool;
         VkDescriptorSet main_descriptor_set;
 
-        VkPipelineLayout pipeline_layout;
-        VkPipeline pipeline;
+        VkPipelineLayout canvas_pipeline_layout;
+        VkPipeline canvas_pipeline;
+
+        VkPipelineLayout sprite_pipeline_layout;
+        VkPipeline sprite_pipeline;
 
         gpu_global_data gpu_global_data;
         arena<void> gpu_samplers;
