@@ -96,7 +96,6 @@ void vku::setup(std::unique_ptr<renderer::data>& data, window& window) {
 
     vkGetPhysicalDeviceProperties(data->physical_device, &data->physical_device_properties);
 
-
     std::uint32_t queue_family_count;
     vkGetPhysicalDeviceQueueFamilyProperties(data->physical_device, &queue_family_count, nullptr);
 
@@ -107,30 +106,32 @@ void vku::setup(std::unique_ptr<renderer::data>& data, window& window) {
         if (queue_family_properties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
             data->graphics_family = i;
         }
+    }
 
+    for (std::uint32_t i = 0; i < queue_family_count; ++i) {
         VkBool32 present_support = VK_FALSE;
         vkGetPhysicalDeviceSurfaceSupportKHR(data->physical_device, i, data->surface, &present_support);
 
-        if (present_support == VK_TRUE) {
+        if (data->graphics_family != i && present_support == VK_TRUE) {
             data->present_family = i;
+            break;
         }
     }
 
-
     // Fill queue priorities array.
-    float queuePriorities[] = { 1.0f };
+    float queue_priorities[] = { 1.0f };
 
     // Fill graphics device queue create informations.
     VkDeviceQueueCreateInfo device_graphics_queue_info{ VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO };
     device_graphics_queue_info.queueFamilyIndex = data->graphics_family;
     device_graphics_queue_info.queueCount = 1;
-    device_graphics_queue_info.pQueuePriorities = queuePriorities;
+    device_graphics_queue_info.pQueuePriorities = queue_priorities;
 
     // Fill present queue create informations.
     VkDeviceQueueCreateInfo device_present_queue_info{ VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO };
     device_present_queue_info.queueFamilyIndex = data->present_family;
     device_present_queue_info.queueCount = 1;
-    device_present_queue_info.pQueuePriorities = queuePriorities;
+    device_present_queue_info.pQueuePriorities = queue_priorities;
 
     VkDeviceQueueCreateInfo device_queue_infos[] = {
         device_graphics_queue_info,
@@ -141,7 +142,7 @@ void vku::setup(std::unique_ptr<renderer::data>& data, window& window) {
     const char* device_extensions[] = {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME, // Need swapchain to present render result onto a screen.
         VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
-        VK_KHR_DEPTH_STENCIL_RESOLVE_EXTENSION_NAME, // For resolve multisampled depth
+        // VK_KHR_DEPTH_STENCIL_RESOLVE_EXTENSION_NAME, // For resolve multisampled depth
     };
 
     VkPhysicalDeviceDescriptorIndexingFeatures indexing_features{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT };
@@ -190,19 +191,18 @@ void vku::setup(std::unique_ptr<renderer::data>& data, window& window) {
     // Choose surface color format.
     if (surface_format_count == 1 && surface_formats[0].format == VK_FORMAT_UNDEFINED) {
         data->surface_format.format = VK_FORMAT_B8G8R8A8_UNORM;
-    }
-    else {
+    } else {
         data->surface_format.format = surface_formats[0].format;
     }
 
     data->surface_format.colorSpace = surface_formats[0].colorSpace;
 
     // Query surface capabilities.
-    VkSurfaceCapabilitiesKHR surfaceCapabilities;
-    vk(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(data->physical_device, data->surface, &surfaceCapabilities));
+    VkSurfaceCapabilitiesKHR surface_capabilities;
+    vk(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(data->physical_device, data->surface, &surface_capabilities));
 
     // Store swapchain extent
-    data->swapchain_extent = surfaceCapabilities.currentExtent;
+    data->swapchain_extent = surface_capabilities.currentExtent;
 
     // Get window size.
     const auto window_size = window.size();
@@ -217,9 +217,9 @@ void vku::setup(std::unique_ptr<renderer::data>& data, window& window) {
 
     // TODO: Select present mode if vertical synchronization is enabled.
 
-    std::uint32_t min_image_count = surfaceCapabilities.minImageCount + 1;
-    if (surfaceCapabilities.maxImageCount > 0 && min_image_count > surfaceCapabilities.maxImageCount) {
-        min_image_count = surfaceCapabilities.maxImageCount;
+    std::uint32_t min_image_count = surface_capabilities.minImageCount + 1;
+    if (surface_capabilities.maxImageCount > 0 && min_image_count > surface_capabilities.maxImageCount) {
+        min_image_count = surface_capabilities.maxImageCount;
     }
 
     std::uint32_t queue_indices[] = { data->graphics_family, data->present_family };
@@ -236,15 +236,14 @@ void vku::setup(std::unique_ptr<renderer::data>& data, window& window) {
         swapchain_info.queueFamilyIndexCount = sizeof(queue_indices) / sizeof(*queue_indices);
         swapchain_info.pQueueFamilyIndices = queue_indices;
         swapchain_info.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-    }
-    else {
+    } else {
         swapchain_info.queueFamilyIndexCount = 0;
         swapchain_info.pQueueFamilyIndices = nullptr;
         swapchain_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
     }
     swapchain_info.presentMode = data->present_mode;
     swapchain_info.clipped = VK_TRUE;
-    swapchain_info.preTransform = surfaceCapabilities.currentTransform;
+    swapchain_info.preTransform = surface_capabilities.currentTransform;
     swapchain_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
     swapchain_info.oldSwapchain = VK_NULL_HANDLE;
 
@@ -352,14 +351,14 @@ void vku::setup(std::unique_ptr<renderer::data>& data, window& window) {
 
     data->screen_framebuffers.resize(data->screen_image_views.size());
     for (std::size_t i = 0; i < data->screen_framebuffers.size(); ++i) {
-        VkFramebufferCreateInfo framebufferInfo{ VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
-        framebufferInfo.renderPass = data->screen_render_pass;
-        framebufferInfo.attachmentCount = 1;
-        framebufferInfo.pAttachments = &data->screen_image_views[i];
-        framebufferInfo.width = data->swapchain_extent.width;
-        framebufferInfo.height = data->swapchain_extent.height;
-        framebufferInfo.layers = 1;
-        vk(vkCreateFramebuffer(data->device, &framebufferInfo, nullptr, &data->screen_framebuffers[i]));
+        VkFramebufferCreateInfo framebuffer_info{ VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
+        framebuffer_info.renderPass = data->screen_render_pass;
+        framebuffer_info.attachmentCount = 1;
+        framebuffer_info.pAttachments = &data->screen_image_views[i];
+        framebuffer_info.width = data->swapchain_extent.width;
+        framebuffer_info.height = data->swapchain_extent.height;
+        framebuffer_info.layers = 1;
+        vk(vkCreateFramebuffer(data->device, &framebuffer_info, nullptr, &data->screen_framebuffers[i]));
     }
 
     VkCommandPoolCreateInfo command_pool_info{ VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO };
@@ -675,14 +674,15 @@ void vku::begin(std::unique_ptr<renderer::data>& data) {
     vkResetCommandBuffer(data->command_buffers[data->image_index], 0);
 
     VkCommandBufferBeginInfo begin_info{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
-    begin_info.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+    begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
     vkBeginCommandBuffer(data->command_buffers[data->image_index], &begin_info);
 }
 
 void vku::end(std::unique_ptr<renderer::data>& data) {
-    vkEndCommandBuffer(data->command_buffers[data->image_index]);
+    vk(vkEndCommandBuffer(data->command_buffers[data->image_index]));
 
-    VkPipelineStageFlags wait_dst_stage_mask = VK_PIPELINE_STAGE_TRANSFER_BIT;
+    VkPipelineStageFlags wait_dst_stage_mask = VK_PIPELINE_STAGE_TRANSFER_BIT |
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
     VkSubmitInfo submit_info{ VK_STRUCTURE_TYPE_SUBMIT_INFO };
     submit_info.waitSemaphoreCount = 1;
@@ -692,7 +692,7 @@ void vku::end(std::unique_ptr<renderer::data>& data) {
     submit_info.pCommandBuffers = &data->command_buffers[data->image_index];
     submit_info.signalSemaphoreCount = 1;
     submit_info.pSignalSemaphores = &data->render_semaphore;
-    vkQueueSubmit(data->graphics_queue, 1, &submit_info, data->fences[data->image_index]);
+    vk(vkQueueSubmit(data->graphics_queue, 1, &submit_info, data->fences[data->image_index]));
 
     VkPresentInfoKHR present_info{ VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
     present_info.waitSemaphoreCount = 1;
@@ -700,8 +700,8 @@ void vku::end(std::unique_ptr<renderer::data>& data) {
     present_info.swapchainCount = 1;
     present_info.pSwapchains = &data->swapchain;
     present_info.pImageIndices = &data->image_index;
-    vkQueuePresentKHR(data->present_queue, &present_info);
-    vkQueueWaitIdle(data->present_queue);
+    vk(vkQueuePresentKHR(data->present_queue, &present_info));
+    vk(vkQueueWaitIdle(data->present_queue));
 }
 
 
