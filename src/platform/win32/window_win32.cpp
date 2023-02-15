@@ -115,6 +115,8 @@ bool window::is_open() const {
 }
 
 void window::dispatch() {
+    m_dispatcher.trigger<dispatch_event>();
+
     MSG message;
     while (PeekMessage(&message, m_data->hwnd, 0, 0, PM_REMOVE)) {
         TranslateMessage(&message);
@@ -125,11 +127,15 @@ void window::dispatch() {
 }
 
 void window::wait_dispatch() {
+    m_dispatcher.trigger<dispatch_event>();
+
     MSG message;
     if (GetMessage(&message, m_data->hwnd, 0, 0)) {
         TranslateMessage(&message);
         DispatchMessage(&message);
     }
+
+    m_dispatcher.update();
 }
 
 void window::set_title(std::string_view title) {

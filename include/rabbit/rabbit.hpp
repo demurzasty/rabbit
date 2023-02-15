@@ -45,6 +45,7 @@
 #include "physics/shape.hpp"
 
 #include "platform/events.hpp"
+#include "platform/input.hpp"
 #include "platform/window.hpp"
 
 #include "systems/canvas.hpp"
