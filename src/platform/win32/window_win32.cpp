@@ -6,11 +6,49 @@ static LRESULT CALLBACK window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
 
 static int window_count = 0;
 
+static void set_process_dpi_aware() {
+    HINSTANCE shocode_dll = LoadLibrary("Shcore.dll");
+    if (shocode_dll) {
+        enum process_dpi_awareness {
+            unaware = 0,
+            aware = 1,
+            per_monitor_aware = 2
+        };
+
+        typedef HRESULT(WINAPI* set_process_dpi_awareness_func_type)(process_dpi_awareness);
+        set_process_dpi_awareness_func_type set_process_dpi_awereness_func = reinterpret_cast<set_process_dpi_awareness_func_type>(GetProcAddress(shocode_dll, "SetProcessDpiAwareness"));
+
+        if (set_process_dpi_awereness_func) {
+            if (set_process_dpi_awereness_func(aware) != E_INVALIDARG) {
+                FreeLibrary(shocode_dll);
+                return;
+            }
+        }
+
+        FreeLibrary(shocode_dll);
+    }
+
+    HINSTANCE user32_dll = LoadLibrary("user32.dll");
+    if (user32_dll) {
+        typedef BOOL(WINAPI* set_process_dpi_aware_func_type)(void);
+        set_process_dpi_aware_func_type set_process_dpi_aware_func = reinterpret_cast<set_process_dpi_aware_func_type>(GetProcAddress(user32_dll, "SetProcessDPIAware"));
+
+        if (set_process_dpi_aware_func) {
+            set_process_dpi_aware_func();
+        }
+
+        FreeLibrary(user32_dll);
+    }
+}
+
+
 window::window(std::string_view title, const uvec2& size, bool fullscreen)
     : m_data(std::make_unique<window::data>()) {
     m_data->fullscreen = fullscreen;
 
     if (window_count++ == 0) {
+        set_process_dpi_aware();
+
         WNDCLASS wc{};
         wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
         wc.lpfnWndProc = &window_proc;
