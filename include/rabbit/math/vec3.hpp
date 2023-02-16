@@ -4,57 +4,65 @@
 
 namespace rb {
     /**
-     * @brief Representation of 2D vectors and points.
+     * @brief Representation of 3D vectors and points.
      */
     template<typename T>
-    struct basic_vec2 {
+    struct basic_vec3 {
         /**
-         * @brief Make 2D vector with both of its components set to zero.
+         * @brief Make 3D vector with both of its components set to zero.
          *
-         * @return 2D vector with both of its components set to zero.
+         * @return 3D vector with both of its components set to zero.
          */
-        [[nodiscard]] static constexpr basic_vec2<T> zero() { return { 0, 0 }; }
+        [[nodiscard]] static constexpr basic_vec3<T> zero() { return { 0, 0, 0 }; }
 
         /**
-         * @brief Make 2D vector with both of its components set to one.
+         * @brief Make 3D vector with both of its components set to one.
          * 
-         * @return 2D vector with both of its components set to one.
+         * @return 3D vector with both of its components set to one.
          */
-        [[nodiscard]] static constexpr basic_vec2<T> one() { return { 1, 1 }; }
+        [[nodiscard]] static constexpr basic_vec3<T> one() { return { 1, 1, 1 }; }
 
         /**
-         * @brief Make 2D vector with X component set to one.
+         * @brief Make 3D vector with X component set to one.
          *
-         * @return 2D vector with X component set to one.
+         * @return 3D vector with X component set to one.
          */
-        [[nodiscard]] static constexpr basic_vec2<T> axis_x() { return { 1, 0 }; }
+        [[nodiscard]] static constexpr basic_vec3<T> axis_x() { return { 1, 0, 0 }; }
 
         /**
-         * @brief Make 2D vector with Y component set to one.
+         * @brief Make 3D vector with Y component set to one.
          *
-         * @return 2D vector with Y component set to one.
+         * @return 3D vector with Y component set to one.
          */
-        [[nodiscard]] static constexpr basic_vec2<T> axis_y() { return { 0, 1 }; }
+        [[nodiscard]] static constexpr basic_vec3<T> axis_y() { return { 0, 1, 0 }; }
 
         /**
-         * @brief Construct a new uninitialized 2D vector.
+         * @brief Make 3D vector with Z component set to one.
+         *
+         * @return 3D vector with Z component set to one.
          */
-        basic_vec2() = default;
+        [[nodiscard]] static constexpr basic_vec3<T> axis_z() { return { 0, 0, 1 }; }
 
         /**
-         * @brief Construct a new 2D vector.
+         * @brief Construct a new uninitialized 3D vector.
+         */
+        basic_vec3() = default;
+
+        /**
+         * @brief Construct a new 3D vector.
          * 
          * @param scalar Value to initialize both components to.
          */
-        explicit constexpr basic_vec2(T scalar) : x(scalar), y(scalar) {}
+        explicit constexpr basic_vec3(T scalar) : x(scalar), y(scalar), z(scalar) {}
 
         /**
-         * @brief Construct a new 2D vector.
+         * @brief Construct a new 3D vector.
          * 
          * @param x X component of the vector.
          * @param y Y component of the vector.
+         * @param z Z component of the vector.
          */
-        constexpr basic_vec2(T x, T y) : x(x), y(y) {}
+        constexpr basic_vec3(T x, T y, T z) : x(x), y(y), z(z) {}
 
         /** 
          * @brief Get component using an index. 
@@ -81,8 +89,8 @@ namespace rb {
          * 
          * @return Sum of the source vectors.
          */
-        [[nodiscard]] constexpr basic_vec2<T> operator+(const basic_vec2<T>& vec) const {
-            return { x + vec.x, y + vec.y };
+        [[nodiscard]] constexpr basic_vec3<T> operator+(const basic_vec3<T>& vec) const {
+            return { x + vec.x, y + vec.y, z + vec.z };
         }
 
         /**
@@ -92,8 +100,8 @@ namespace rb {
          *
          * @return Sum of the source vector and a scalar value.
          */
-        [[nodiscard]] constexpr basic_vec2<T> operator+(T scalar) const {
-            return { x + scalar, y + scalar };
+        [[nodiscard]] constexpr basic_vec3<T> operator+(T scalar) const {
+            return { x + scalar, y + scalar, z + scalar };
         }
 
         /**
@@ -103,8 +111,8 @@ namespace rb {
          *
          * @return Result of the subtraction.
          */
-        [[nodiscard]] constexpr basic_vec2<T> operator-(const basic_vec2<T>& vec) const {
-            return { x - vec.x, y - vec.y };
+        [[nodiscard]] constexpr basic_vec3<T> operator-(const basic_vec3<T>& vec) const {
+            return { x - vec.x, y - vec.y, y - vec.z };
         }
 
         /**
@@ -114,8 +122,8 @@ namespace rb {
          *
          * @return Result of the subtraction.
          */
-        [[nodiscard]] constexpr basic_vec2<T> operator-(T scalar) const {
-            return { x - scalar, y - scalar };
+        [[nodiscard]] constexpr basic_vec3<T> operator-(T scalar) const {
+            return { x - scalar, y - scalar, z - scalar };
         }
 
         /**
@@ -125,8 +133,8 @@ namespace rb {
          *
          * @return Result of the multiplication.
          */
-        [[nodiscard]] constexpr basic_vec2<T> operator*(const basic_vec2<T>& vec) const {
-            return { x * vec.x, y * vec.y };
+        [[nodiscard]] constexpr basic_vec3<T> operator*(const basic_vec3<T>& vec) const {
+            return { x * vec.x, y * vec.y, z * vec.z };
         }
 
         /**
@@ -136,8 +144,8 @@ namespace rb {
          *
          * @return Result of the multiplication.
          */
-        [[nodiscard]] constexpr basic_vec2<T> operator*(T scalar) const {
-            return { x * scalar, y * scalar };
+        [[nodiscard]] constexpr basic_vec3<T> operator*(T scalar) const {
+            return { x * scalar, y * scalar, z * scalar };
         }
 
         /**
@@ -147,8 +155,8 @@ namespace rb {
          *
          * @return The result of dividing the vectors.
          */
-        [[nodiscard]] constexpr basic_vec2<T> operator/(const basic_vec2<T>& vec) const {
-            return { x / vec.x, y / vec.y };
+        [[nodiscard]] constexpr basic_vec3<T> operator/(const basic_vec3<T>& vec) const {
+            return { x / vec.x, y / vec.y, z / vec.z };
         }
 
         /**
@@ -158,8 +166,8 @@ namespace rb {
          *
          * @return The source vector divided by a scalar.
          */
-        [[nodiscard]] constexpr basic_vec2<T> operator/(T scalar) const {
-            return { x / scalar, y / scalar };
+        [[nodiscard]] constexpr basic_vec3<T> operator/(T scalar) const {
+            return { x / scalar, y / scalar, z / scalar };
         }
 
         /**
@@ -167,8 +175,8 @@ namespace rb {
          * 
          * @return Vector pointing in the opposite direction.
          */
-        [[nodiscard]] constexpr basic_vec2<T> operator-() const {
-            return { -x, -y };
+        [[nodiscard]] constexpr basic_vec3<T> operator-() const {
+            return { -x, -y, -z };
         }
 
         /**
@@ -176,10 +184,12 @@ namespace rb {
          * 
          * @return True if vectors are almost equal, false otherwise.
          */
-        [[nodiscard]] constexpr bool almost_equal(const basic_vec2<T>& vec) const {
+        [[nodiscard]] constexpr bool almost_equal(const basic_vec3<T>& vec) const {
             constexpr T epsilon = std::numeric_limits<T>::epsilon();
 
-            return rb::abs(x - vec.x) < epsilon && rb::abs(y - vec.y) < epsilon;
+            return rb::abs(x - vec.x) < epsilon && 
+                rb::abs(y - vec.y) < epsilon &&
+                rb::abs(z - vec.z) < epsilon;
         }
 
         /** 
@@ -187,8 +197,8 @@ namespace rb {
          * 
          * @return Dot product between two vectors.
          */
-        [[nodiscard]] constexpr T dot(const basic_vec2<T>& vec) const {
-            return x * vec.x + y * vec.y;
+        [[nodiscard]] constexpr T dot(const basic_vec3<T>& vec) const {
+            return x * vec.x + y * vec.y + z * vec.z;
         }
 
         /**
@@ -220,7 +230,7 @@ namespace rb {
          *
          * @return Normalized vector.
          */
-        [[nodiscard]] basic_vec2<T> normalized() const {
+        [[nodiscard]] basic_vec3<T> normalized() const {
             return (*this) / length();
         }
 
@@ -233,7 +243,7 @@ namespace rb {
          * 
          * @return Distance between two points.
          */
-        [[nodiscard]] T distance_to(const basic_vec2<T>& vec) const {
+        [[nodiscard]] T distance_to(const basic_vec3<T>& vec) const {
             return length(vec - *this)
         }
 
@@ -246,7 +256,7 @@ namespace rb {
          *
          * @return Direction vector.
          */
-        [[nodiscard]] T direction_to(const basic_vec2<T>& target) const {
+        [[nodiscard]] T direction_to(const basic_vec3<T>& target) const {
             return (target - *this).normalized();
         }
 
@@ -261,32 +271,8 @@ namespace rb {
          *
          * @return New position.
          */
-        [[nodiscard]] T move_towards(const basic_vec2<T>& target, T delta) const {
+        [[nodiscard]] T move_towards(const basic_vec3<T>& target, T delta) const {
             return *this + direction_to(target) * min(delta, distance_to(target));
-        }
-
-        /**
-         * @brief Rotate a point around another point.
-         *
-         * @param pivot The point around which we will rotate another point.
-         * @param angle Rotation angle in radians.
-         *
-         * @return Rotated point around a pivot.
-         */
-        template<typename T>
-        [[nodiscard]] basic_vec2<T> rotated(const basic_vec2<T>& pivot, T angle) const {
-            // Compute sinus and cosinus from angle in radians.
-            T s = std::sin(angle);
-            T c = std::cos(angle);
-
-            // Translate point back to origin.
-            basic_vec2<T> origin(x - pivot.x, y - pivot.y);
-
-            // Rotate point around a pivot.
-            basic_vec2<T> offset(origin.x* c - origin.y * s, origin.x* s + origin.y * c);
-
-            // Translate point back.
-            return { offset.x + pivot.x, offset.y + pivot.y };
         }
 
         /**
@@ -294,8 +280,8 @@ namespace rb {
          * 
          * @return Vector with all components rounded down.
          */
-        [[nodiscard]] basic_vec2<T> floor() const {
-            return { std::floor(x), std::floor(y) };
+        [[nodiscard]] basic_vec3<T> floor() const {
+            return { std::floor(x), std::floor(y), std::floor(z) };
         }
 
         /**
@@ -303,8 +289,8 @@ namespace rb {
          *
          * @return Vector with all components rounded.
          */
-        [[nodiscard]] basic_vec2<T> round() const {
-            return { std::round(x), std::round(y) };
+        [[nodiscard]] basic_vec3<T> round() const {
+            return { std::round(x), std::round(y), std::round(z) };
         }
 
         /**
@@ -312,8 +298,8 @@ namespace rb {
          * 
          * @return Vector with all components rounded up.
          */
-        [[nodiscard]] basic_vec2<T> ceil() const {
-            return { std::ceil(x), std::ceil(y) };
+        [[nodiscard]] basic_vec3<T> ceil() const {
+            return { std::ceil(x), std::ceil(y), std::ceil(z) };
         }
 
         /**
@@ -321,17 +307,8 @@ namespace rb {
          *
          * @return Vector with all components in absolute values.
          */
-        [[nodiscard]] constexpr basic_vec2<T> abs() const {
-            return { rb::abs(x), rb::abs(y) };
-        }
-
-        /**
-         * @brief Returns the aspect ratio of this vector, the ratio of x to y.
-         *
-         * @return Aspect ratio.
-         */
-        [[nodiscard]] constexpr T aspect() const {
-            return x / y;
+        [[nodiscard]] constexpr basic_vec3<T> abs() const {
+            return { rb::abs(x), rb::abs(y), rb::abs(z) };
         }
 
         /**
@@ -340,7 +317,7 @@ namespace rb {
          * 
          * @return Interpolated vector.
          */
-        [[nodiscard]] constexpr basic_vec2<T> lerp(const basic_vec2<T>& target, T weight) const {
+        [[nodiscard]] constexpr basic_vec3<T> lerp(const basic_vec3<T>& target, T weight) const {
             return *this + (target - *this) * weight;
         }
 
@@ -353,9 +330,14 @@ namespace rb {
          * @brief Y component of the vector.
          */
         T y;
+
+        /**
+         * @brief Z component of the vector.
+         */
+        T z;
     };
 
-    using vec2 = basic_vec2<float>;
-    using ivec2 = basic_vec2<int>;
-    using uvec2 = basic_vec2<unsigned int>;
+    using vec3 = basic_vec3<float>;
+    using ivec3 = basic_vec3<int>;
+    using uvec3 = basic_vec3<unsigned int>;
 }

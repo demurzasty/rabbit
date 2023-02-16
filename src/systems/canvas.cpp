@@ -15,17 +15,17 @@ void canvas::process(registry& registry, float time_step) {
 
             uvec2 frame_size = { texture_size.x / sprite.hframes, texture_size.y / sprite.vframes };
 
-            ivec4 source;
-            source.x = (sprite.frame % sprite.hframes) * frame_size.x;
-            source.y = (sprite.frame / sprite.hframes) * frame_size.y;
-            source.z = frame_size.x;
-            source.w = frame_size.y;
+            irect source;
+            source.position.x = (sprite.frame % sprite.hframes) * frame_size.x;
+            source.position.y = (sprite.frame / sprite.hframes) * frame_size.y;
+            source.size.x = frame_size.x;
+            source.size.y = frame_size.y;
 
-            vec4 destination;
-            destination.x = transform.position.x - sprite.offset.x * transform.scale.x;
-            destination.y = transform.position.y - sprite.offset.y * transform.scale.y;
-            destination.z = float(frame_size.x) * transform.scale.x;
-            destination.w = float(frame_size.y) * transform.scale.y;
+            rect destination;
+            destination.position.x = transform.position.x - sprite.offset.x * transform.scale.x;
+            destination.position.y = transform.position.y - sprite.offset.y * transform.scale.y;
+            destination.size.x = float(frame_size.x) * transform.scale.x;
+            destination.size.y = float(frame_size.y) * transform.scale.y;
 
             m_painter.draw(*sprite.texture, source, destination, sprite.color, sprite.offset * transform.scale, transform.rotation);
         }

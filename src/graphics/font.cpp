@@ -43,7 +43,7 @@ font::~font() = default;
 
 const glyph& font::get_glyph(unsigned int code_point, unsigned int character_size) const {
     glyph& glyph = m_glyphs[code_point];
-    if (glyph.rect.z > 0 && glyph.rect.w > 0) {
+    if (glyph.rect.size.x > 0 && glyph.rect.size.y > 0) {
         return glyph;
     }
 
@@ -51,12 +51,12 @@ const glyph& font::get_glyph(unsigned int code_point, unsigned int character_siz
     float scale = stbtt_ScaleForPixelHeight(&m_data->info, float(character_size));
     unsigned char* bitmap = stbtt_GetCodepointBitmap(&m_data->info, 0.0f, scale, code_point, &width, &height, &xoff, &yoff);
     glyph.advance = 8.0f;
-    ivec4 rect = m_rect_pack.pack({ (unsigned int)(width), (unsigned int)(height) });
+    irect rect = m_rect_pack.pack({ (unsigned int)(width), (unsigned int)(height) });
 
-    for (int y = 0; y < rect.w; ++y) {
-        for (int x = 0; x < rect.z; ++x) {
-            unsigned int index = (rect.y + y) * 512 + (rect.x + x);
-            m_data->pixels[index] = { 255, 255, 255, bitmap[y * rect.z + x] };
+    for (int y = 0; y < rect.size.y; ++y) {
+        for (int x = 0; x < rect.size.x; ++x) {
+            unsigned int index = (rect.position.y + y) * 512 + (rect.position.x + x);
+            m_data->pixels[index] = { 255, 255, 255, bitmap[y * rect.size.x + x] };
         }
     }
 

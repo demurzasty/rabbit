@@ -36,8 +36,12 @@
 #include "loaders/json_loader.hpp"
 #include "loaders/texture_loader.hpp"
 
+#include "math/mat4.hpp"
+#include "math/mat4x3.hpp"
 #include "math/math.hpp"
+#include "math/rect.hpp"
 #include "math/vec2.hpp"
+#include "math/vec3.hpp"
 #include "math/vec4.hpp"
 
 #include "network/client.hpp"

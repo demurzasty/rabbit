@@ -7,6 +7,7 @@
 #include "../platform/window.hpp"
 #include "../math/vec2.hpp"
 #include "../math/vec4.hpp"
+#include "../math/rect.hpp"
 
 #include <memory>
 

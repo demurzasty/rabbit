@@ -28,7 +28,7 @@ rect_pack& rect_pack::operator=(rect_pack&& rect_pack) noexcept {
     return *this;
 }
 
-ivec4 rect_pack::pack(const uvec2& size) {
+irect rect_pack::pack(const uvec2& size) {
     stbrp_rect rect;
     rect.w = int(size.x + 2);
     rect.h = int(size.y + 2);
