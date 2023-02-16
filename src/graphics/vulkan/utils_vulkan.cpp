@@ -619,15 +619,18 @@ void vku::setup(std::unique_ptr<renderer::data>& data, window& window) {
 }
 
 void vku::quit(std::unique_ptr<renderer::data>& data) {
+    vkWaitForFences(data->device, std::uint32_t(data->fences.size()), data->fences.data(), VK_TRUE, UINT64_MAX);
     for (auto& fence : data->fences) {
-        vkWaitForFences(data->device, 1, &fence, VK_TRUE, 1000000000);
         vkDestroyFence(data->device, fence, nullptr);
     }
+
     vkFreeCommandBuffers(data->device, data->command_pool, std::uint32_t(data->command_buffers.size()), data->command_buffers.data());
 
     vkQueueWaitIdle(data->graphics_queue);
     vkQueueWaitIdle(data->present_queue);
     vkDeviceWaitIdle(data->device);
+
+    cleanup(data);
 
     data->textures.each([&data](handle id, texture_data& texture) {
         cleanup_texture(data, texture);
@@ -663,6 +666,14 @@ void vku::quit(std::unique_ptr<renderer::data>& data) {
     vkDestroyDevice(data->device, nullptr);
     vkDestroySurfaceKHR(data->instance, data->surface, nullptr);
     vkDestroyInstance(data->instance, nullptr);
+}
+
+void vku::cleanup(std::unique_ptr<renderer::data>& data) {
+    // Ready to cleanup.
+    while (!data->textures_to_delete.empty()) {
+        cleanup_texture(data, data->textures_to_delete.front());
+        data->textures_to_delete.pop();
+    }
 }
 
 void vku::begin(std::unique_ptr<renderer::data>& data) {

@@ -18,6 +18,8 @@ namespace rb::vku {
 
 	void quit(std::unique_ptr<renderer::data>& data);
 
+	void cleanup(std::unique_ptr<renderer::data>& data);
+
 	void begin(std::unique_ptr<renderer::data>& data);
 
 	void end(std::unique_ptr<renderer::data>& data);

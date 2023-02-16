@@ -23,7 +23,9 @@ handle renderer::create_texture(const uvec2& size, texture_filter filter, pixel_
 void renderer::destroy_texture(handle id) {
     assert(m_data->textures.valid(id));
 
-    vku::cleanup_texture(m_data, m_data->textures[id]);
+    m_data->textures_to_delete.push(m_data->textures[id]);
+    m_data->textures[id] = {};
+    // vku::cleanup_texture(m_data, m_data->textures[id]);
 
     m_data->textures.destroy(id);
 }
@@ -136,6 +138,8 @@ void renderer::display(color color) {
     m_data->canvas_vertex_buffer_offset = 0;
     m_data->canvas_index_buffer_offset = 0;
     m_data->draw_commands.clear();
+
+    vku::cleanup(m_data);
 }
 
 uvec2 renderer::surface_size() const {
