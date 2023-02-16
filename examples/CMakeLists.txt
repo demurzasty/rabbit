@@ -14,6 +14,8 @@ add_subdirectory ("05_ui")
 
 add_subdirectory ("06_input")
 
+add_subdirectory ("07_compression")
+
 add_subdirectory ("demo")
 
 add_subdirectory ("networking")

@@ -26,6 +26,7 @@ endforeach (BIN_SRC)
 add_custom_target (binaries DEPENDS ${BIN_FILES})
 
 set (SRC 
+	"src/core/compressor.cpp"
 	"src/core/reference.cpp"
 	"src/core/stopwatch.cpp"
 	"src/core/thread_pool.cpp"
@@ -64,7 +65,7 @@ add_library (rabbit STATIC ${SRC})
 target_include_directories (rabbit PUBLIC "include")
 target_compile_features (rabbit PUBLIC cxx_std_17)
 target_link_libraries (rabbit PUBLIC json fmt entt gsl)
-target_link_libraries (rabbit PRIVATE box2d enet stb vma volk)
+target_link_libraries (rabbit PRIVATE miniz box2d enet stb vma volk)
 target_compile_definitions (rabbit PRIVATE VMA_STATIC_VULKAN_FUNCTIONS)
 add_dependencies (rabbit binaries)
 

@@ -8,6 +8,7 @@
 
 #include "core/arena.hpp"
 #include "core/assets.hpp"
+#include "core/compressor.hpp"
 #include "core/format.hpp"
 #include "core/handle.hpp"
 #include "core/json.hpp"
