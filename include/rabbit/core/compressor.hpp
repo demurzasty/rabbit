@@ -18,7 +18,7 @@ namespace rb {
         std::size_t uncompress(const void* compressed_data, std::size_t compressed_size, void* uncompressed_data, std::size_t uncompressed_size) const;
     
 		template<typename T>
-		[[nodiscard]] std::vector<std::uint8_t> compress(const span<const T>& uncompressed_data) const {
+		[[nodiscard]] std::vector<std::uint8_t> compress(span<const T> uncompressed_data) const {
 			std::vector<std::uint8_t> compressed_data(bound(uncompressed_data.size_bytes()));
 			std::size_t compressed_size = compress(uncompressed_data.data(), uncompressed_data.size_bytes(), compressed_data.data(), compressed_data.size());
 			

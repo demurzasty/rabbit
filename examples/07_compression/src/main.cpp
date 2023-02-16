@@ -2,38 +2,26 @@
 
 using namespace rb;
 
+static const char data[] =
+R"(Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+Nunc semper lacus eu feugiat sagittis. Nullam in nunc felis. 
+Aliquam erat volutpat. Donec consequat tellus eu elit vestibulum, 
+ut sodales mi interdum. Pellentesque nunc leo, rutrum eget euismod non, 
+viverra pretium diam. Cras ultricies sapien lectus, at eleifend 
+lacus efficitur vitae. Etiam vehicula sagittis dolor in volutpat. 
+Integer interdum orci rutrum, facilisis nunc in, laoreet lectus. 
+Integer ac urna id leo sodales tristique. Vivamus vel luctus neque. 
+Cras ac libero quis mi suscipit pretium. Fusce quam quam, fermentum 
+eu dignissim ac, aliquam id enim. Integer vitae nisl pharetra, consequat 
+dui non, scelerisque justo. Curabitur pretium dolor ac ultrices bibendum.)";
+
 int main(int argc, char* argv[]) {
-    // Create new window.
-    window window("basic_draw", { 1280, 720 }, false);
-
-    // Create renderer and attached window to it.
-    renderer renderer(window);
-
-    // Create painter to dynamically render 2D stuff.
-    painter painter(renderer, { 320, 180 });
-
-    image image = image::from("data/buddy.png", true);
-
     compressor compressor;
-    std::vector<std::uint8_t> compressed_data = compressor.compress(image.pixels());
-    std::vector<std::uint8_t> uncompressed_data = compressor.uncompress(image.pixels().size(), compressed_data);
+    std::vector<std::uint8_t> compressed_data = compressor.compress<char>(data);
+    
+    println("data size: {} compressed size: {}", sizeof(data), compressed_data.size());
 
-    texture texture(renderer, image.size(), texture_filter::nearest, pixel_format::rgba8);
+    std::vector<char> uncompressed_data = compressor.uncompress<char>(sizeof(data), compressed_data);
 
-    texture.update(uncompressed_data.data());
-
-    // Connect window close event to stop main loop.
-    window.on<close_event>().connect<&window::close>(window);
-
-    // Run our example in loop until close button is pressed.
-    while (window.is_open()) {
-        // Dispatch window events and run all connected signals.
-        window.dispatch();
-
-        // Draw texture on screen.
-        painter.draw(texture, { 146.0f, 60.0f }, color::white());
-
-        // Render and display it onto a screen.
-        renderer.display(color::cornflower_blue());
-    }
+    println("uncompressed data: \n{}", uncompressed_data.data());
 }
