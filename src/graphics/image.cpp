@@ -43,6 +43,10 @@ const uvec2& image::size() const {
     return m_size;
 }
 
+std::size_t image::stride() const {
+    return std::size_t(m_size.x) * 4;
+}
+
 image::image(unsigned char* pixels, const uvec2& size)
     : m_pixels(pixels, &free), m_size(size) {
 }

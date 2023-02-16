@@ -24,6 +24,10 @@ namespace rb::vku {
 
 	void end(std::unique_ptr<renderer::data>& data);
 
+	VkDeviceSize get_bits_per_pixel(pixel_format format);
+
+	VkFormat get_pixel_format(pixel_format format);
+
 	VkFilter get_filter(texture_filter filter);
 
 	texture_data create_texture(std::unique_ptr<renderer::data>& data, const uvec2& size, texture_filter filter, pixel_format format);

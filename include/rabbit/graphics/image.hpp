@@ -80,6 +80,13 @@ namespace rb {
          */
         [[nodiscard]] const uvec2& size() const;
 
+        /**
+         * @brief Get image stide.
+         * 
+         * @return Size of row in bytes.
+         */
+        [[nodiscard]] std::size_t stride() const;
+
     private:
         /**
          * @brief Construct a new image.

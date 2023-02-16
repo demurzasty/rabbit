@@ -33,7 +33,17 @@ namespace rb {
         /**
          * @brief Unsigned 32-bit pixel format using 8 bits per channel.
          */
-        rgba8
+        rgba8,
+
+        /**
+         * @brief 
+         */
+        bc1,
+
+        /** 
+         * @brief
+         */
+        bc3
     };
 
     /**

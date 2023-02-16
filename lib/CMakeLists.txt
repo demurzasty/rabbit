@@ -14,6 +14,8 @@ add_subdirectory ("json-3.11.2")
 
 add_subdirectory ("miniz-3.0.2")
 
+add_subdirectory ("rgbcx-1.12")
+
 add_subdirectory ("stb")
 
 add_subdirectory ("vma-3.0.1")
