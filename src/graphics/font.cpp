@@ -39,10 +39,7 @@ font::font(font&& font) noexcept
     , m_glyphs(std::move(font.m_glyphs)) {
 }
 
-font::~font() {
-    // For this specific implementation we do not need
-    // this destructor at all. 
-}
+font::~font() = default;
 
 const glyph& font::get_glyph(unsigned int code_point, unsigned int character_size) const {
     glyph& glyph = m_glyphs[code_point];
