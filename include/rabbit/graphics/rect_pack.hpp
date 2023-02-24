@@ -2,6 +2,7 @@
 
 #include "../math/vec2.hpp"
 #include "../math/vec4.hpp"
+#include "../math/rect.hpp"
 
 #include <memory>
 
@@ -49,7 +50,7 @@ namespace rb {
          * 
          * @return Packed rectangle.
          */
-        [[nodiscard]] ivec4 pack(const uvec2& size);
+        [[nodiscard]] irect pack(const uvec2& size);
 
     private:
         /**

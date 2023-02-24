@@ -744,6 +744,8 @@ void vku::quit(std::unique_ptr<renderer::data>& data) {
     vkQueueWaitIdle(data->present_queue);
     vkDeviceWaitIdle(data->device);
 
+    cleanup(data);
+
     data->textures.each([&data](handle id, texture_data& texture) {
         cleanup_texture(data, texture);
     });
@@ -787,6 +789,14 @@ void vku::quit(std::unique_ptr<renderer::data>& data) {
     vkDestroyInstance(data->instance, nullptr);
 }
 
+void vku::cleanup(std::unique_ptr<renderer::data>& data) {
+    // Ready to cleanup.
+    while (!data->textures_to_delete.empty()) {
+        cleanup_texture(data, data->textures_to_delete.front());
+        data->textures_to_delete.pop();
+    }
+}
+
 void vku::begin(std::unique_ptr<renderer::data>& data) {
     vk(vkAcquireNextImageKHR(data->device, data->swapchain, UINT64_MAX, data->present_semaphore, VK_NULL_HANDLE, &data->image_index));
 
@@ -825,6 +835,31 @@ void vku::end(std::unique_ptr<renderer::data>& data) {
     vkQueueWaitIdle(data->present_queue);
 }
 
+VkDeviceSize vku::get_bits_per_pixel(pixel_format format) {
+    switch (format) {
+        case pixel_format::r8: return 8;
+        case pixel_format::rg8: return 16;
+        case pixel_format::rgba8: return 32;
+        case pixel_format::bc1: return 4;
+        case pixel_format::bc3: return 8;
+    }
+
+    assert(0);
+    return 0;
+}
+
+VkFormat vku::get_pixel_format(pixel_format format) {
+    switch (format) {
+        case pixel_format::r8: return VK_FORMAT_R8_UNORM;
+        case pixel_format::rg8: return VK_FORMAT_R8G8_UNORM;
+        case pixel_format::rgba8: return VK_FORMAT_R8G8B8A8_UNORM;
+        case pixel_format::bc1: return VK_FORMAT_BC1_RGBA_UNORM_BLOCK;
+        case pixel_format::bc3: return VK_FORMAT_BC3_UNORM_BLOCK;
+    }
+
+    assert(0);
+    return VK_FORMAT_UNDEFINED;
+}
 
 VkFilter vku::get_filter(texture_filter filter) {
     switch (filter) {
@@ -841,7 +876,7 @@ texture_data vku::create_texture(std::unique_ptr<renderer::data>& data, const uv
 
     VkImageCreateInfo image_info{ VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
     image_info.imageType = VK_IMAGE_TYPE_2D;
-    image_info.format = VK_FORMAT_R8G8B8A8_UNORM;
+    image_info.format = get_pixel_format(format);
     image_info.extent = { size.x, size.y, 1 };
     image_info.mipLevels = 1;
     image_info.arrayLayers = 1;
@@ -860,7 +895,7 @@ texture_data vku::create_texture(std::unique_ptr<renderer::data>& data, const uv
     VkImageViewCreateInfo image_view_info{ VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
     image_view_info.image = texture.image;
     image_view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    image_view_info.format = VK_FORMAT_R8G8B8A8_UNORM;
+    image_view_info.format = image_info.format;
     image_view_info.components.r = VK_COMPONENT_SWIZZLE_R;
     image_view_info.components.g = VK_COMPONENT_SWIZZLE_G;
     image_view_info.components.b = VK_COMPONENT_SWIZZLE_B;
@@ -898,7 +933,7 @@ texture_data vku::create_texture(std::unique_ptr<renderer::data>& data, const uv
 void vku::update_texture(std::unique_ptr<renderer::data>& data, texture_data& texture, const void* pixels) {
     // Create staging buffer.
     VkBufferCreateInfo buffer_info{ VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
-    buffer_info.size = texture.size.x * texture.size.y * 4;
+    buffer_info.size = VkDeviceSize(texture.size.x) * texture.size.y * get_bits_per_pixel(texture.format) / 8;
     buffer_info.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
     buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     buffer_info.queueFamilyIndexCount = 0;
@@ -914,7 +949,7 @@ void vku::update_texture(std::unique_ptr<renderer::data>& data, texture_data& te
     // Transfer pixels into buffer.
     void* ptr;
     vk(vmaMapMemory(data->allocator, staging_buffer_allocation, &ptr));
-    memcpy(ptr, pixels, std::size_t(buffer_info.size));
+    memcpy(ptr, pixels, buffer_info.size);
     vmaUnmapMemory(data->allocator, staging_buffer_allocation);
 
     // Create temporary buffer

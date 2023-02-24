@@ -8,6 +8,7 @@
 #include "../math/vec2.hpp"
 #include "../math/vec4.hpp"
 #include "../math/mat2x3.hpp"
+#include "../math/rect.hpp"
 
 #include <memory>
 
@@ -34,7 +35,17 @@ namespace rb {
         /**
          * @brief Unsigned 32-bit pixel format using 8 bits per channel.
          */
-        rgba8
+        rgba8,
+
+        /**
+         * @brief 
+         */
+        bc1,
+
+        /** 
+         * @brief
+         */
+        bc3
     };
 
     /**

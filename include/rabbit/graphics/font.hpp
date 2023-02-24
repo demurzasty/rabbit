@@ -21,7 +21,7 @@ namespace rb {
         /**
          * @brief Texture coordinates of the glyph inside the font's texture.
          */
-        ivec4 rect;
+        irect rect;
 
         /**
          * @brief Glyph texture offset.

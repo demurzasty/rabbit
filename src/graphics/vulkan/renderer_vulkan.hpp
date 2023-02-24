@@ -7,6 +7,7 @@
 #include <vma/vk_mem_alloc.h>
 
 #include <vector>
+#include <queue>
 
 namespace rb {
     struct alignas(16) gpu_global_data {
@@ -108,6 +109,7 @@ namespace rb {
         arena<gpu_sprite_data> gpu_sprites;
 
         arena<texture_data> textures;
+        std::queue<texture_data> textures_to_delete;
 
         std::vector<draw_data> draw_commands;
     };

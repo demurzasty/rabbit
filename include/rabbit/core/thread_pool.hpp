@@ -21,7 +21,7 @@ namespace rb {
          *
          * @param thread_count Thread count to create.
          */
-        thread_pool(unsigned int thead_count = std::thread::hardware_concurrency());
+        thread_pool(unsigned int thread_count = std::thread::hardware_concurrency());
 
         /**
          * @brief Disabled copy constructor.

@@ -150,7 +150,7 @@ namespace rb {
             /**
              * @brief Rectangle of the panel.
              */
-            vec4 rect = { 0.0f, 24.0f, 256.0f, 512.0f };
+            rect rect = { 0.0f, 24.0f, 256.0f, 512.0f };
 
             /**
              * @brief Current offset.
@@ -183,12 +183,12 @@ namespace rb {
         /**
          * @brief Draw rect.
          */
-        void draw_rect(panel& panel, const vec4& rect, color color);
+        void draw_rect(panel& panel, const rect& rect, color color);
 
         /**
          * @brief Draw rect with texture.
          */
-        void draw_rect(panel& panel, const texture& texture, const ivec4& src, const vec4& dst, color color);
+        void draw_rect(panel& panel, const texture& texture, const irect& src, const rect& dst, color color);
 
         /**
          * @brief Draw text.

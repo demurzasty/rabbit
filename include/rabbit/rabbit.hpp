@@ -6,6 +6,7 @@
 
 #include "core/arena.hpp"
 #include "core/assets.hpp"
+#include "core/compressor.hpp"
 #include "core/format.hpp"
 #include "core/handle.hpp"
 #include "core/json.hpp"
@@ -26,6 +27,7 @@
 #include "graphics/rect_pack.hpp"
 #include "graphics/renderer.hpp"
 #include "graphics/sprite.hpp"
+#include "graphics/s3tc.hpp"
 #include "graphics/texture.hpp"
 #include "graphics/vertex.hpp"
 
@@ -35,8 +37,12 @@
 #include "loaders/texture_loader.hpp"
 
 #include "math/mat2x3.hpp"
+#include "math/mat4.hpp"
+#include "math/mat4x3.hpp"
 #include "math/math.hpp"
+#include "math/rect.hpp"
 #include "math/vec2.hpp"
+#include "math/vec3.hpp"
 #include "math/vec4.hpp"
 
 #include "network/client.hpp"
@@ -47,6 +53,7 @@
 #include "physics/shape.hpp"
 
 #include "platform/events.hpp"
+#include "platform/input.hpp"
 #include "platform/window.hpp"
 
 #include "ui/ui.hpp"

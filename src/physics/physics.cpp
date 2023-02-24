@@ -32,8 +32,7 @@ physics::physics(physics&& physics) noexcept
     : m_data(std::move(physics.m_data)) {
 }
 
-physics::~physics() {
-}
+physics::~physics() = default;
 
 handle physics::create_circle_shape(float radius) {
     handle id = m_data->shapes.create();
