@@ -20,20 +20,27 @@ int main(int argc, char* argv[]) {
 
         body& body = registry.emplace<rb::body>(buddy, physics, body_type::type_dynamic);
         body.set_position({ 640.0f, 360.0f });
-        body.set_shape(box_shape(physics, { 16.0f, 16.0f }));
+        body.set_shape(box_shape(physics, { 8.0f, 11.0f }));
     }
 
     stopwatch stopwatch;
+
+    float acc = 0.0f;
+
     while (window.is_open()) {
         window.dispatch();
 
-        physics.simulate(stopwatch.restart());
+        float time_step = stopwatch.restart();
+        acc += time_step;
+
+        while (acc >= 1.0f / 60.0f) {
+            physics.simulate(1.0f / 60.0f);
+            acc -= 1.0f / 60.0f;
+        }
 
         registry.view<body, sprite>().each([](body& body, sprite& sprite) {
             sprite.set_transform(body.transform());
         });
-
-        // sprite->set_transform(mat2x3::rotation(stopwatch.time()));
 
         renderer.display(color::cornflower_blue());
     }

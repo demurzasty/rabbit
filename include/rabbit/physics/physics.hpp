@@ -2,6 +2,7 @@
 
 #include "../core/handle.hpp"
 #include "../math/vec2.hpp"
+#include "../math/mat2x3.hpp"
 
 #include <memory>
 
@@ -154,6 +155,18 @@ namespace rb {
          * @return Rotation in radians of the body.
          */
         float get_body_rotation(handle id) const;
+
+        /**
+         * @brief Get current body transform.
+         *
+         * @warning Attempting to set shape to a body that is invalid
+                    or being destroyed results in undefined behavior.
+         *
+         * @param id Body handle.
+         *
+         * @return Transform of the body.
+         */
+        mat2x3 get_body_transform(handle id) const;
 
         /**
          * @brief Simulate world. This performs collision detection, integration,

@@ -135,6 +135,15 @@ float physics::get_body_rotation(handle id) const {
     return body_data.body->GetAngle();
 }
 
+mat2x3 physics::get_body_transform(handle id) const {
+    assert(m_data->bodies.valid(id));
+
+    body_data& body_data = m_data->bodies[id];
+    const b2Vec2& position = body_data.body->GetPosition();
+
+    return mat2x3::rotation(body_data.body->GetAngle()) * mat2x3::translation({ position.x / scale, position.y / scale });
+}
+
 void physics::simulate(float time_step) {
     m_data->world.Step(time_step, 6, 2);
 }

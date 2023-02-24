@@ -60,9 +60,9 @@ namespace rb {
          */
         inline basic_mat2x3<T> operator*(const basic_mat2x3<T>& matrix) const {
             return { {
-                { cols[0][0] * matrix[0][0] + cols[0][1] * cols[1][0], cols[0][0] * matrix[0][1] + cols[0][1] * matrix[1][1] },
-                { cols[1][0] * matrix[0][0] + cols[1][1] * cols[1][0], cols[1][0] * matrix[0][1] + cols[1][1] * matrix[1][1] },
-                { cols[2][0] * matrix[0][0] + cols[2][1] * cols[1][0] + matrix[2][0], cols[2][0] * matrix[0][1] + cols[2][1] * matrix[1][1] + matrix[2][1]},
+                { cols[0][0] * matrix[0][0] + cols[0][1] * matrix[1][0],                cols[0][0] * matrix[0][1] + cols[0][1] * matrix[1][1] },
+                { cols[1][0] * matrix[0][0] + cols[1][1] * matrix[1][0],                cols[1][0] * matrix[0][1] + cols[1][1] * matrix[1][1] },
+                { cols[2][0] * matrix[0][0] + cols[2][1] * matrix[1][0] + matrix[2][0], cols[2][0] * matrix[0][1] + cols[2][1] * matrix[1][1] + matrix[2][1]},
             } };
         }
 

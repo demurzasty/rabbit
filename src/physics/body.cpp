@@ -43,5 +43,5 @@ float body::rotation() const {
 }
 
 mat2x3 body::transform() const {
-    return mat2x3::rotation(rotation()) * mat2x3::translation(position());
+    return m_physics.get_body_transform(m_id);
 }
