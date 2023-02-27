@@ -34,7 +34,7 @@ const mat2x3& sprite::transform() const {
     return m_renderer.get_sprite_transform(m_id);
 }
 
-void sprite::set_texture(ref<rb::texture> texture) {
+void sprite::set_texture(const ref<rb::texture>& texture) {
     m_renderer.set_sprite_texture(m_id, texture ? texture->id() : null);
     m_texture = texture;
 }

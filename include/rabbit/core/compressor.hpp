@@ -24,7 +24,6 @@ namespace rb {
 			
 			if (compressed_size > 0) {
 				compressed_data.resize(compressed_size);
-				compressed_data.shrink_to_fit();
 				return compressed_data;
 			}
 

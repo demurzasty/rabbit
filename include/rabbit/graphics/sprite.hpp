@@ -83,7 +83,7 @@ namespace rb {
          *
          * @param texture Texture handle to set. Can be null.
          */
-        void set_texture(ref<texture> texture);
+        void set_texture(const ref<rb::texture>& texture);
 
         /**
          * @brief Get texture handle.
